@@ -20,11 +20,23 @@ export function ProductImageSlider({ images, productName }: ProductImageSliderPr
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
   }
 
+  const getValidImageSrc = (src: string | undefined, index: number) => {
+    if (!src)
+      return `/placeholder.svg?height=500&width=400&query=${encodeURIComponent(productName || "flower bouquet")}`
+    if (src.startsWith("data:image")) return src
+    if (src.startsWith("/placeholder")) return src
+    if (src.startsWith("http")) return src
+    // For unknown paths, use placeholder
+    return `/placeholder.svg?height=500&width=400&query=${encodeURIComponent(productName || "flower bouquet")} view ${index + 1}`
+  }
+
+  const currentImageSrc = getValidImageSrc(images[currentIndex], currentIndex)
+
   return (
     <div className="relative max-w-lg mx-auto">
       <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-white shadow-sm">
         <Image
-          src={images[currentIndex] || "/placeholder.svg?height=500&width=400&query=flower bouquet"}
+          src={currentImageSrc || "/placeholder.svg"}
           alt={`${productName} - Image ${currentIndex + 1}`}
           fill
           className="object-cover"
@@ -61,7 +73,7 @@ export function ProductImageSlider({ images, productName }: ProductImageSliderPr
             }`}
           >
             <Image
-              src={image || "/placeholder.svg?height=80&width=80&query=flower"}
+              src={getValidImageSrc(image, index) || "/placeholder.svg"}
               alt={`Thumbnail ${index + 1}`}
               fill
               className="object-cover"

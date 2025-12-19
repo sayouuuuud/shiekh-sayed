@@ -15,9 +15,18 @@ export function HeroSection() {
     setMounted(true)
   }, [])
 
-  const heroImage = mounted
-    ? contentSettings.heroImage || "/elegant-pink-roses-bouquet.jpg"
-    : "/elegant-pink-roses-bouquet.jpg"
+  const isBase64Image = (img: string) => img && img.startsWith("data:image")
+
+  const getValidImageSrc = (src: string | undefined) => {
+    if (!src) return "/beautiful-pink-roses-flower-arrangement-elegant.jpg"
+    if (src.startsWith("data:image")) return src
+    if (src.includes("/placeholder.svg")) return src
+    if (src.startsWith("http")) return src
+    // For local file paths, use placeholder with descriptive query
+    return "/beautiful-pink-roses-flower-arrangement-elegant.jpg"
+  }
+
+  const heroImage = mounted ? getValidImageSrc(contentSettings.heroImage) : "/beautiful-pink-roses-flower-arrangement-elegant.jpg"
 
   const heroTitle = mounted
     ? isRTL
@@ -38,22 +47,27 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden mx-4 mt-4 rounded-3xl" dir={isRTL ? "rtl" : "ltr"}>
       <div className="relative h-[480px] md:h-[560px] w-full">
-        <Image
-          src={heroImage || "/placeholder.svg"}
-          alt="Beautiful floral arrangement"
-          fill
-          className="object-cover"
-          priority
+        {isBase64Image(heroImage) ? (
+          <img
+            src={heroImage || "/placeholder.svg"}
+            alt="Beautiful floral arrangement"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <Image
+            src={heroImage || "/placeholder.svg"}
+            alt="Beautiful floral arrangement"
+            fill
+            className="object-cover"
+            priority
+          />
+        )}
+        <div
+          className={`absolute inset-0 bg-gradient-to-l from-transparent via-white/70 to-white/95`}
+          style={{ direction: isRTL ? "rtl" : "ltr" }}
         />
         <div
-          className={`absolute inset-0 ${
-            isRTL
-              ? "bg-gradient-to-l from-white/95 via-white/70 to-transparent"
-              : "bg-gradient-to-r from-white/95 via-white/70 to-transparent"
-          }`}
-        />
-        <div
-          className={`absolute inset-0 flex flex-col justify-center p-8 md:p-16 ${isRTL ? "items-end text-right" : ""}`}
+          className={`absolute inset-y-0 start-0 end-auto flex flex-col justify-center p-8 md:p-16 max-w-2xl items-start ${isRTL ? "text-right" : "text-left"}`}
         >
           <span
             className={`text-rose-500 text-sm font-medium tracking-widest uppercase mb-4 ${isRTL ? "font-arabic" : ""}`}

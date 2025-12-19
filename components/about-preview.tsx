@@ -30,7 +30,7 @@ export function AboutPreview() {
           <h3 className="font-serif text-xl text-rose-900 mb-3">{t.visitBoutique}</h3>
           <div className="rounded-xl overflow-hidden mb-3 relative h-40">
             <Image
-              src="/map-location-pin-flower-shop.jpg"
+              src="/flower-shop-storefront-elegant-boutique-location.jpg"
               alt="Map showing our location"
               fill
               className="object-cover"

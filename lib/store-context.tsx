@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode, useRef, useCallback } from "react"
 
 // Types
 export interface ContactMessage {
@@ -90,12 +90,39 @@ export interface Notification {
   time: string
   read: boolean
   sourceId: string
+  type: "message" | "quiz"
 }
 
 export interface Category {
   id: string
   name: { en: string; ar: string }
   description?: { en: string; ar: string }
+}
+
+export interface QuizQuestion {
+  id: string
+  image: string
+  questionText: { en: string; ar: string }
+  correctAnswer: { en: string; ar: string }
+  wrongAnswers: { en: string; ar: string }[]
+}
+
+export interface Quiz {
+  id: string
+  title: { en: string; ar: string }
+  description: { en: string; ar: string }
+  questions: QuizQuestion[]
+  isActive: boolean
+  createdAt: string
+}
+
+export interface QuizResult {
+  id: string
+  quizId: string
+  date: string
+  score: number
+  totalQuestions: number
+  userAnswers: { questionId: string; answer: string; correct: boolean }[]
 }
 
 export interface AdminTranslations {
@@ -111,6 +138,7 @@ export interface AdminTranslations {
     adminTranslations: { en: string; ar: string }
     footer: { en: string; ar: string }
     settings: { en: string; ar: string }
+    quiz: { en: string; ar: string }
   }
   common: {
     save: { en: string; ar: string }
@@ -176,84 +204,61 @@ export interface AdminTranslations {
 }
 
 interface StoreContextType {
-  // Contact Messages
   contactMessages: ContactMessage[]
   addContactMessage: (message: Omit<ContactMessage, "id" | "date" | "status">) => void
   updateMessageStatus: (id: string, status: ContactMessage["status"]) => void
   deleteMessage: (id: string) => void
-
-  // Store Settings
   storeSettings: StoreSettings
   updateStoreSettings: (settings: Partial<StoreSettings>) => void
-
-  // Footer Settings
   footerSettings: FooterSettings
   updateFooterSettings: (settings: Partial<FooterSettings>) => void
-
-  // Admin Settings
   adminSettings: AdminSettings
   updateAdminSettings: (settings: Partial<AdminSettings>) => void
-
-  // Section Names
   sectionNames: SectionNames
   updateSectionNames: (names: Partial<SectionNames>) => void
-
-  // Content Settings
   contentSettings: ContentSettings
   updateContentSettings: (settings: Partial<ContentSettings>) => void
-
-  // Gallery
   galleryImages: GalleryImage[]
   addGalleryImage: (image: Omit<GalleryImage, "id">) => void
   removeGalleryImage: (id: string) => void
   updateGalleryImage: (id: string, image: Partial<GalleryImage>) => void
-
-  // Reviews
   reviews: Review[]
   addReview: (review: Omit<Review, "id">) => void
   removeReview: (id: string) => void
   updateReview: (id: string, review: Partial<Review>) => void
-
-  // Products
   products: Product[]
   addProduct: (product: Omit<Product, "id">) => void
   removeProduct: (id: number) => void
   updateProduct: (id: number, product: Partial<Product>) => void
-
-  notifications: Notification[]
-  markNotificationAsRead: (id: string) => void
-  markAllNotificationsAsRead: () => void
-
   categories: Category[]
   addCategory: (category: Omit<Category, "id">) => void
   updateCategory: (id: string, category: Partial<Category>) => void
   removeCategory: (id: string) => void
-
   adminTranslations: AdminTranslations
   updateAdminTranslations: (translations: Partial<AdminTranslations>) => void
+  quizzes: Quiz[]
+  activeQuiz: Quiz | null
+  quizResults: QuizResult[]
+  addQuiz: (quiz: Omit<Quiz, "id">) => void
+  updateQuiz: (id: string, quiz: Partial<Quiz>) => void
+  deleteQuiz: (id: string) => void
+  setActiveQuizById: (id: string) => void
+  addQuizResult: (result: Omit<QuizResult, "id">) => void
+  clearQuizResults: () => void
+  notifications: Notification[]
+  markNotificationAsRead: (id: string) => void
+  markAllNotificationsAsRead: () => void
+  clearAllNotifications: () => void
+  playAdminNotificationSound: () => void
+  setIsAdminPage: (isAdmin: boolean) => void
 }
 
 const defaultStoreSettings: StoreSettings = {
   storeName: "Whispering Petals",
   logo: "",
   whatsappNumber: "+201234567890",
-  productOrderTemplate: `Hello {storeName}!
-
-I would like to order:
-Product: {productName}
-Product ID: {productId}
-Color: {color}
-Quantity: {quantity}
-Total: {total}
-
-Thank you!`,
-  customOrderTemplate: `Hello {storeName}!
-
-I would like to place a custom order.
-
-Please contact me to discuss my requirements.
-
-Thank you!`,
+  productOrderTemplate: `Hello {storeName}!\n\nI would like to order:\nProduct: {productName}\nProduct ID: {productId}\nColor: {color}\nQuantity: {quantity}\nTotal: {total}\n\nThank you!`,
+  customOrderTemplate: `Hello {storeName}!\n\nI would like to place a custom order.\n\nPlease contact me to discuss my requirements.\n\nThank you!`,
   address: "Alexandria, Egypt",
   businessHours: "Daily: 10:00 AM - 6:00 PM",
   phone: "+20 123 456 7890",
@@ -299,23 +304,25 @@ const defaultContentSettings: ContentSettings = {
     en: "Discover our curated collection for moments of love and grace.",
     ar: "اكتشف مجموعتنا المختارة للحظات الحب والرقي.",
   },
-  heroImage: "/elegant-pink-roses-bouquet-arrangement.jpg",
+  heroImage: "/beautiful-pink-roses-flower-arrangement-elegant.jpg",
   storyText: {
-    en: "Founded in 2015, Whispering Petals began as a small dream nurtured by a passion for floristry and a love for creating meaningful connections through flowers. We believe every bloom tells a story and every arrangement creates a memory.",
-    ar: "تأسست همسات البتلات في عام ٢٠١٥، بدأت كحلم صغير نما بشغف لفن الزهور وحب خلق روابط ذات معنى من خلال الورود. نؤمن أن كل زهرة تحكي قصة وكل ترتيب يخلق ذكرى.",
+    en: "Founded in 2015, Whispering Petals began as a small dream nurtured by a passion for floristry and a love for creating meaningful connections through flowers.",
+    ar: "تأسست همسات البتلات في عام ٢٠١٥، بدأت كحلم صغير نما بشغف لفن الزهور وحب خلق روابط ذات معنى من خلال الورود.",
   },
   storyText2: {
     en: "From weekend farmers market arrangements to a beloved boutique, we continue to craft beauty with the same passion and attention to detail.",
     ar: "من ترتيبات أسواق المزارعين في نهاية الأسبوع إلى متجر محبوب، نواصل صياغة الجمال بنفس الشغف والاهتمام بالتفاصيل.",
   },
-  aboutImage: "/flower-shop-interior.png",
+  aboutImage: "/flower-shop-storefront-elegant-boutique.jpg",
 }
 
 const defaultGalleryImages: GalleryImage[] = [
-  { id: "1", src: "/vibrant-mixed-flower-bouquet.jpg", alt: "Vibrant mixed flower bouquet" },
-  { id: "2", src: "/roses-in-workspace.jpg", alt: "Roses in workspace" },
-  { id: "3", src: "/delicate-pink-peonies.jpg", alt: "Delicate pink peonies" },
+  { id: "1", src: "/vibrant-mixed-flower-bouquet-colorful.jpg", alt: "Vibrant mixed flower bouquet" },
+  { id: "2", src: "/roses-in-workspace-elegant-arrangement.jpg", alt: "Roses in workspace" },
+  { id: "3", src: "/delicate-pink-peonies-soft-petals.jpg", alt: "Delicate pink peonies" },
   { id: "4", src: "/colorful-spring-flower-arrangement.jpg", alt: "Colorful spring arrangement" },
+  { id: "5", src: "/elegant-white-roses-bouquet.jpg", alt: "Elegant white roses" },
+  { id: "6", src: "/lavender-flower-arrangement-purple.jpg", alt: "Lavender arrangement" },
 ]
 
 const defaultReviews: Review[] = [
@@ -327,17 +334,14 @@ const defaultReviews: Review[] = [
       en: "Absolutely stunning arrangements! The flowers were fresh and lasted for weeks.",
       ar: "ترتيبات مذهلة! كانت الزهور طازجة واستمرت لأسابيع.",
     },
-    avatar: "/diverse-woman-avatar.png",
+    avatar: "/professional-woman-avatar.png",
   },
   {
     id: "2",
     name: "Ahmed K.",
     rating: 5,
-    text: {
-      en: "Perfect for my anniversary. My wife loved them!",
-      ar: "مثالية لذكرى زواجي. زوجتي أحبتها!",
-    },
-    avatar: "/man-avatar.png",
+    text: { en: "Perfect for my anniversary. My wife loved them!", ar: "مثالية لذكرى زواجي. زوجتي أحبتها!" },
+    avatar: "/professional-man-avatar.png",
   },
   {
     id: "3",
@@ -347,7 +351,7 @@ const defaultReviews: Review[] = [
       en: "The most beautiful flowers I've ever received. Excellent service!",
       ar: "أجمل زهور تلقيتها على الإطلاق. خدمة ممتازة!",
     },
-    avatar: "/woman-hijab-avatar.jpg",
+    avatar: "/woman-hijab-avatar-professional.jpg",
   },
 ]
 
@@ -384,6 +388,7 @@ const defaultAdminTranslations: AdminTranslations = {
     adminTranslations: { en: "Admin Translations", ar: "ترجمات الإدارة" },
     footer: { en: "Footer", ar: "التذييل" },
     settings: { en: "Settings", ar: "الإعدادات" },
+    quiz: { en: "Flower Quiz", ar: "اختبار الأزهار" },
   },
   common: {
     save: { en: "Save", ar: "حفظ" },
@@ -454,10 +459,10 @@ const defaultProducts: Product[] = [
     name: { en: "Blush Harmony Bouquet", ar: "باقة الانسجام الوردية" },
     price: 95,
     description: {
-      en: "Exquisite harmony bouquet with blush, autumn tones and hints of romance and elegance. Perfect for anniversaries, birthdays, or expressing your deepest affections.",
-      ar: "باقة انسجام رائعة بألوان وردية وخريفية ولمسات من الرومانسية والأناقة. مثالية للذكرى السنوية وأعياد الميلاد أو التعبير عن أعمق مشاعرك.",
+      en: "Exquisite harmony bouquet with blush, autumn tones and hints of romance and elegance.",
+      ar: "باقة انسجام رائعة بألوان وردية وخريفية ولمسات من الرومانسية والأناقة.",
     },
-    images: ["/pink-roses-bouquet-elegant.jpg"],
+    images: ["/pink-roses-bouquet-elegant-blush.jpg"],
     colors: ["Baby Pink", "Blush Rose", "Soft Coral"],
     availability: true,
     category: "Bouquets",
@@ -467,10 +472,10 @@ const defaultProducts: Product[] = [
     name: { en: "Eternal Grace Box", ar: "صندوق الرقي الأبدي" },
     price: 120,
     description: {
-      en: "A stunning arrangement of premium roses in an elegant box, symbolizing eternal love and grace.",
-      ar: "ترتيب مذهل من الورود الفاخرة في صندوق أنيق، يرمز إلى الحب والرقي الأبديين.",
+      en: "A stunning arrangement of premium roses in an elegant box.",
+      ar: "ترتيب مذهل من الورود الفاخرة في صندوق أنيق.",
     },
-    images: ["/luxury-flower-box-roses.jpg"],
+    images: ["/luxury-flower-box-roses-elegant-gift.jpg"],
     colors: ["Classic Red", "Soft Pink", "Pure White"],
     availability: true,
     category: "Box Arrangements",
@@ -480,10 +485,10 @@ const defaultProducts: Product[] = [
     name: { en: "Velvet Romance Arrangement", ar: "ترتيب الرومانسية المخملية" },
     price: 110,
     description: {
-      en: "Velvet-textured roses paired with delicate greenery create this romantic masterpiece.",
-      ar: "ورود بملمس مخملي مع خضرة رقيقة تخلق هذه التحفة الرومانسية.",
+      en: "Velvet-textured roses paired with delicate greenery.",
+      ar: "ورود بملمس مخملي مع خضرة رقيقة.",
     },
-    images: ["/velvet-red-roses-arrangement.jpg"],
+    images: ["/velvet-red-roses-arrangement-romantic.jpg"],
     colors: ["Deep Red", "Burgundy", "Rose Gold"],
     availability: true,
     category: "Arrangements",
@@ -493,10 +498,10 @@ const defaultProducts: Product[] = [
     name: { en: "Garden Dream Basket", ar: "سلة أحلام الحديقة" },
     price: 85,
     description: {
-      en: "A whimsical basket filled with garden-fresh blooms, bringing the beauty of nature indoors.",
-      ar: "سلة خيالية مليئة بالأزهار الطازجة من الحديقة، تجلب جمال الطبيعة إلى الداخل.",
+      en: "A whimsical basket filled with garden-fresh blooms.",
+      ar: "سلة خيالية مليئة بالأزهار الطازجة من الحديقة.",
     },
-    images: ["/garden-flower-basket-arrangement.jpg"],
+    images: ["/garden-flower-basket-arrangement-colorful.jpg"],
     colors: ["Mixed Pastels", "Lavender Dreams", "Sunny Yellow"],
     availability: true,
     category: "Baskets",
@@ -506,10 +511,10 @@ const defaultProducts: Product[] = [
     name: { en: "Peony Paradise", ar: "جنة الفاوانيا" },
     price: 145,
     description: {
-      en: "Luxurious peonies in full bloom, representing prosperity and romance.",
-      ar: "فاوانيا فاخرة في تفتح كامل، ترمز إلى الازدهار والرومانسية.",
+      en: "Luxurious peonies in full bloom.",
+      ar: "فاوانيا فاخرة في تفتح كامل.",
     },
-    images: ["/peony-flower-arrangement-luxury.jpg"],
+    images: ["/peony-flower-arrangement-luxury-pink.jpg"],
     colors: ["Blush Pink", "Coral Charm", "White Cloud"],
     availability: true,
     category: "Premium",
@@ -522,53 +527,12 @@ const defaultProducts: Product[] = [
       en: "Warm sunset tones dance through this enchanting arrangement.",
       ar: "ألوان غروب دافئة ترقص عبر هذا الترتيب الساحر.",
     },
-    images: ["/sunset-colored-flower-arrangement.jpg"],
+    images: ["/sunset-colored-flower-arrangement-orange-coral.jpg"],
     colors: ["Sunset Orange", "Coral Pink", "Golden Yellow"],
     availability: true,
     category: "Bouquets",
   },
 ]
-
-// Helper function to safely set localStorage items
-const safeSetItem = (key: string, value: string): boolean => {
-  try {
-    localStorage.setItem(key, value)
-    return true
-  } catch {
-    console.warn(`Failed to save ${key} to localStorage - quota exceeded`)
-    return false
-  }
-}
-
-// Helper function to compress image data
-const compressImageData = async (imageData: string, maxWidth = 400): Promise<string> => {
-  // If it's not a base64 data URL, return as-is
-  if (!imageData.startsWith("data:image")) {
-    return imageData
-  }
-
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.crossOrigin = "anonymous"
-    img.onload = () => {
-      const canvas = document.createElement("canvas")
-      const ratio = Math.min(maxWidth / img.width, maxWidth / img.height)
-      canvas.width = img.width * ratio
-      canvas.height = img.height * ratio
-      const ctx = canvas.getContext("2d")
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        // Compress to JPEG with 0.6 quality
-        const compressed = canvas.toDataURL("image/jpeg", 0.6)
-        resolve(compressed)
-      } else {
-        resolve(imageData)
-      }
-    }
-    img.onerror = () => resolve(imageData)
-    img.src = imageData
-  })
-}
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
 
@@ -585,157 +549,235 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [categories, setCategories] = useState<Category[]>(defaultCategories)
   const [adminTranslations, setAdminTranslations] = useState<AdminTranslations>(defaultAdminTranslations)
+  const [quizzes, setQuizzes] = useState<Quiz[]>([])
+  const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null)
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  const prevMessageCountRef = useRef(0)
+  const prevQuizResultCountRef = useRef(0)
+  const initialLoadRef = useRef(true)
+
+  const isAdminPageRef = useRef(false)
+
+  const playNotificationSound = useCallback(() => {
+    if (!isAdminPageRef.current) return
+
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      oscillator.frequency.value = 800
+      oscillator.type = "sine"
+      gainNode.gain.value = 0.3
+
+      oscillator.start()
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+      oscillator.stop(audioContext.currentTime + 0.3)
+    } catch (e) {
+      // Ignore errors
+    }
+  }, [])
+
+  const setIsAdminPage = useCallback((isAdmin: boolean) => {
+    isAdminPageRef.current = isAdmin
+  }, [])
+
+  const playAdminNotificationSound = useCallback(() => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      oscillator.frequency.value = 800
+      oscillator.type = "sine"
+      gainNode.gain.value = 0.3
+
+      oscillator.start()
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+      oscillator.stop(audioContext.currentTime + 0.3)
+    } catch (e) {
+      // Ignore errors
+    }
+  }, [])
+
+  const clearAllNotifications = useCallback(() => {
+    setNotifications([])
+    localStorage.setItem("notifications", JSON.stringify([]))
+  }, [])
 
   // Load from localStorage on mount
   useEffect(() => {
-    const loadFromStorage = (key: string, setter: (val: unknown) => void, defaultVal: unknown) => {
-      try {
-        const saved = localStorage.getItem(key)
-        if (saved) setter(JSON.parse(saved))
-      } catch {
-        setter(defaultVal)
-      }
-    }
+    setMounted(true)
+    try {
+      const savedMessages = localStorage.getItem("contactMessages")
+      if (savedMessages) setContactMessages(JSON.parse(savedMessages))
 
-    loadFromStorage("contactMessages", setContactMessages, [])
-    loadFromStorage("storeSettings", setStoreSettings, defaultStoreSettings)
-    loadFromStorage("footerSettings", setFooterSettings, defaultFooterSettings)
-    loadFromStorage("adminSettings", setAdminSettings, defaultAdminSettings)
-    loadFromStorage("sectionNames", setSectionNames, defaultSectionNames)
-    loadFromStorage("contentSettings", setContentSettings, defaultContentSettings)
-    loadFromStorage("galleryImages", setGalleryImages, defaultGalleryImages)
-    loadFromStorage("reviews", setReviews, defaultReviews)
-    loadFromStorage("products", setProducts, defaultProducts)
-    loadFromStorage("notifications", setNotifications, [])
-    loadFromStorage("categories", setCategories, defaultCategories)
-    loadFromStorage("adminTranslations", setAdminTranslations, defaultAdminTranslations)
+      const savedStoreSettings = localStorage.getItem("storeSettings")
+      if (savedStoreSettings) setStoreSettings({ ...defaultStoreSettings, ...JSON.parse(savedStoreSettings) })
+
+      const savedFooterSettings = localStorage.getItem("footerSettings")
+      if (savedFooterSettings) setFooterSettings({ ...defaultFooterSettings, ...JSON.parse(savedFooterSettings) })
+
+      const savedAdminSettings = localStorage.getItem("adminSettings")
+      if (savedAdminSettings) setAdminSettings({ ...defaultAdminSettings, ...JSON.parse(savedAdminSettings) })
+
+      const savedSectionNames = localStorage.getItem("sectionNames")
+      if (savedSectionNames) setSectionNames({ ...defaultSectionNames, ...JSON.parse(savedSectionNames) })
+
+      const savedContentSettings = localStorage.getItem("contentSettings")
+      if (savedContentSettings) setContentSettings({ ...defaultContentSettings, ...JSON.parse(savedContentSettings) })
+
+      const savedGalleryImages = localStorage.getItem("galleryImages")
+      if (savedGalleryImages) setGalleryImages(JSON.parse(savedGalleryImages))
+
+      const savedReviews = localStorage.getItem("reviews")
+      if (savedReviews) setReviews(JSON.parse(savedReviews))
+
+      const savedProducts = localStorage.getItem("products")
+      if (savedProducts) setProducts(JSON.parse(savedProducts))
+
+      const savedCategories = localStorage.getItem("categories")
+      if (savedCategories) setCategories(JSON.parse(savedCategories))
+
+      const savedAdminTranslations = localStorage.getItem("adminTranslations")
+      if (savedAdminTranslations) {
+        const parsed = JSON.parse(savedAdminTranslations)
+        setAdminTranslations({
+          ...defaultAdminTranslations,
+          ...parsed,
+          sidebar: { ...defaultAdminTranslations.sidebar, ...parsed.sidebar },
+        })
+      }
+
+      const savedQuizzes = localStorage.getItem("quizzes")
+      if (savedQuizzes) {
+        const parsedQuizzes = JSON.parse(savedQuizzes)
+        setQuizzes(parsedQuizzes)
+        const active = parsedQuizzes.find((q: Quiz) => q.isActive)
+        if (active) setActiveQuiz(active)
+      }
+
+      const savedQuizResults = localStorage.getItem("quizResults")
+      if (savedQuizResults) setQuizResults(JSON.parse(savedQuizResults))
+
+      const savedNotifications = localStorage.getItem("notifications")
+      if (savedNotifications) {
+        const parsed = JSON.parse(savedNotifications)
+        setNotifications(parsed)
+      }
+
+      // Set initial counts after loading
+      setTimeout(() => {
+        const msgs = localStorage.getItem("contactMessages")
+        if (msgs) {
+          const parsed = JSON.parse(msgs)
+          prevMessageCountRef.current = parsed.filter((m: ContactMessage) => m.status === "new").length
+        }
+        const results = localStorage.getItem("quizResults")
+        if (results) {
+          prevQuizResultCountRef.current = JSON.parse(results).length
+        }
+        initialLoadRef.current = false
+      }, 100)
+    } catch (error) {
+      console.error("[v0] Error loading from localStorage:", error)
+    }
   }, [])
 
   useEffect(() => {
-    const newNotifications = contactMessages
-      .filter((m) => m.status === "new")
-      .filter((m) => !notifications.some((n) => n.sourceId === m.id))
-      .map((m) => ({
-        id: `notif-${m.id}`,
-        message: `New message from ${m.name}`,
-        time: new Date(m.date).toLocaleString(),
-        read: false,
-        sourceId: m.id,
-      }))
+    if (!mounted || initialLoadRef.current) return
 
-    if (newNotifications.length > 0) {
-      setNotifications((prev) => {
-        const updated = [...newNotifications, ...prev].slice(0, 20)
-        localStorage.setItem("notifications", JSON.stringify(updated))
-        return updated
-      })
+    const newMessages = contactMessages.filter((m) => m.status === "new")
+
+    if (newMessages.length > prevMessageCountRef.current) {
+      const existingIds = notifications.map((n) => n.sourceId)
+      const newNotifs = newMessages
+        .filter((m) => !existingIds.includes(m.id))
+        .map((m) => ({
+          id: `notif-${m.id}`,
+          message: `New message from ${m.name}`,
+          time: new Date(m.date).toLocaleString(),
+          read: false,
+          sourceId: m.id,
+          type: "message" as const,
+        }))
+
+      if (newNotifs.length > 0) {
+        setNotifications((prev) => {
+          const updated = [...newNotifs, ...prev].slice(0, 50)
+          localStorage.setItem("notifications", JSON.stringify(updated))
+          return updated
+        })
+        if (isAdminPageRef.current) {
+          playNotificationSound()
+        }
+      }
     }
-  }, [contactMessages, notifications])
+    prevMessageCountRef.current = newMessages.length
+  }, [contactMessages, mounted, notifications])
 
-  // Save to localStorage helpers
-  const saveToStorage = useCallback((key: string, value: unknown) => {
-    const stringified = JSON.stringify(value)
-    if (!safeSetItem(key, stringified)) {
-      console.warn("Attempting to clear old storage data...")
+  useEffect(() => {
+    if (!mounted || initialLoadRef.current || quizResults.length === 0) return
+
+    if (quizResults.length > prevQuizResultCountRef.current) {
+      const existingIds = notifications.map((n) => n.sourceId)
+      const newNotifs = quizResults
+        .filter((r) => !existingIds.includes(r.id))
+        .map((r) => ({
+          id: `quiz-notif-${r.id}`,
+          message: `Quiz completed: ${r.score}/${r.totalQuestions} correct`,
+          time: new Date(r.date).toLocaleString(),
+          read: false,
+          sourceId: r.id,
+          type: "quiz" as const,
+        }))
+
+      if (newNotifs.length > 0) {
+        setNotifications((prev) => {
+          const updated = [...newNotifs, ...prev].slice(0, 50)
+          localStorage.setItem("notifications", JSON.stringify(updated))
+          return updated
+        })
+        if (isAdminPageRef.current) {
+          playNotificationSound()
+        }
+      }
+    }
+    prevQuizResultCountRef.current = quizResults.length
+  }, [quizResults, mounted, notifications])
+
+  const saveToStorage = useCallback((key: string, value: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+      console.error(`[v0] Error saving ${key}:`, error)
     }
   }, [])
 
-  const markNotificationAsRead = useCallback(
-    (id: string) => {
-      setNotifications((prev) => {
-        const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-        saveToStorage("notifications", updated)
-        return updated
-      })
-    },
-    [saveToStorage],
-  )
+  const markNotificationAsRead = useCallback((id: string) => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      localStorage.setItem("notifications", JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   const markAllNotificationsAsRead = useCallback(() => {
     setNotifications((prev) => {
       const updated = prev.map((n) => ({ ...n, read: true }))
-      saveToStorage("notifications", updated)
+      localStorage.setItem("notifications", JSON.stringify(updated))
       return updated
     })
-  }, [saveToStorage])
+  }, [])
 
-  // Contact Messages
-  const addContactMessage = useCallback(
-    (message: Omit<ContactMessage, "id" | "date" | "status">) => {
-      const newMessage: ContactMessage = {
-        ...message,
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        status: "new",
-      }
-      setContactMessages((prev) => {
-        const updated = [newMessage, ...prev]
-        saveToStorage("contactMessages", updated)
-        return updated
-      })
-    },
-    [saveToStorage],
-  )
-
-  const updateMessageStatus = useCallback(
-    (id: string, status: ContactMessage["status"]) => {
-      setContactMessages((prev) => {
-        const updated = prev.map((m) => (m.id === id ? { ...m, status } : m))
-        saveToStorage("contactMessages", updated)
-        return updated
-      })
-    },
-    [saveToStorage],
-  )
-
-  const deleteMessage = useCallback(
-    (id: string) => {
-      setContactMessages((prev) => {
-        const updated = prev.filter((m) => m.id !== id)
-        saveToStorage("contactMessages", updated)
-        return updated
-      })
-    },
-    [saveToStorage],
-  )
-
-  // Store Settings
-  const updateStoreSettings = useCallback(
-    (settings: Partial<StoreSettings>) => {
-      setStoreSettings((prev) => {
-        const updated = { ...prev, ...settings }
-        saveToStorage("storeSettings", updated)
-        return updated
-      })
-    },
-    [saveToStorage],
-  )
-
-  // Footer Settings
-  const updateFooterSettings = useCallback(
-    (settings: Partial<FooterSettings>) => {
-      setFooterSettings((prev) => {
-        const updated = { ...prev, ...settings }
-        saveToStorage("footerSettings", updated)
-        return updated
-      })
-    },
-    [saveToStorage],
-  )
-
-  // Admin Settings
-  const updateAdminSettings = useCallback(
-    (settings: Partial<AdminSettings>) => {
-      setAdminSettings((prev) => {
-        const updated = { ...prev, ...settings }
-        saveToStorage("adminSettings", updated)
-        return updated
-      })
-    },
-    [saveToStorage],
-  )
-
-  // Section Names
   const updateSectionNames = useCallback(
     (names: Partial<SectionNames>) => {
       setSectionNames((prev) => {
@@ -747,7 +789,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [saveToStorage],
   )
 
-  // Content Settings
   const updateContentSettings = useCallback(
     (settings: Partial<ContentSettings>) => {
       setContentSettings((prev) => {
@@ -759,11 +800,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [saveToStorage],
   )
 
-  // Gallery
   const addGalleryImage = useCallback(
     (image: Omit<GalleryImage, "id">) => {
+      const newImage: GalleryImage = { ...image, id: Date.now().toString() }
       setGalleryImages((prev) => {
-        const updated = [...prev, { ...image, id: Date.now().toString() }]
+        const updated = [...prev, newImage]
         saveToStorage("galleryImages", updated)
         return updated
       })
@@ -774,7 +815,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const removeGalleryImage = useCallback(
     (id: string) => {
       setGalleryImages((prev) => {
-        const updated = prev.filter((i) => i.id !== id)
+        const updated = prev.filter((img) => img.id !== id)
         saveToStorage("galleryImages", updated)
         return updated
       })
@@ -785,7 +826,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const updateGalleryImage = useCallback(
     (id: string, image: Partial<GalleryImage>) => {
       setGalleryImages((prev) => {
-        const updated = prev.map((i) => (i.id === id ? { ...i, ...image } : i))
+        const updated = prev.map((img) => (img.id === id ? { ...img, ...image } : img))
         saveToStorage("galleryImages", updated)
         return updated
       })
@@ -793,11 +834,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [saveToStorage],
   )
 
-  // Reviews
   const addReview = useCallback(
     (review: Omit<Review, "id">) => {
+      const newReview: Review = { ...review, id: Date.now().toString() }
       setReviews((prev) => {
-        const updated = [...prev, { ...review, id: Date.now().toString() }]
+        const updated = [...prev, newReview]
         saveToStorage("reviews", updated)
         return updated
       })
@@ -827,35 +868,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [saveToStorage],
   )
 
-  // Products
-  const addProduct = useCallback(async (product: Omit<Product, "id">) => {
-    // Compress images before storing
-    const compressedImages = await Promise.all(product.images.map((img) => compressImageData(img, 400)))
-
-    setProducts((prev) => {
-      const maxId = prev.reduce((max, p) => Math.max(max, p.id), 0)
-      const newProduct: Product = {
-        ...product,
-        id: maxId + 1,
-        images: compressedImages,
-      }
-      const updated = [...prev, newProduct]
-
-      const stringified = JSON.stringify(updated)
-      if (!safeSetItem("products", stringified)) {
-        const fallbackProduct: Product = {
-          ...product,
-          id: maxId + 1,
-          images: ["/vibrant-flower-bouquet.png"],
-        }
-        const fallbackUpdated = [...prev, fallbackProduct]
-        safeSetItem("products", JSON.stringify(fallbackUpdated))
-        return fallbackUpdated
-      }
-
-      return updated
-    })
-  }, [])
+  const addProduct = useCallback(
+    (product: Omit<Product, "id">) => {
+      const newProduct: Product = { ...product, id: Date.now() }
+      setProducts((prev) => {
+        const updated = [...prev, newProduct]
+        saveToStorage("products", updated)
+        return updated
+      })
+    },
+    [saveToStorage],
+  )
 
   const removeProduct = useCallback(
     (id: number) => {
@@ -868,29 +891,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [saveToStorage],
   )
 
-  const updateProduct = useCallback(async (id: number, product: Partial<Product>) => {
-    let processedProduct = product
-    if (product.images) {
-      const compressedImages = await Promise.all(product.images.map((img) => compressImageData(img, 400)))
-      processedProduct = { ...product, images: compressedImages }
-    }
-
-    setProducts((prev) => {
-      const updated = prev.map((p) => (p.id === id ? { ...p, ...processedProduct } : p))
-      const stringified = JSON.stringify(updated)
-      if (!safeSetItem("products", stringified)) {
-        const noImageUpdate = prev.map((p) => (p.id === id ? { ...p, ...product, images: p.images } : p))
-        safeSetItem("products", JSON.stringify(noImageUpdate))
-        return noImageUpdate
-      }
-      return updated
-    })
-  }, [])
+  const updateProduct = useCallback(
+    (id: number, product: Partial<Product>) => {
+      setProducts((prev) => {
+        const updated = prev.map((p) => (p.id === id ? { ...p, ...product } : p))
+        saveToStorage("products", updated)
+        return updated
+      })
+    },
+    [saveToStorage],
+  )
 
   const addCategory = useCallback(
     (category: Omit<Category, "id">) => {
+      const newCategory: Category = { ...category, id: Date.now().toString() }
       setCategories((prev) => {
-        const updated = [...prev, { ...category, id: Date.now().toString() }]
+        const updated = [...prev, newCategory]
         saveToStorage("categories", updated)
         return updated
       })
@@ -931,54 +947,178 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [saveToStorage],
   )
 
-  return (
-    <StoreContext.Provider
-      value={{
-        contactMessages,
-        addContactMessage,
-        updateMessageStatus,
-        deleteMessage,
-        storeSettings,
-        updateStoreSettings,
-        footerSettings,
-        updateFooterSettings,
-        adminSettings,
-        updateAdminSettings,
-        sectionNames,
-        updateSectionNames,
-        contentSettings,
-        updateContentSettings,
-        galleryImages,
-        addGalleryImage,
-        removeGalleryImage,
-        updateGalleryImage,
-        reviews,
-        addReview,
-        removeReview,
-        updateReview,
-        products,
-        addProduct,
-        removeProduct,
-        updateProduct,
-        notifications,
-        markNotificationAsRead,
-        markAllNotificationsAsRead,
-        categories,
-        addCategory,
-        updateCategory,
-        removeCategory,
-        adminTranslations,
-        updateAdminTranslations,
-      }}
-    >
-      {children}
-    </StoreContext.Provider>
+  const addQuiz = useCallback(
+    (quiz: Omit<Quiz, "id">) => {
+      const newQuiz: Quiz = { ...quiz, id: Date.now().toString(), createdAt: new Date().toISOString() }
+      setQuizzes((prev) => {
+        let updated = [...prev, newQuiz]
+        if (newQuiz.isActive) {
+          updated = updated.map((q) => (q.id === newQuiz.id ? q : { ...q, isActive: false }))
+          setActiveQuiz(newQuiz)
+        }
+        saveToStorage("quizzes", updated)
+        return updated
+      })
+    },
+    [saveToStorage],
   )
+
+  const updateQuiz = useCallback(
+    (id: string, quiz: Partial<Quiz>) => {
+      setQuizzes((prev) => {
+        let updated = prev.map((q) => (q.id === id ? { ...q, ...quiz } : q))
+        if (quiz.isActive) {
+          updated = updated.map((q) => (q.id === id ? q : { ...q, isActive: false }))
+          const active = updated.find((q) => q.id === id)
+          if (active) setActiveQuiz(active)
+        }
+        saveToStorage("quizzes", updated)
+        return updated
+      })
+    },
+    [saveToStorage],
+  )
+
+  const deleteQuiz = useCallback(
+    (id: string) => {
+      setQuizzes((prev) => {
+        const updated = prev.filter((q) => q.id !== id)
+        saveToStorage("quizzes", updated)
+        if (activeQuiz?.id === id) setActiveQuiz(null)
+        return updated
+      })
+    },
+    [saveToStorage, activeQuiz],
+  )
+
+  const setActiveQuizById = useCallback(
+    (id: string) => {
+      setQuizzes((prev) => {
+        const updated = prev.map((q) => ({ ...q, isActive: q.id === id }))
+        const active = updated.find((q) => q.id === id)
+        if (active) setActiveQuiz(active)
+        saveToStorage("quizzes", updated)
+        return updated
+      })
+    },
+    [saveToStorage],
+  )
+
+  const addQuizResult = useCallback(
+    (result: Omit<QuizResult, "id">) => {
+      const newResult: QuizResult = { ...result, id: Date.now().toString() }
+      setQuizResults((prev) => {
+        const updated = [newResult, ...prev]
+        saveToStorage("quizResults", updated)
+        return updated
+      })
+    },
+    [saveToStorage],
+  )
+
+  const clearQuizResults = useCallback(() => {
+    setQuizResults([])
+    saveToStorage("quizResults", [])
+  }, [saveToStorage])
+
+  const value: StoreContextType = {
+    contactMessages,
+    addContactMessage: (message: Omit<ContactMessage, "id" | "date" | "status">) => {
+      const newMessage: ContactMessage = {
+        ...message,
+        id: Date.now().toString(),
+        date: new Date().toISOString(),
+        status: "new",
+      }
+      setContactMessages((prev) => {
+        const updated = [newMessage, ...prev]
+        saveToStorage("contactMessages", updated)
+        return updated
+      })
+    },
+    updateMessageStatus: (id: string, status: ContactMessage["status"]) => {
+      setContactMessages((prev) => {
+        const updated = prev.map((m) => (m.id === id ? { ...m, status } : m))
+        saveToStorage("contactMessages", updated)
+        return updated
+      })
+    },
+    deleteMessage: (id: string) => {
+      setContactMessages((prev) => {
+        const updated = prev.filter((m) => m.id !== id)
+        saveToStorage("contactMessages", updated)
+        return updated
+      })
+    },
+    storeSettings,
+    updateStoreSettings: (settings: Partial<StoreSettings>) => {
+      setStoreSettings((prev) => {
+        const updated = { ...prev, ...settings }
+        saveToStorage("storeSettings", updated)
+        return updated
+      })
+    },
+    footerSettings,
+    updateFooterSettings: (settings: Partial<FooterSettings>) => {
+      setFooterSettings((prev) => {
+        const updated = { ...prev, ...settings }
+        saveToStorage("footerSettings", updated)
+        return updated
+      })
+    },
+    adminSettings,
+    updateAdminSettings: (settings: Partial<AdminSettings>) => {
+      setAdminSettings((prev) => {
+        const updated = { ...prev, ...settings }
+        saveToStorage("adminSettings", updated)
+        return updated
+      })
+    },
+    sectionNames,
+    updateSectionNames,
+    contentSettings,
+    updateContentSettings,
+    galleryImages,
+    addGalleryImage,
+    removeGalleryImage,
+    updateGalleryImage,
+    reviews,
+    addReview,
+    removeReview,
+    updateReview,
+    products,
+    addProduct,
+    removeProduct,
+    updateProduct,
+    notifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    clearAllNotifications,
+    playAdminNotificationSound,
+    setIsAdminPage,
+    categories,
+    addCategory,
+    updateCategory,
+    removeCategory,
+    adminTranslations,
+    updateAdminTranslations,
+    quizzes,
+    activeQuiz,
+    quizResults,
+    addQuiz,
+    updateQuiz,
+    deleteQuiz,
+    setActiveQuizById,
+    addQuizResult,
+    clearQuizResults,
+  }
+
+  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }
 
 export function useStore() {
   const context = useContext(StoreContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useStore must be used within a StoreProvider")
   }
   return context

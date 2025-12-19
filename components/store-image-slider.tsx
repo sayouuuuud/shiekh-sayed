@@ -5,10 +5,10 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const storeImages = [
-  "/elegant-flower-shop-interior-with-soft-lighting.jpg",
-  "/flower-shop-display-with-roses.jpg",
-  "/beautiful-bouquet-arrangement.jpg",
-  "/flower-shop-cozy-corner.jpg",
+  "/elegant-flower-shop-interior-soft-lighting.jpg",
+  "/placeholder.svg?height=300&width=400",
+  "/placeholder.svg?height=300&width=400",
+  "/placeholder.svg?height=300&width=400",
 ]
 
 export function StoreImageSlider() {

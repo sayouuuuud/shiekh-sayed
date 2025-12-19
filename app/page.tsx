@@ -9,6 +9,7 @@ import { OurStorySection } from "@/components/our-story-section"
 import { Footer } from "@/components/footer"
 import { useLanguage } from "@/lib/language-context"
 import { useStore } from "@/lib/store-context"
+import { FlowerQuizPopup } from "@/components/flower-quiz-popup"
 
 export default function HomePage() {
   const { isRTL } = useLanguage()
@@ -39,6 +40,8 @@ export default function HomePage() {
       <OurStorySection />
 
       <Footer />
+
+      <FlowerQuizPopup />
     </main>
   )
 }

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -20,6 +20,18 @@ export default function AboutPage() {
   const [formData, setFormData] = useState({ name: "", contact: "", message: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [mapKey, setMapKey] = useState(0)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      setMapKey((prev) => prev + 1)
+    }
+  }, [storeSettings.mapLat, storeSettings.mapLng, mounted])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,7 +54,8 @@ export default function AboutPage() {
   const whatsappNumber = storeSettings.whatsappNumber.replace(/[^0-9]/g, "")
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
 
-  const mapEmbedUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123456789!2d${storeSettings.mapLng}!3d${storeSettings.mapLat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzHCsDEyJzAwLjQiTiAyOcKwNTUnMDcuMyJF!5e0!3m2!1sen!2seg!4v1702000000000!5m2!1sen!2seg`
+  const mapLat = mounted ? storeSettings.mapLat : 31.2001
+  const mapLng = mounted ? storeSettings.mapLng : 29.9187
 
   return (
     <main className="min-h-screen bg-rose-50/30" dir={isRTL ? "rtl" : "ltr"}>
@@ -210,29 +223,31 @@ export default function AboutPage() {
 
             {/* Location Info */}
             <div className="space-y-6">
-              {/* Map */}
+              {/* Map - Using OpenStreetMap with proper coordinates */}
               <div className="relative h-[250px] rounded-2xl overflow-hidden">
                 <iframe
-                  src={mapEmbedUrl}
+                  key={mapKey}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapLng - 0.01},${mapLat - 0.01},${mapLng + 0.01},${mapLat + 0.01}&layer=mapnik&marker=${mapLat},${mapLng}`}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
                   title="Store Location"
                 />
               </div>
 
-              {/* Contact Details */}
+              {/* Contact Details - Using mounted check for proper values */}
               <div className="bg-rose-50/50 rounded-2xl p-6 space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-5 h-5 text-rose-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-rose-900">{storeSettings.storeName}</p>
-                    <p className="text-rose-600/70 text-sm">{storeSettings.address}</p>
+                    <p className="font-semibold text-rose-900">
+                      {mounted ? storeSettings.storeName : "Whispering Petals"}
+                    </p>
+                    <p className="text-rose-600/70 text-sm">{mounted ? storeSettings.address : "Alexandria, Egypt"}</p>
                   </div>
                 </div>
 
@@ -242,7 +257,7 @@ export default function AboutPage() {
                   </div>
                   <div>
                     <p className="font-semibold text-rose-900">{isRTL ? "ساعات العمل" : "Business Hours"}</p>
-                    <p className="text-rose-600/70 text-sm">{storeSettings.businessHours}</p>
+                    <p className="text-rose-600/70 text-sm">{mounted ? storeSettings.businessHours : "9 AM - 9 PM"}</p>
                   </div>
                 </div>
 
@@ -250,18 +265,18 @@ export default function AboutPage() {
                   <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <Phone className="w-5 h-5 text-rose-600" />
                   </div>
-                  <p className="font-semibold text-rose-900">{storeSettings.phone}</p>
+                  <p className="font-semibold text-rose-900">{mounted ? storeSettings.phone : "+20 123 456 7890"}</p>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <Mail className="w-5 h-5 text-rose-600" />
                   </div>
-                  <p className="font-semibold text-rose-900">{storeSettings.email}</p>
+                  <p className="font-semibold text-rose-900">{mounted ? storeSettings.email : "hello@store.com"}</p>
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  {storeSettings.instagram && (
+                  {mounted && storeSettings.instagram && (
                     <a
                       href={storeSettings.instagram}
                       target="_blank"
@@ -272,7 +287,7 @@ export default function AboutPage() {
                       <Instagram className="w-5 h-5 text-rose-600" />
                     </a>
                   )}
-                  {storeSettings.facebook && (
+                  {mounted && storeSettings.facebook && (
                     <a
                       href={storeSettings.facebook}
                       target="_blank"

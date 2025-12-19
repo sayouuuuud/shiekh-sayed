@@ -7,13 +7,15 @@ import { useStore } from "@/lib/store-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Save, FileText, Check, Upload, Pencil } from "lucide-react"
+import { Save, FileText, Check, Upload, Pencil, AlertCircle, Loader2 } from "lucide-react"
 
 export function ContentClient() {
   const { contentSettings, updateContentSettings, sectionNames, updateSectionNames } = useStore()
   const [localContent, setLocalContent] = useState(contentSettings)
   const [localSectionNames, setLocalSectionNames] = useState(sectionNames)
   const [saved, setSaved] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [imageLoading, setImageLoading] = useState(false)
   const heroImageRef = useRef<HTMLInputElement>(null)
   const aboutImageRef = useRef<HTMLInputElement>(null)
 
@@ -23,21 +25,70 @@ export function ContentClient() {
   }, [contentSettings, sectionNames])
 
   const handleSave = (section: string) => {
-    if (section === "sections") {
-      updateSectionNames(localSectionNames)
-    } else {
-      updateContentSettings(localContent)
+    setSaveError(null)
+    try {
+      if (section === "sections") {
+        updateSectionNames(localSectionNames)
+      } else {
+        updateContentSettings(localContent)
+      }
+      setSaved(section)
+      setTimeout(() => setSaved(null), 2000)
+    } catch (error) {
+      console.error("[v0] Error saving content:", error)
+      setSaveError("Failed to save - storage may be full")
     }
-    setSaved(section)
-    setTimeout(() => setSaved(null), 2000)
+  }
+
+  const compressImage = (dataUrl: string, maxWidth: number): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!dataUrl.startsWith("data:image")) {
+        resolve(dataUrl)
+        return
+      }
+
+      const img = new window.Image()
+      img.crossOrigin = "anonymous"
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        // Ensure we don't upscale
+        const ratio = Math.min(maxWidth / img.width, 1)
+        canvas.width = img.width * ratio
+        canvas.height = img.height * ratio
+        const ctx = canvas.getContext("2d")
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+          const compressed = canvas.toDataURL("image/jpeg", 0.5)
+          console.log(
+            `[v0] Compressed: ${Math.round(dataUrl.length / 1024)}KB -> ${Math.round(compressed.length / 1024)}KB`,
+          )
+          resolve(compressed)
+        } else {
+          resolve(dataUrl)
+        }
+      }
+      img.onerror = () => resolve(dataUrl)
+      img.src = dataUrl
+    })
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: "heroImage" | "aboutImage") => {
     const file = e.target.files?.[0]
     if (file) {
+      setImageLoading(true)
+      setSaveError(null)
+
       const reader = new FileReader()
       reader.onloadend = () => {
-        setLocalContent({ ...localContent, [field]: reader.result as string })
+        const result = reader.result as string
+        compressImage(result, 500).then((compressed) => {
+          setLocalContent({ ...localContent, [field]: compressed })
+          setImageLoading(false)
+        })
+      }
+      reader.onerror = () => {
+        setSaveError("Failed to read image file")
+        setImageLoading(false)
       }
       reader.readAsDataURL(file)
     }
@@ -51,8 +102,18 @@ export function ContentClient() {
         <p className="text-gray-500 mt-1">Edit website text and images</p>
       </div>
 
+      {saveError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <p className="text-red-700 text-sm">{saveError}</p>
+          <button onClick={() => setSaveError(null)} className="ml-auto text-red-500 hover:text-red-700">
+            ×
+          </button>
+        </div>
+      )}
+
       <div className="space-y-8">
-        {/* Section Names - Added editable section names */}
+        {/* Section Names */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -175,10 +236,21 @@ export function ContentClient() {
               className="hidden"
             />
             <div
-              onClick={() => heroImageRef.current?.click()}
+              onClick={() => !imageLoading && heroImageRef.current?.click()}
               className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-rose-300 transition-colors cursor-pointer"
             >
-              {localContent.heroImage && !localContent.heroImage.includes("placeholder") ? (
+              {imageLoading ? (
+                <div className="flex flex-col items-center">
+                  <Loader2 className="w-8 h-8 text-rose-500 animate-spin mb-2" />
+                  <p className="text-sm text-gray-600">Compressing image...</p>
+                </div>
+              ) : localContent.heroImage && localContent.heroImage.startsWith("data:image") ? (
+                <img
+                  src={localContent.heroImage || "/placeholder.svg"}
+                  alt="Hero"
+                  className="max-h-32 mx-auto rounded-lg"
+                />
+              ) : localContent.heroImage && localContent.heroImage.length > 1 ? (
                 <img
                   src={localContent.heroImage || "/placeholder.svg"}
                   alt="Hero"

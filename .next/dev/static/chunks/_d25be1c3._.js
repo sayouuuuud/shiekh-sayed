@@ -278,23 +278,8 @@ const defaultStoreSettings = {
     storeName: "Whispering Petals",
     logo: "",
     whatsappNumber: "+201234567890",
-    productOrderTemplate: `Hello {storeName}!
-
-I would like to order:
-Product: {productName}
-Product ID: {productId}
-Color: {color}
-Quantity: {quantity}
-Total: {total}
-
-Thank you!`,
-    customOrderTemplate: `Hello {storeName}!
-
-I would like to place a custom order.
-
-Please contact me to discuss my requirements.
-
-Thank you!`,
+    productOrderTemplate: `Hello {storeName}!\n\nI would like to order:\nProduct: {productName}\nProduct ID: {productId}\nColor: {color}\nQuantity: {quantity}\nTotal: {total}\n\nThank you!`,
+    customOrderTemplate: `Hello {storeName}!\n\nI would like to place a custom order.\n\nPlease contact me to discuss my requirements.\n\nThank you!`,
     address: "Alexandria, Egypt",
     businessHours: "Daily: 10:00 AM - 6:00 PM",
     phone: "+20 123 456 7890",
@@ -372,37 +357,47 @@ const defaultContentSettings = {
         en: "Discover our curated collection for moments of love and grace.",
         ar: "اكتشف مجموعتنا المختارة للحظات الحب والرقي."
     },
-    heroImage: "/elegant-pink-roses-bouquet-arrangement.jpg",
+    heroImage: "/beautiful-pink-roses-flower-arrangement-elegant.jpg",
     storyText: {
-        en: "Founded in 2015, Whispering Petals began as a small dream nurtured by a passion for floristry and a love for creating meaningful connections through flowers. We believe every bloom tells a story and every arrangement creates a memory.",
-        ar: "تأسست همسات البتلات في عام ٢٠١٥، بدأت كحلم صغير نما بشغف لفن الزهور وحب خلق روابط ذات معنى من خلال الورود. نؤمن أن كل زهرة تحكي قصة وكل ترتيب يخلق ذكرى."
+        en: "Founded in 2015, Whispering Petals began as a small dream nurtured by a passion for floristry and a love for creating meaningful connections through flowers.",
+        ar: "تأسست همسات البتلات في عام ٢٠١٥، بدأت كحلم صغير نما بشغف لفن الزهور وحب خلق روابط ذات معنى من خلال الورود."
     },
     storyText2: {
         en: "From weekend farmers market arrangements to a beloved boutique, we continue to craft beauty with the same passion and attention to detail.",
         ar: "من ترتيبات أسواق المزارعين في نهاية الأسبوع إلى متجر محبوب، نواصل صياغة الجمال بنفس الشغف والاهتمام بالتفاصيل."
     },
-    aboutImage: "/flower-shop-interior.png"
+    aboutImage: "/flower-shop-storefront-elegant-boutique.jpg"
 };
 const defaultGalleryImages = [
     {
         id: "1",
-        src: "/vibrant-mixed-flower-bouquet.jpg",
+        src: "/vibrant-mixed-flower-bouquet-colorful.jpg",
         alt: "Vibrant mixed flower bouquet"
     },
     {
         id: "2",
-        src: "/roses-in-workspace.jpg",
+        src: "/roses-in-workspace-elegant-arrangement.jpg",
         alt: "Roses in workspace"
     },
     {
         id: "3",
-        src: "/delicate-pink-peonies.jpg",
+        src: "/delicate-pink-peonies-soft-petals.jpg",
         alt: "Delicate pink peonies"
     },
     {
         id: "4",
         src: "/colorful-spring-flower-arrangement.jpg",
         alt: "Colorful spring arrangement"
+    },
+    {
+        id: "5",
+        src: "/elegant-white-roses-bouquet.jpg",
+        alt: "Elegant white roses"
+    },
+    {
+        id: "6",
+        src: "/lavender-flower-arrangement-purple.jpg",
+        alt: "Lavender arrangement"
     }
 ];
 const defaultReviews = [
@@ -414,7 +409,7 @@ const defaultReviews = [
             en: "Absolutely stunning arrangements! The flowers were fresh and lasted for weeks.",
             ar: "ترتيبات مذهلة! كانت الزهور طازجة واستمرت لأسابيع."
         },
-        avatar: "/diverse-woman-avatar.png"
+        avatar: "/professional-woman-avatar.png"
     },
     {
         id: "2",
@@ -424,7 +419,7 @@ const defaultReviews = [
             en: "Perfect for my anniversary. My wife loved them!",
             ar: "مثالية لذكرى زواجي. زوجتي أحبتها!"
         },
-        avatar: "/man-avatar.png"
+        avatar: "/professional-man-avatar.png"
     },
     {
         id: "3",
@@ -434,7 +429,7 @@ const defaultReviews = [
             en: "The most beautiful flowers I've ever received. Excellent service!",
             ar: "أجمل زهور تلقيتها على الإطلاق. خدمة ممتازة!"
         },
-        avatar: "/woman-hijab-avatar.jpg"
+        avatar: "/woman-hijab-avatar-professional.jpg"
     }
 ];
 const defaultCategories = [
@@ -539,6 +534,10 @@ const defaultAdminTranslations = {
         settings: {
             en: "Settings",
             ar: "الإعدادات"
+        },
+        quiz: {
+            en: "Flower Quiz",
+            ar: "اختبار الأزهار"
         }
     },
     common: {
@@ -753,11 +752,11 @@ const defaultProducts = [
         },
         price: 95,
         description: {
-            en: "Exquisite harmony bouquet with blush, autumn tones and hints of romance and elegance. Perfect for anniversaries, birthdays, or expressing your deepest affections.",
-            ar: "باقة انسجام رائعة بألوان وردية وخريفية ولمسات من الرومانسية والأناقة. مثالية للذكرى السنوية وأعياد الميلاد أو التعبير عن أعمق مشاعرك."
+            en: "Exquisite harmony bouquet with blush, autumn tones and hints of romance and elegance.",
+            ar: "باقة انسجام رائعة بألوان وردية وخريفية ولمسات من الرومانسية والأناقة."
         },
         images: [
-            "/pink-roses-bouquet-elegant.jpg"
+            "/pink-roses-bouquet-elegant-blush.jpg"
         ],
         colors: [
             "Baby Pink",
@@ -775,11 +774,11 @@ const defaultProducts = [
         },
         price: 120,
         description: {
-            en: "A stunning arrangement of premium roses in an elegant box, symbolizing eternal love and grace.",
-            ar: "ترتيب مذهل من الورود الفاخرة في صندوق أنيق، يرمز إلى الحب والرقي الأبديين."
+            en: "A stunning arrangement of premium roses in an elegant box.",
+            ar: "ترتيب مذهل من الورود الفاخرة في صندوق أنيق."
         },
         images: [
-            "/luxury-flower-box-roses.jpg"
+            "/luxury-flower-box-roses-elegant-gift.jpg"
         ],
         colors: [
             "Classic Red",
@@ -797,11 +796,11 @@ const defaultProducts = [
         },
         price: 110,
         description: {
-            en: "Velvet-textured roses paired with delicate greenery create this romantic masterpiece.",
-            ar: "ورود بملمس مخملي مع خضرة رقيقة تخلق هذه التحفة الرومانسية."
+            en: "Velvet-textured roses paired with delicate greenery.",
+            ar: "ورود بملمس مخملي مع خضرة رقيقة."
         },
         images: [
-            "/velvet-red-roses-arrangement.jpg"
+            "/velvet-red-roses-arrangement-romantic.jpg"
         ],
         colors: [
             "Deep Red",
@@ -819,11 +818,11 @@ const defaultProducts = [
         },
         price: 85,
         description: {
-            en: "A whimsical basket filled with garden-fresh blooms, bringing the beauty of nature indoors.",
-            ar: "سلة خيالية مليئة بالأزهار الطازجة من الحديقة، تجلب جمال الطبيعة إلى الداخل."
+            en: "A whimsical basket filled with garden-fresh blooms.",
+            ar: "سلة خيالية مليئة بالأزهار الطازجة من الحديقة."
         },
         images: [
-            "/garden-flower-basket-arrangement.jpg"
+            "/garden-flower-basket-arrangement-colorful.jpg"
         ],
         colors: [
             "Mixed Pastels",
@@ -841,11 +840,11 @@ const defaultProducts = [
         },
         price: 145,
         description: {
-            en: "Luxurious peonies in full bloom, representing prosperity and romance.",
-            ar: "فاوانيا فاخرة في تفتح كامل، ترمز إلى الازدهار والرومانسية."
+            en: "Luxurious peonies in full bloom.",
+            ar: "فاوانيا فاخرة في تفتح كامل."
         },
         images: [
-            "/peony-flower-arrangement-luxury.jpg"
+            "/peony-flower-arrangement-luxury-pink.jpg"
         ],
         colors: [
             "Blush Pink",
@@ -867,7 +866,7 @@ const defaultProducts = [
             ar: "ألوان غروب دافئة ترقص عبر هذا الترتيب الساحر."
         },
         images: [
-            "/sunset-colored-flower-arrangement.jpg"
+            "/sunset-colored-flower-arrangement-orange-coral.jpg"
         ],
         colors: [
             "Sunset Orange",
@@ -878,44 +877,6 @@ const defaultProducts = [
         category: "Bouquets"
     }
 ];
-// Helper function to safely set localStorage items
-const safeSetItem = (key, value)=>{
-    try {
-        localStorage.setItem(key, value);
-        return true;
-    } catch  {
-        console.warn(`Failed to save ${key} to localStorage - quota exceeded`);
-        return false;
-    }
-};
-// Helper function to compress image data
-const compressImageData = async (imageData, maxWidth = 400)=>{
-    // If it's not a base64 data URL, return as-is
-    if (!imageData.startsWith("data:image")) {
-        return imageData;
-    }
-    return new Promise((resolve)=>{
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = ()=>{
-            const canvas = document.createElement("canvas");
-            const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-            canvas.width = img.width * ratio;
-            canvas.height = img.height * ratio;
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                // Compress to JPEG with 0.6 quality
-                const compressed = canvas.toDataURL("image/jpeg", 0.6);
-                resolve(compressed);
-            } else {
-                resolve(imageData);
-            }
-        };
-        img.onerror = ()=>resolve(imageData);
-        img.src = imageData;
-    });
-};
 const StoreContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createContext"])(undefined);
 function StoreProvider({ children }) {
     _s();
@@ -931,73 +892,247 @@ function StoreProvider({ children }) {
     const [notifications, setNotifications] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [categories, setCategories] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(defaultCategories);
     const [adminTranslations, setAdminTranslations] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(defaultAdminTranslations);
+    const [quizzes, setQuizzes] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [activeQuiz, setActiveQuiz] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [quizResults, setQuizResults] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [mounted, setMounted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const prevMessageCountRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(0);
+    const prevQuizResultCountRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(0);
+    const initialLoadRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(true);
+    const isAdminPageRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const playNotificationSound = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[playNotificationSound]": ()=>{
+            if (!isAdminPageRef.current) return;
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 800;
+                oscillator.type = "sine";
+                gainNode.gain.value = 0.3;
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+            // Ignore errors
+            }
+        }
+    }["StoreProvider.useCallback[playNotificationSound]"], []);
+    const setIsAdminPage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[setIsAdminPage]": (isAdmin)=>{
+            isAdminPageRef.current = isAdmin;
+        }
+    }["StoreProvider.useCallback[setIsAdminPage]"], []);
+    const playAdminNotificationSound = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[playAdminNotificationSound]": ()=>{
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 800;
+                oscillator.type = "sine";
+                gainNode.gain.value = 0.3;
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+            // Ignore errors
+            }
+        }
+    }["StoreProvider.useCallback[playAdminNotificationSound]"], []);
+    const clearAllNotifications = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[clearAllNotifications]": ()=>{
+            setNotifications([]);
+            localStorage.setItem("notifications", JSON.stringify([]));
+        }
+    }["StoreProvider.useCallback[clearAllNotifications]"], []);
     // Load from localStorage on mount
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "StoreProvider.useEffect": ()=>{
-            const loadFromStorage = {
-                "StoreProvider.useEffect.loadFromStorage": (key, setter, defaultVal)=>{
-                    try {
-                        const saved = localStorage.getItem(key);
-                        if (saved) setter(JSON.parse(saved));
-                    } catch  {
-                        setter(defaultVal);
-                    }
+            setMounted(true);
+            try {
+                const savedMessages = localStorage.getItem("contactMessages");
+                if (savedMessages) setContactMessages(JSON.parse(savedMessages));
+                const savedStoreSettings = localStorage.getItem("storeSettings");
+                if (savedStoreSettings) setStoreSettings({
+                    ...defaultStoreSettings,
+                    ...JSON.parse(savedStoreSettings)
+                });
+                const savedFooterSettings = localStorage.getItem("footerSettings");
+                if (savedFooterSettings) setFooterSettings({
+                    ...defaultFooterSettings,
+                    ...JSON.parse(savedFooterSettings)
+                });
+                const savedAdminSettings = localStorage.getItem("adminSettings");
+                if (savedAdminSettings) setAdminSettings({
+                    ...defaultAdminSettings,
+                    ...JSON.parse(savedAdminSettings)
+                });
+                const savedSectionNames = localStorage.getItem("sectionNames");
+                if (savedSectionNames) setSectionNames({
+                    ...defaultSectionNames,
+                    ...JSON.parse(savedSectionNames)
+                });
+                const savedContentSettings = localStorage.getItem("contentSettings");
+                if (savedContentSettings) setContentSettings({
+                    ...defaultContentSettings,
+                    ...JSON.parse(savedContentSettings)
+                });
+                const savedGalleryImages = localStorage.getItem("galleryImages");
+                if (savedGalleryImages) setGalleryImages(JSON.parse(savedGalleryImages));
+                const savedReviews = localStorage.getItem("reviews");
+                if (savedReviews) setReviews(JSON.parse(savedReviews));
+                const savedProducts = localStorage.getItem("products");
+                if (savedProducts) setProducts(JSON.parse(savedProducts));
+                const savedCategories = localStorage.getItem("categories");
+                if (savedCategories) setCategories(JSON.parse(savedCategories));
+                const savedAdminTranslations = localStorage.getItem("adminTranslations");
+                if (savedAdminTranslations) {
+                    const parsed = JSON.parse(savedAdminTranslations);
+                    setAdminTranslations({
+                        ...defaultAdminTranslations,
+                        ...parsed,
+                        sidebar: {
+                            ...defaultAdminTranslations.sidebar,
+                            ...parsed.sidebar
+                        }
+                    });
                 }
-            }["StoreProvider.useEffect.loadFromStorage"];
-            loadFromStorage("contactMessages", setContactMessages, []);
-            loadFromStorage("storeSettings", setStoreSettings, defaultStoreSettings);
-            loadFromStorage("footerSettings", setFooterSettings, defaultFooterSettings);
-            loadFromStorage("adminSettings", setAdminSettings, defaultAdminSettings);
-            loadFromStorage("sectionNames", setSectionNames, defaultSectionNames);
-            loadFromStorage("contentSettings", setContentSettings, defaultContentSettings);
-            loadFromStorage("galleryImages", setGalleryImages, defaultGalleryImages);
-            loadFromStorage("reviews", setReviews, defaultReviews);
-            loadFromStorage("products", setProducts, defaultProducts);
-            loadFromStorage("notifications", setNotifications, []);
-            loadFromStorage("categories", setCategories, defaultCategories);
-            loadFromStorage("adminTranslations", setAdminTranslations, defaultAdminTranslations);
+                const savedQuizzes = localStorage.getItem("quizzes");
+                if (savedQuizzes) {
+                    const parsedQuizzes = JSON.parse(savedQuizzes);
+                    setQuizzes(parsedQuizzes);
+                    const active = parsedQuizzes.find({
+                        "StoreProvider.useEffect.active": (q)=>q.isActive
+                    }["StoreProvider.useEffect.active"]);
+                    if (active) setActiveQuiz(active);
+                }
+                const savedQuizResults = localStorage.getItem("quizResults");
+                if (savedQuizResults) setQuizResults(JSON.parse(savedQuizResults));
+                const savedNotifications = localStorage.getItem("notifications");
+                if (savedNotifications) {
+                    const parsed = JSON.parse(savedNotifications);
+                    setNotifications(parsed);
+                }
+                // Set initial counts after loading
+                setTimeout({
+                    "StoreProvider.useEffect": ()=>{
+                        const msgs = localStorage.getItem("contactMessages");
+                        if (msgs) {
+                            const parsed = JSON.parse(msgs);
+                            prevMessageCountRef.current = parsed.filter({
+                                "StoreProvider.useEffect": (m)=>m.status === "new"
+                            }["StoreProvider.useEffect"]).length;
+                        }
+                        const results = localStorage.getItem("quizResults");
+                        if (results) {
+                            prevQuizResultCountRef.current = JSON.parse(results).length;
+                        }
+                        initialLoadRef.current = false;
+                    }
+                }["StoreProvider.useEffect"], 100);
+            } catch (error) {
+                console.error("[v0] Error loading from localStorage:", error);
+            }
         }
     }["StoreProvider.useEffect"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "StoreProvider.useEffect": ()=>{
-            const newNotifications = contactMessages.filter({
-                "StoreProvider.useEffect.newNotifications": (m)=>m.status === "new"
-            }["StoreProvider.useEffect.newNotifications"]).filter({
-                "StoreProvider.useEffect.newNotifications": (m)=>!notifications.some({
-                        "StoreProvider.useEffect.newNotifications": (n)=>n.sourceId === m.id
-                    }["StoreProvider.useEffect.newNotifications"])
-            }["StoreProvider.useEffect.newNotifications"]).map({
-                "StoreProvider.useEffect.newNotifications": (m)=>({
-                        id: `notif-${m.id}`,
-                        message: `New message from ${m.name}`,
-                        time: new Date(m.date).toLocaleString(),
-                        read: false,
-                        sourceId: m.id
-                    })
-            }["StoreProvider.useEffect.newNotifications"]);
-            if (newNotifications.length > 0) {
-                setNotifications({
-                    "StoreProvider.useEffect": (prev)=>{
-                        const updated = [
-                            ...newNotifications,
-                            ...prev
-                        ].slice(0, 20);
-                        localStorage.setItem("notifications", JSON.stringify(updated));
-                        return updated;
+            if (!mounted || initialLoadRef.current) return;
+            const newMessages = contactMessages.filter({
+                "StoreProvider.useEffect.newMessages": (m)=>m.status === "new"
+            }["StoreProvider.useEffect.newMessages"]);
+            if (newMessages.length > prevMessageCountRef.current) {
+                const existingIds = notifications.map({
+                    "StoreProvider.useEffect.existingIds": (n)=>n.sourceId
+                }["StoreProvider.useEffect.existingIds"]);
+                const newNotifs = newMessages.filter({
+                    "StoreProvider.useEffect.newNotifs": (m)=>!existingIds.includes(m.id)
+                }["StoreProvider.useEffect.newNotifs"]).map({
+                    "StoreProvider.useEffect.newNotifs": (m)=>({
+                            id: `notif-${m.id}`,
+                            message: `New message from ${m.name}`,
+                            time: new Date(m.date).toLocaleString(),
+                            read: false,
+                            sourceId: m.id,
+                            type: "message"
+                        })
+                }["StoreProvider.useEffect.newNotifs"]);
+                if (newNotifs.length > 0) {
+                    setNotifications({
+                        "StoreProvider.useEffect": (prev)=>{
+                            const updated = [
+                                ...newNotifs,
+                                ...prev
+                            ].slice(0, 50);
+                            localStorage.setItem("notifications", JSON.stringify(updated));
+                            return updated;
+                        }
+                    }["StoreProvider.useEffect"]);
+                    if (isAdminPageRef.current) {
+                        playNotificationSound();
                     }
-                }["StoreProvider.useEffect"]);
+                }
             }
+            prevMessageCountRef.current = newMessages.length;
         }
     }["StoreProvider.useEffect"], [
         contactMessages,
+        mounted,
         notifications
     ]);
-    // Save to localStorage helpers
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "StoreProvider.useEffect": ()=>{
+            if (!mounted || initialLoadRef.current || quizResults.length === 0) return;
+            if (quizResults.length > prevQuizResultCountRef.current) {
+                const existingIds = notifications.map({
+                    "StoreProvider.useEffect.existingIds": (n)=>n.sourceId
+                }["StoreProvider.useEffect.existingIds"]);
+                const newNotifs = quizResults.filter({
+                    "StoreProvider.useEffect.newNotifs": (r)=>!existingIds.includes(r.id)
+                }["StoreProvider.useEffect.newNotifs"]).map({
+                    "StoreProvider.useEffect.newNotifs": (r)=>({
+                            id: `quiz-notif-${r.id}`,
+                            message: `Quiz completed: ${r.score}/${r.totalQuestions} correct`,
+                            time: new Date(r.date).toLocaleString(),
+                            read: false,
+                            sourceId: r.id,
+                            type: "quiz"
+                        })
+                }["StoreProvider.useEffect.newNotifs"]);
+                if (newNotifs.length > 0) {
+                    setNotifications({
+                        "StoreProvider.useEffect": (prev)=>{
+                            const updated = [
+                                ...newNotifs,
+                                ...prev
+                            ].slice(0, 50);
+                            localStorage.setItem("notifications", JSON.stringify(updated));
+                            return updated;
+                        }
+                    }["StoreProvider.useEffect"]);
+                    if (isAdminPageRef.current) {
+                        playNotificationSound();
+                    }
+                }
+            }
+            prevQuizResultCountRef.current = quizResults.length;
+        }
+    }["StoreProvider.useEffect"], [
+        quizResults,
+        mounted,
+        notifications
+    ]);
     const saveToStorage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[saveToStorage]": (key, value)=>{
-            const stringified = JSON.stringify(value);
-            if (!safeSetItem(key, stringified)) {
-                console.warn("Attempting to clear old storage data...");
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (error) {
+                console.error(`[v0] Error saving ${key}:`, error);
             }
         }
     }["StoreProvider.useCallback[saveToStorage]"], []);
@@ -1011,14 +1146,12 @@ function StoreProvider({ children }) {
                                 read: true
                             } : n
                     }["StoreProvider.useCallback[markNotificationAsRead].updated"]);
-                    saveToStorage("notifications", updated);
+                    localStorage.setItem("notifications", JSON.stringify(updated));
                     return updated;
                 }
             }["StoreProvider.useCallback[markNotificationAsRead]"]);
         }
-    }["StoreProvider.useCallback[markNotificationAsRead]"], [
-        saveToStorage
-    ]);
+    }["StoreProvider.useCallback[markNotificationAsRead]"], []);
     const markAllNotificationsAsRead = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[markAllNotificationsAsRead]": ()=>{
             setNotifications({
@@ -1029,122 +1162,12 @@ function StoreProvider({ children }) {
                                 read: true
                             })
                     }["StoreProvider.useCallback[markAllNotificationsAsRead].updated"]);
-                    saveToStorage("notifications", updated);
+                    localStorage.setItem("notifications", JSON.stringify(updated));
                     return updated;
                 }
             }["StoreProvider.useCallback[markAllNotificationsAsRead]"]);
         }
-    }["StoreProvider.useCallback[markAllNotificationsAsRead]"], [
-        saveToStorage
-    ]);
-    // Contact Messages
-    const addContactMessage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[addContactMessage]": (message)=>{
-            const newMessage = {
-                ...message,
-                id: Date.now().toString(),
-                date: new Date().toISOString(),
-                status: "new"
-            };
-            setContactMessages({
-                "StoreProvider.useCallback[addContactMessage]": (prev)=>{
-                    const updated = [
-                        newMessage,
-                        ...prev
-                    ];
-                    saveToStorage("contactMessages", updated);
-                    return updated;
-                }
-            }["StoreProvider.useCallback[addContactMessage]"]);
-        }
-    }["StoreProvider.useCallback[addContactMessage]"], [
-        saveToStorage
-    ]);
-    const updateMessageStatus = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[updateMessageStatus]": (id, status)=>{
-            setContactMessages({
-                "StoreProvider.useCallback[updateMessageStatus]": (prev)=>{
-                    const updated = prev.map({
-                        "StoreProvider.useCallback[updateMessageStatus].updated": (m)=>m.id === id ? {
-                                ...m,
-                                status
-                            } : m
-                    }["StoreProvider.useCallback[updateMessageStatus].updated"]);
-                    saveToStorage("contactMessages", updated);
-                    return updated;
-                }
-            }["StoreProvider.useCallback[updateMessageStatus]"]);
-        }
-    }["StoreProvider.useCallback[updateMessageStatus]"], [
-        saveToStorage
-    ]);
-    const deleteMessage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[deleteMessage]": (id)=>{
-            setContactMessages({
-                "StoreProvider.useCallback[deleteMessage]": (prev)=>{
-                    const updated = prev.filter({
-                        "StoreProvider.useCallback[deleteMessage].updated": (m)=>m.id !== id
-                    }["StoreProvider.useCallback[deleteMessage].updated"]);
-                    saveToStorage("contactMessages", updated);
-                    return updated;
-                }
-            }["StoreProvider.useCallback[deleteMessage]"]);
-        }
-    }["StoreProvider.useCallback[deleteMessage]"], [
-        saveToStorage
-    ]);
-    // Store Settings
-    const updateStoreSettings = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[updateStoreSettings]": (settings)=>{
-            setStoreSettings({
-                "StoreProvider.useCallback[updateStoreSettings]": (prev)=>{
-                    const updated = {
-                        ...prev,
-                        ...settings
-                    };
-                    saveToStorage("storeSettings", updated);
-                    return updated;
-                }
-            }["StoreProvider.useCallback[updateStoreSettings]"]);
-        }
-    }["StoreProvider.useCallback[updateStoreSettings]"], [
-        saveToStorage
-    ]);
-    // Footer Settings
-    const updateFooterSettings = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[updateFooterSettings]": (settings)=>{
-            setFooterSettings({
-                "StoreProvider.useCallback[updateFooterSettings]": (prev)=>{
-                    const updated = {
-                        ...prev,
-                        ...settings
-                    };
-                    saveToStorage("footerSettings", updated);
-                    return updated;
-                }
-            }["StoreProvider.useCallback[updateFooterSettings]"]);
-        }
-    }["StoreProvider.useCallback[updateFooterSettings]"], [
-        saveToStorage
-    ]);
-    // Admin Settings
-    const updateAdminSettings = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[updateAdminSettings]": (settings)=>{
-            setAdminSettings({
-                "StoreProvider.useCallback[updateAdminSettings]": (prev)=>{
-                    const updated = {
-                        ...prev,
-                        ...settings
-                    };
-                    saveToStorage("adminSettings", updated);
-                    return updated;
-                }
-            }["StoreProvider.useCallback[updateAdminSettings]"]);
-        }
-    }["StoreProvider.useCallback[updateAdminSettings]"], [
-        saveToStorage
-    ]);
-    // Section Names
+    }["StoreProvider.useCallback[markAllNotificationsAsRead]"], []);
     const updateSectionNames = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[updateSectionNames]": (names)=>{
             setSectionNames({
@@ -1161,7 +1184,6 @@ function StoreProvider({ children }) {
     }["StoreProvider.useCallback[updateSectionNames]"], [
         saveToStorage
     ]);
-    // Content Settings
     const updateContentSettings = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[updateContentSettings]": (settings)=>{
             setContentSettings({
@@ -1178,17 +1200,17 @@ function StoreProvider({ children }) {
     }["StoreProvider.useCallback[updateContentSettings]"], [
         saveToStorage
     ]);
-    // Gallery
     const addGalleryImage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[addGalleryImage]": (image)=>{
+            const newImage = {
+                ...image,
+                id: Date.now().toString()
+            };
             setGalleryImages({
                 "StoreProvider.useCallback[addGalleryImage]": (prev)=>{
                     const updated = [
                         ...prev,
-                        {
-                            ...image,
-                            id: Date.now().toString()
-                        }
+                        newImage
                     ];
                     saveToStorage("galleryImages", updated);
                     return updated;
@@ -1203,7 +1225,7 @@ function StoreProvider({ children }) {
             setGalleryImages({
                 "StoreProvider.useCallback[removeGalleryImage]": (prev)=>{
                     const updated = prev.filter({
-                        "StoreProvider.useCallback[removeGalleryImage].updated": (i)=>i.id !== id
+                        "StoreProvider.useCallback[removeGalleryImage].updated": (img)=>img.id !== id
                     }["StoreProvider.useCallback[removeGalleryImage].updated"]);
                     saveToStorage("galleryImages", updated);
                     return updated;
@@ -1218,10 +1240,10 @@ function StoreProvider({ children }) {
             setGalleryImages({
                 "StoreProvider.useCallback[updateGalleryImage]": (prev)=>{
                     const updated = prev.map({
-                        "StoreProvider.useCallback[updateGalleryImage].updated": (i)=>i.id === id ? {
-                                ...i,
+                        "StoreProvider.useCallback[updateGalleryImage].updated": (img)=>img.id === id ? {
+                                ...img,
                                 ...image
-                            } : i
+                            } : img
                     }["StoreProvider.useCallback[updateGalleryImage].updated"]);
                     saveToStorage("galleryImages", updated);
                     return updated;
@@ -1231,17 +1253,17 @@ function StoreProvider({ children }) {
     }["StoreProvider.useCallback[updateGalleryImage]"], [
         saveToStorage
     ]);
-    // Reviews
     const addReview = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[addReview]": (review)=>{
+            const newReview = {
+                ...review,
+                id: Date.now().toString()
+            };
             setReviews({
                 "StoreProvider.useCallback[addReview]": (prev)=>{
                     const updated = [
                         ...prev,
-                        {
-                            ...review,
-                            id: Date.now().toString()
-                        }
+                        newReview
                     ];
                     saveToStorage("reviews", updated);
                     return updated;
@@ -1284,48 +1306,26 @@ function StoreProvider({ children }) {
     }["StoreProvider.useCallback[updateReview]"], [
         saveToStorage
     ]);
-    // Products
     const addProduct = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[addProduct]": async (product)=>{
-            // Compress images before storing
-            const compressedImages = await Promise.all(product.images.map({
-                "StoreProvider.useCallback[addProduct]": (img)=>compressImageData(img, 400)
-            }["StoreProvider.useCallback[addProduct]"]));
+        "StoreProvider.useCallback[addProduct]": (product)=>{
+            const newProduct = {
+                ...product,
+                id: Date.now()
+            };
             setProducts({
                 "StoreProvider.useCallback[addProduct]": (prev)=>{
-                    const maxId = prev.reduce({
-                        "StoreProvider.useCallback[addProduct].maxId": (max, p)=>Math.max(max, p.id)
-                    }["StoreProvider.useCallback[addProduct].maxId"], 0);
-                    const newProduct = {
-                        ...product,
-                        id: maxId + 1,
-                        images: compressedImages
-                    };
                     const updated = [
                         ...prev,
                         newProduct
                     ];
-                    const stringified = JSON.stringify(updated);
-                    if (!safeSetItem("products", stringified)) {
-                        const fallbackProduct = {
-                            ...product,
-                            id: maxId + 1,
-                            images: [
-                                "/vibrant-flower-bouquet.png"
-                            ]
-                        };
-                        const fallbackUpdated = [
-                            ...prev,
-                            fallbackProduct
-                        ];
-                        safeSetItem("products", JSON.stringify(fallbackUpdated));
-                        return fallbackUpdated;
-                    }
+                    saveToStorage("products", updated);
                     return updated;
                 }
             }["StoreProvider.useCallback[addProduct]"]);
         }
-    }["StoreProvider.useCallback[addProduct]"], []);
+    }["StoreProvider.useCallback[addProduct]"], [
+        saveToStorage
+    ]);
     const removeProduct = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[removeProduct]": (id)=>{
             setProducts({
@@ -1342,52 +1342,34 @@ function StoreProvider({ children }) {
         saveToStorage
     ]);
     const updateProduct = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "StoreProvider.useCallback[updateProduct]": async (id, product)=>{
-            let processedProduct = product;
-            if (product.images) {
-                const compressedImages = await Promise.all(product.images.map({
-                    "StoreProvider.useCallback[updateProduct]": (img)=>compressImageData(img, 400)
-                }["StoreProvider.useCallback[updateProduct]"]));
-                processedProduct = {
-                    ...product,
-                    images: compressedImages
-                };
-            }
+        "StoreProvider.useCallback[updateProduct]": (id, product)=>{
             setProducts({
                 "StoreProvider.useCallback[updateProduct]": (prev)=>{
                     const updated = prev.map({
                         "StoreProvider.useCallback[updateProduct].updated": (p)=>p.id === id ? {
                                 ...p,
-                                ...processedProduct
+                                ...product
                             } : p
                     }["StoreProvider.useCallback[updateProduct].updated"]);
-                    const stringified = JSON.stringify(updated);
-                    if (!safeSetItem("products", stringified)) {
-                        const noImageUpdate = prev.map({
-                            "StoreProvider.useCallback[updateProduct].noImageUpdate": (p)=>p.id === id ? {
-                                    ...p,
-                                    ...product,
-                                    images: p.images
-                                } : p
-                        }["StoreProvider.useCallback[updateProduct].noImageUpdate"]);
-                        safeSetItem("products", JSON.stringify(noImageUpdate));
-                        return noImageUpdate;
-                    }
+                    saveToStorage("products", updated);
                     return updated;
                 }
             }["StoreProvider.useCallback[updateProduct]"]);
         }
-    }["StoreProvider.useCallback[updateProduct]"], []);
+    }["StoreProvider.useCallback[updateProduct]"], [
+        saveToStorage
+    ]);
     const addCategory = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "StoreProvider.useCallback[addCategory]": (category)=>{
+            const newCategory = {
+                ...category,
+                id: Date.now().toString()
+            };
             setCategories({
                 "StoreProvider.useCallback[addCategory]": (prev)=>{
                     const updated = [
                         ...prev,
-                        {
-                            ...category,
-                            id: Date.now().toString()
-                        }
+                        newCategory
                     ];
                     saveToStorage("categories", updated);
                     return updated;
@@ -1446,57 +1428,254 @@ function StoreProvider({ children }) {
     }["StoreProvider.useCallback[updateAdminTranslations]"], [
         saveToStorage
     ]);
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StoreContext.Provider, {
-        value: {
-            contactMessages,
-            addContactMessage,
-            updateMessageStatus,
-            deleteMessage,
-            storeSettings,
-            updateStoreSettings,
-            footerSettings,
-            updateFooterSettings,
-            adminSettings,
-            updateAdminSettings,
-            sectionNames,
-            updateSectionNames,
-            contentSettings,
-            updateContentSettings,
-            galleryImages,
-            addGalleryImage,
-            removeGalleryImage,
-            updateGalleryImage,
-            reviews,
-            addReview,
-            removeReview,
-            updateReview,
-            products,
-            addProduct,
-            removeProduct,
-            updateProduct,
-            notifications,
-            markNotificationAsRead,
-            markAllNotificationsAsRead,
-            categories,
-            addCategory,
-            updateCategory,
-            removeCategory,
-            adminTranslations,
-            updateAdminTranslations
+    const addQuiz = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[addQuiz]": (quiz)=>{
+            const newQuiz = {
+                ...quiz,
+                id: Date.now().toString(),
+                createdAt: new Date().toISOString()
+            };
+            setQuizzes({
+                "StoreProvider.useCallback[addQuiz]": (prev)=>{
+                    let updated = [
+                        ...prev,
+                        newQuiz
+                    ];
+                    if (newQuiz.isActive) {
+                        updated = updated.map({
+                            "StoreProvider.useCallback[addQuiz]": (q)=>q.id === newQuiz.id ? q : {
+                                    ...q,
+                                    isActive: false
+                                }
+                        }["StoreProvider.useCallback[addQuiz]"]);
+                        setActiveQuiz(newQuiz);
+                    }
+                    saveToStorage("quizzes", updated);
+                    return updated;
+                }
+            }["StoreProvider.useCallback[addQuiz]"]);
+        }
+    }["StoreProvider.useCallback[addQuiz]"], [
+        saveToStorage
+    ]);
+    const updateQuiz = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[updateQuiz]": (id, quiz)=>{
+            setQuizzes({
+                "StoreProvider.useCallback[updateQuiz]": (prev)=>{
+                    let updated = prev.map({
+                        "StoreProvider.useCallback[updateQuiz].updated": (q)=>q.id === id ? {
+                                ...q,
+                                ...quiz
+                            } : q
+                    }["StoreProvider.useCallback[updateQuiz].updated"]);
+                    if (quiz.isActive) {
+                        updated = updated.map({
+                            "StoreProvider.useCallback[updateQuiz]": (q)=>q.id === id ? q : {
+                                    ...q,
+                                    isActive: false
+                                }
+                        }["StoreProvider.useCallback[updateQuiz]"]);
+                        const active = updated.find({
+                            "StoreProvider.useCallback[updateQuiz].active": (q)=>q.id === id
+                        }["StoreProvider.useCallback[updateQuiz].active"]);
+                        if (active) setActiveQuiz(active);
+                    }
+                    saveToStorage("quizzes", updated);
+                    return updated;
+                }
+            }["StoreProvider.useCallback[updateQuiz]"]);
+        }
+    }["StoreProvider.useCallback[updateQuiz]"], [
+        saveToStorage
+    ]);
+    const deleteQuiz = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[deleteQuiz]": (id)=>{
+            setQuizzes({
+                "StoreProvider.useCallback[deleteQuiz]": (prev)=>{
+                    const updated = prev.filter({
+                        "StoreProvider.useCallback[deleteQuiz].updated": (q)=>q.id !== id
+                    }["StoreProvider.useCallback[deleteQuiz].updated"]);
+                    saveToStorage("quizzes", updated);
+                    if (activeQuiz?.id === id) setActiveQuiz(null);
+                    return updated;
+                }
+            }["StoreProvider.useCallback[deleteQuiz]"]);
+        }
+    }["StoreProvider.useCallback[deleteQuiz]"], [
+        saveToStorage,
+        activeQuiz
+    ]);
+    const setActiveQuizById = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[setActiveQuizById]": (id)=>{
+            setQuizzes({
+                "StoreProvider.useCallback[setActiveQuizById]": (prev)=>{
+                    const updated = prev.map({
+                        "StoreProvider.useCallback[setActiveQuizById].updated": (q)=>({
+                                ...q,
+                                isActive: q.id === id
+                            })
+                    }["StoreProvider.useCallback[setActiveQuizById].updated"]);
+                    const active = updated.find({
+                        "StoreProvider.useCallback[setActiveQuizById].active": (q)=>q.id === id
+                    }["StoreProvider.useCallback[setActiveQuizById].active"]);
+                    if (active) setActiveQuiz(active);
+                    saveToStorage("quizzes", updated);
+                    return updated;
+                }
+            }["StoreProvider.useCallback[setActiveQuizById]"]);
+        }
+    }["StoreProvider.useCallback[setActiveQuizById]"], [
+        saveToStorage
+    ]);
+    const addQuizResult = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[addQuizResult]": (result)=>{
+            const newResult = {
+                ...result,
+                id: Date.now().toString()
+            };
+            setQuizResults({
+                "StoreProvider.useCallback[addQuizResult]": (prev)=>{
+                    const updated = [
+                        newResult,
+                        ...prev
+                    ];
+                    saveToStorage("quizResults", updated);
+                    return updated;
+                }
+            }["StoreProvider.useCallback[addQuizResult]"]);
+        }
+    }["StoreProvider.useCallback[addQuizResult]"], [
+        saveToStorage
+    ]);
+    const clearQuizResults = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "StoreProvider.useCallback[clearQuizResults]": ()=>{
+            setQuizResults([]);
+            saveToStorage("quizResults", []);
+        }
+    }["StoreProvider.useCallback[clearQuizResults]"], [
+        saveToStorage
+    ]);
+    const value = {
+        contactMessages,
+        addContactMessage: (message)=>{
+            const newMessage = {
+                ...message,
+                id: Date.now().toString(),
+                date: new Date().toISOString(),
+                status: "new"
+            };
+            setContactMessages((prev)=>{
+                const updated = [
+                    newMessage,
+                    ...prev
+                ];
+                saveToStorage("contactMessages", updated);
+                return updated;
+            });
         },
+        updateMessageStatus: (id, status)=>{
+            setContactMessages((prev)=>{
+                const updated = prev.map((m)=>m.id === id ? {
+                        ...m,
+                        status
+                    } : m);
+                saveToStorage("contactMessages", updated);
+                return updated;
+            });
+        },
+        deleteMessage: (id)=>{
+            setContactMessages((prev)=>{
+                const updated = prev.filter((m)=>m.id !== id);
+                saveToStorage("contactMessages", updated);
+                return updated;
+            });
+        },
+        storeSettings,
+        updateStoreSettings: (settings)=>{
+            setStoreSettings((prev)=>{
+                const updated = {
+                    ...prev,
+                    ...settings
+                };
+                saveToStorage("storeSettings", updated);
+                return updated;
+            });
+        },
+        footerSettings,
+        updateFooterSettings: (settings)=>{
+            setFooterSettings((prev)=>{
+                const updated = {
+                    ...prev,
+                    ...settings
+                };
+                saveToStorage("footerSettings", updated);
+                return updated;
+            });
+        },
+        adminSettings,
+        updateAdminSettings: (settings)=>{
+            setAdminSettings((prev)=>{
+                const updated = {
+                    ...prev,
+                    ...settings
+                };
+                saveToStorage("adminSettings", updated);
+                return updated;
+            });
+        },
+        sectionNames,
+        updateSectionNames,
+        contentSettings,
+        updateContentSettings,
+        galleryImages,
+        addGalleryImage,
+        removeGalleryImage,
+        updateGalleryImage,
+        reviews,
+        addReview,
+        removeReview,
+        updateReview,
+        products,
+        addProduct,
+        removeProduct,
+        updateProduct,
+        notifications,
+        markNotificationAsRead,
+        markAllNotificationsAsRead,
+        clearAllNotifications,
+        playAdminNotificationSound,
+        setIsAdminPage,
+        categories,
+        addCategory,
+        updateCategory,
+        removeCategory,
+        adminTranslations,
+        updateAdminTranslations,
+        quizzes,
+        activeQuiz,
+        quizResults,
+        addQuiz,
+        updateQuiz,
+        deleteQuiz,
+        setActiveQuizById,
+        addQuizResult,
+        clearQuizResults
+    };
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StoreContext.Provider, {
+        value: value,
         children: children
     }, void 0, false, {
         fileName: "[project]/lib/store-context.tsx",
-        lineNumber: 935,
-        columnNumber: 5
+        lineNumber: 1116,
+        columnNumber: 10
     }, this);
 }
-_s(StoreProvider, "xcc9bUGfX6MFrBpB6A3/7llkHlA=");
+_s(StoreProvider, "LbC0DyNHsM+Oc94mCKSefuqS0WY=");
 _c = StoreProvider;
 function useStore() {
     _s1();
     const context = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useContext"])(StoreContext);
-    if (!context) {
+    if (context === undefined) {
         throw new Error("useStore must be used within a StoreProvider");
     }
     return context;
