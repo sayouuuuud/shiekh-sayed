@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>صفحة المقال - التفاصيل</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=Tajawal:wght@300;400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1D4E41", // Deep green from the screenshot buttons
+              secondary: "#D4A373", // Gold/brown accent
+              "background-light": "#F9F9F9", // Light grey background
+              "background-dark": "#121212", // Dark mode background
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#1E1E1E",
+              "accent-green": "#E6F4F1", // Very light green bg
+            },
+            fontFamily: {
+              sans: ["Tajawal", "sans-serif"],
+              serif: ["Amiri", "serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'xl': '1rem',
+              '2xl': '1.5rem',
+            },
+            typography: (theme) => ({
+              DEFAULT: {
+                css: {
+                  color: theme('colors.gray.700'),
+                  fontFamily: theme('fontFamily.serif'),
+                  lineHeight: '2.2',
+                  fontSize: '1.25rem',
+                  h1: {
+                    fontFamily: theme('fontFamily.sans'),
+                    color: theme('colors.primary'),
+                  },
+                  h2: {
+                    fontFamily: theme('fontFamily.sans'),
+                    color: theme('colors.primary'),
+                  },
+                  h3: {
+                    fontFamily: theme('fontFamily.sans'),
+                    color: theme('colors.primary'),
+                  },
+                  blockquote: {
+                    borderRightColor: theme('colors.secondary'),
+                    backgroundColor: theme('colors.accent-green'),
+                    padding: '1.5rem',
+                    fontStyle: 'normal',
+                    borderRadius: '0.5rem',
+                  },
+                },
+              },
+              dark: {
+                css: {
+                  color: theme('colors.gray.300'),
+                  h1: { color: theme('colors.white') },
+                  h2: { color: theme('colors.white') },
+                  h3: { color: theme('colors.white') },
+                  blockquote: {
+                     backgroundColor: theme('colors.gray.800'),
+                     color: theme('colors.gray.200'),
+                  }
+                },
+              },
+            }),
+          },
+        },
+      };
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 font-sans min-h-screen flex flex-col">
+<header class="bg-surface-light dark:bg-surface-dark shadow-sm py-4 sticky top-0 z-50">
+<div class="container mx-auto px-4 lg:px-12 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-icons-outlined text-2xl">mosque</span>
+</div>
+<div class="flex flex-col">
+<span class="text-primary dark:text-white font-bold text-lg leading-tight">الشيخ السيد مراد</span>
+<span class="text-gray-500 text-xs">عالم أزهري</span>
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-8 text-gray-600 dark:text-gray-300 font-medium">
+<a class="text-primary dark:text-white font-bold" href="#">الرئيسية</a>
+<a class="hover:text-primary transition-colors" href="#">خطب</a>
+<a class="hover:text-primary transition-colors" href="#">دروس</a>
+<a class="hover:text-primary transition-colors" href="#">مقالات</a>
+<a class="hover:text-primary transition-colors" href="#">كتب</a>
+<a class="hover:text-primary transition-colors" href="#">مرئيات</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-white">
+<span class="material-icons-outlined">search</span>
+</button>
+<button class="bg-primary hover:bg-opacity-90 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-md">
+                    اشترك
+                </button>
+<button class="lg:hidden text-gray-600 dark:text-gray-300">
+<span class="material-icons-outlined text-3xl">menu</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow container mx-auto px-4 lg:px-12 py-12">
+<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-8 font-medium">
+<a class="hover:text-primary transition-colors" href="#">الرئيسية</a>
+<span class="material-icons-outlined text-xs rtl:rotate-180">chevron_left</span>
+<a class="hover:text-primary transition-colors" href="#">المقالات</a>
+<span class="material-icons-outlined text-xs rtl:rotate-180">chevron_left</span>
+<span class="text-primary dark:text-secondary font-bold truncate max-w-[200px] md:max-w-none">أهمية الصدق في المعاملات التجارية في ضوء الشريعة</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+<div class="lg:col-span-8">
+<article class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm p-6 md:p-10 mb-8 border border-gray-100 dark:border-gray-800">
+<div class="mb-6 flex flex-wrap items-center gap-4 text-sm">
+<span class="px-3 py-1 bg-accent-green dark:bg-primary/20 text-primary dark:text-green-300 rounded-full font-bold">فقه المعاملات</span>
+<div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-base">calendar_today</span>
+<span>15 محرم 1445</span>
+</div>
+<div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-base">schedule</span>
+<span>5 دقائق قراءة</span>
+</div>
+</div>
+<h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-snug mb-8 font-sans">
+                        أهمية الصدق في المعاملات التجارية وأثره على الفرد والمجتمع
+                    </h1>
+<div class="w-full h-64 md:h-80 rounded-xl overflow-hidden mb-10 relative bg-primary/5">
+<img alt="كتاب مفتوح وإضاءة خافتة تعبر عن العلم" class="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwPeol2syBBN69DIApCVJF-1ShhIlAMq1GJENFvu1Ocz8t5APnXJtYGcIoVVc8sHobbVjD63P3fg6fyTNiu11dwnzzno9c-PrfPl1bVJhisQ9OQ7zLf1pHMcquKNswv52F062GYrSUsEil5IG2D9d5d8uY82qcSpQ3MaRu9ZAOcKoAixTf8OFtv7PXhXB30N6036AY2-afRVnm84r-Oc3xu7QRFhsMiZ5l5F-oW56yrmkrwoyqYmdJfp4Lb2rXyIZiGRyRCDDivtuu"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+</div>
+<div class="prose prose-lg dark:prose-invert prose-headings:font-sans prose-p:font-serif max-w-none text-gray-700 dark:text-gray-300">
+<p class="lead font-bold text-xl md:text-2xl text-gray-800 dark:text-gray-100 mb-6">
+                            الصدق هو أساس البركة في التجارة، وكيف حث الإسلام التاجر المسلم على التحلي بالأمانة والابتعاد عن الغش والخداع، لما في ذلك من صلاح للأحوال ونماء للأموال.
+                        </p>
+<p>
+                            الحمد لله رب العالمين، والصلاة والسلام على أشرف الأنبياء والمرسلين، نبينا محمد وعلى آله وصحبه أجمعين. أما بعد، فإن المعاملات المالية في الإسلام مبنية على أسس متينة من الأخلاق والقيم، وعلى رأس هذه القيم قيمة "الصدق". وقد قال النبي صلى الله عليه وسلم: <span class="text-primary font-bold">«البيعان بالخيار ما لم يتفرقا، فإن صدقا وبينا بورك لهما في بيعهما، وإن كذبا وكتما محقت بركة بيعهما»</span>.
+                        </p>
+<h3>لماذا الصدق في التجارة؟</h3>
+<p>
+                            التجارة ليست مجرد وسيلة لجمع المال، بل هي وظيفة اجتماعية وتبادل للمنافع. والصدق يزرع الثقة بين الناس، والثقة هي رأس مال التاجر الحقيقي. إذا عرف التاجر بصدقه، أقبل الناس عليه واطمأنوا إلى سلعته. أما الكاذب، فقد يربح قليلاً في البداية، ولكنه يخسر سمعته ودينه في النهاية.
+                        </p>
+<blockquote>
+<p class="mb-0 text-xl font-serif italic text-gray-800 dark:text-gray-200">
+                                "التاجر الصدوق الأمين مع النبيين والصديقين والشهداء يوم القيامة"
+                                <br/>
+<span class="text-sm font-sans not-italic text-gray-500 mt-2 block">- حديث شريف</span>
+</p>
+</blockquote>
+<h3>صور من الصدق في المعاملات</h3>
+<ul>
+<li><strong>بيان العيوب:</strong> لا يجوز كتمان عيب في السلعة، فمن باع شيئاً وفيه عيب ولم يبينه فقد غش أخاه المسلم.</li>
+<li><strong>الوفاء بالوعد:</strong> الالتزام بمواعيد التسليم والسداد من شيم المؤمنين الصادقين.</li>
+<li><strong>تجنب الحلف الكاذب:</strong> الحلف لتنفيق السلعة ممحقة للبركة وإن كان سبباً في بيعها ظاهرياً.</li>
+</ul>
+<p>
+                            ختاماً، ينبغي لكل مسلم يمارس التجارة أن يتقي الله في بيعه وشرائه، وأن يعلم أن الرزق بيد الله وحده، وأن ما عند الله لا ينال إلا بطاعته. نسأل الله أن يرزقنا الحلال الطيب ويبارك لنا فيه.
+                        </p>
+</div>
+<div class="mt-12 pt-8 border-t border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-wrap gap-2">
+<span class="text-gray-500 text-sm ml-2">الوسوم:</span>
+<a class="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-primary hover:text-white dark:hover:bg-primary rounded text-sm transition-colors text-gray-600 dark:text-gray-300" href="#">أخلاق التاجر</a>
+<a class="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-primary hover:text-white dark:hover:bg-primary rounded text-sm transition-colors text-gray-600 dark:text-gray-300" href="#">البيوع</a>
+<a class="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-primary hover:text-white dark:hover:bg-primary rounded text-sm transition-colors text-gray-600 dark:text-gray-300" href="#">البركة</a>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-gray-500 text-sm ml-2">شارك المقال:</span>
+<button class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors">
+<span class="material-icons-outlined text-sm">facebook</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-sky-100 text-sky-500 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-colors">
+<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path></svg>
+</button>
+<button class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-colors">
+<span class="material-icons-outlined text-sm">share</span>
+</button>
+</div>
+</div>
+</article>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+<a class="group bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-primary/30 transition-all flex items-center justify-between" href="#">
+<div class="flex flex-col">
+<span class="text-xs text-gray-400 mb-1">المقال السابق</span>
+<span class="text-gray-800 dark:text-white font-bold group-hover:text-primary transition-colors text-sm line-clamp-1">أحكام الزكاة في الأموال المعاصرة</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 group-hover:bg-primary group-hover:text-white flex items-center justify-center transition-colors">
+<span class="material-icons-outlined text-sm rtl:rotate-180">arrow_forward</span>
+</div>
+</a>
+<a class="group bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-primary/30 transition-all flex items-center justify-between flex-row-reverse text-left" href="#">
+<div class="flex flex-col items-end">
+<span class="text-xs text-gray-400 mb-1">المقال التالي</span>
+<span class="text-gray-800 dark:text-white font-bold group-hover:text-primary transition-colors text-sm line-clamp-1">تأملات في سورة الكهف</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 group-hover:bg-primary group-hover:text-white flex items-center justify-center transition-colors">
+<span class="material-icons-outlined text-sm rtl:rotate-180">arrow_back</span>
+</div>
+</a>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm p-6 md:p-10 border border-gray-100 dark:border-gray-800">
+<h3 class="text-xl font-bold text-primary dark:text-white mb-6 flex items-center gap-2">
+<span class="material-icons-outlined">chat_bubble_outline</span>
+                        التعليقات (3)
+                    </h3>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary font-bold shrink-0">
+                                م
+                            </div>
+<div class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl rounded-tr-none flex-grow">
+<div class="flex justify-between items-center mb-2">
+<span class="font-bold text-gray-800 dark:text-gray-200 text-sm">محمد أحمد</span>
+<span class="text-xs text-gray-400">منذ يومين</span>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                                    جزاكم الله خيراً يا شيخنا الفاضل، مقال ماتع ومفيد جداً، نسأل الله أن يكتب أجركم.
+                                </p>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800">
+<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">أضف تعليقاً</h4>
+<form class="space-y-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<input class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary dark:text-white placeholder-gray-400" placeholder="الاسم" type="text"/>
+<input class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary dark:text-white placeholder-gray-400" placeholder="البريد الإلكتروني" type="email"/>
+</div>
+<textarea class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary dark:text-white placeholder-gray-400" placeholder="اكتب تعليقك هنا..." rows="4"></textarea>
+<button class="bg-primary hover:bg-opacity-90 text-white px-8 py-3 rounded-lg font-bold transition-all shadow-md text-sm" type="submit">
+                                    إرسال التعليق
+                                </button>
+</form>
+</div>
+</div>
+</div>
+</div>
+<aside class="lg:col-span-4 space-y-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-800 text-center">
+<div class="w-20 h-20 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl shadow-lg border-4 border-white dark:border-gray-700">
+<span class="material-icons-outlined">person</span>
+</div>
+<h3 class="font-bold text-lg text-gray-900 dark:text-white">الشيخ السيد مراد</h3>
+<p class="text-gray-500 text-sm mb-4">عالم أزهري ومتخصص في الفقه المقارن</p>
+<button class="text-primary text-sm font-bold border border-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all w-full">
+                        عرض السيرة الذاتية
+                    </button>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-800">
+<h3 class="font-bold text-lg text-gray-900 dark:text-white mb-6 border-b-2 border-primary/10 pb-2 inline-block">مقالات ذات صلة</h3>
+<div class="space-y-4">
+<a class="flex gap-3 group" href="#">
+<div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-200">
+<img alt="عملة نقدية" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6S30At4O52tJrqj-E9DA4lT4djRtFLvowPKdVdJLTTS-jCKyymYeE5kK8FSMIdVeD44W9TKAhNoLezqjqSOZzOzuyO484l0VyS61s71UksthxgXqDBEEOpVxgS7Ai0NtVEvBaesARLLdRaiQ8qnMZHQoTKAsrpXb5QPidx6LPXL_aFAVLxICi5UrstkZ98clEe2rOx9zJ-xACOTABvvQOXMXRdx07ozGLt2MoPRlbjIjJ7SteJS8-Ep8_R5l0ADGuILjm05aDkQtD"/>
+</div>
+<div class="flex flex-col justify-center">
+<span class="text-xs text-primary dark:text-secondary mb-1">فقه المعاملات</span>
+<h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors leading-relaxed">حكم التعامل بالعملات الرقمية المشفرة</h4>
+</div>
+</a>
+<a class="flex gap-3 group" href="#">
+<div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-200">
+<img alt="مسجد" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDAx9SWirn5TSX_VtebZG_UwrMZpSbKwsdwzBo-KMa-rs2QiIG1JwbaWl0UPcssEhj8xr_biKE8fnVF1BHzAp5_SyTtxsFddHlvkJ66wc34IJA0VKK77NFzJVPSHSDln4ZoKq_8X2u_tsqfE2F_8vtLiVUd6QHfBq9G_hSNP_D8u-MYh8wckhVkR2T-CuNd2WPmJ-UcCYETXJ9IZcNjnym2XQ1bu8P8ywak-Tfx8vpa2AP8uuRAdHLvFRwaWQFhiaZ6W9Q4oNp43GV"/>
+</div>
+<div class="flex flex-col justify-center">
+<span class="text-xs text-primary dark:text-secondary mb-1">آداب عامة</span>
+<h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors leading-relaxed">أخلاقيات المسلم في الأسواق العامة</h4>
+</div>
+</a>
+<a class="flex gap-3 group" href="#">
+<div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-200">
+<img alt="كتابة وقلم" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_Qcawp8U8jSJliJFliyLgET73k7g3PX4mxTOkl0qYckwZM4scgXVb_Mx8vrxFfND94hjtJyRTDrEsVa979h2t16drDubljN2j3_aA8zjXkUxl0_lmZ-VBHzB40ZMDIF23ZUxfpnG_izE7zyky_3MCIY6_RHHF6YbOgeTNsZL9CyHehgKUcjb0-ensqKAvnEicVjsqmbYvL55osofQQFwtGW4LxD9H_V2ajkZmXUAHqnLg2HRRe8TQ44nFqJy5D0u7eEe7EGIxjQjo"/>
+</div>
+<div class="flex flex-col justify-center">
+<span class="text-xs text-primary dark:text-secondary mb-1">فتاوى</span>
+<h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors leading-relaxed">هل يجوز بيع العينة؟ التفصيل الفقهي</h4>
+</div>
+</a>
+</div>
+</div>
+<div class="bg-primary text-white rounded-2xl shadow-sm p-6 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute bottom-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full translate-x-1/2 translate-y-1/2"></div>
+<div class="relative z-10 text-center">
+<span class="material-icons-outlined text-4xl mb-3">mark_email_unread</span>
+<h3 class="font-bold text-lg mb-2">القائمة البريدية</h3>
+<p class="text-green-100 text-sm mb-4 leading-relaxed">اشترك الآن ليصلك جديد المقالات والدروس والخطب أسبوعياً</p>
+<form class="space-y-3">
+<input class="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-4 placeholder-green-100 text-white focus:outline-none focus:bg-white/20 text-sm" placeholder="البريد الإلكتروني" type="email"/>
+<button class="w-full bg-secondary text-white font-bold py-2 rounded-lg hover:bg-opacity-90 transition-colors shadow-lg text-sm" type="submit">
+                                 اشترك مجاناً
+                             </button>
+</form>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<footer class="bg-surface-light dark:bg-surface-dark border-t border-gray-100 dark:border-gray-800 py-12 mt-12">
+<div class="container mx-auto px-4 lg:px-12">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-icons-outlined text-2xl">mosque</span>
+</div>
+<div class="flex flex-col">
+<span class="text-primary dark:text-white font-bold text-lg leading-tight">الشيخ السيد مراد</span>
+<span class="text-gray-500 text-xs">عالم أزهري</span>
+</div>
+</div>
+<p class="text-gray-500 text-sm leading-relaxed">
+                        علم نافع للقلب السليم، ومنهج وسطي قويم يجمع بين الأصالة والمعاصرة في ضوء الكتاب والسنة.
+                    </p>
+<div class="flex gap-4">
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined text-xl">facebook</span></a>
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path></svg></a>
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined text-xl">smart_display</span></a>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-gray-900 dark:text-white mb-6">روابط سريعة</h4>
+<ul class="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">عن الشيخ</a></li>
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">اتصل بنا</a></li>
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">سياسة الخصوصية</a></li>
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">الشروط والأحكام</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-gray-900 dark:text-white mb-6">أقسام المحتوى</h4>
+<ul class="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">أحدث الفتاوى</a></li>
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">البث المباشر</a></li>
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">المجتمع</a></li>
+<li><a class="hover:text-primary dark:hover:text-white transition-colors" href="#">المشاريع الدعوية</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-gray-900 dark:text-white mb-6">إبق على تواصل</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">اشترك في القائمة البريدية لاستقبال الدروس والمقالات الجديدة مباشرة.</p>
+<form class="flex flex-col gap-3">
+<input class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg py-2 px-4 focus:ring-1 focus:ring-primary text-sm placeholder-gray-400" placeholder="البريد الإلكتروني" type="email"/>
+<button class="bg-primary hover:bg-opacity-90 text-white py-2 rounded-lg font-bold transition-all text-sm" type="submit">
+                             اشترك الآن
+                         </button>
+</form>
+</div>
+</div>
+<div class="border-t border-gray-100 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+<p>© 2024 الشيخ السيد مراد سلامة. جميع الحقوق محفوظة.</p>
+<div class="flex items-center gap-1">
+<span>صمم بإتقان ومحبة</span>
+<span class="text-red-500">♥</span>
+</div>
+</div>
+</div>
+</footer>
+
+</body></html>

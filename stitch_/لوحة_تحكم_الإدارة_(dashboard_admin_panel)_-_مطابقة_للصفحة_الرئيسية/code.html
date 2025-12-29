@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>لوحة التحكم - الشيخ السيد مراد</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1E4338", // The dark green from the branding
+                        secondary: "#D4B98C", // Gold/Sand accent color
+                        "background-light": "#F9F9F7", // Warm beige/off-white background
+                        "background-dark": "#111827", // Standard dark mode bg
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1F2937",
+                        "text-main": "#1F2937",
+                        "text-muted": "#6B7280",
+                    },
+                    fontFamily: {
+                        display: ['"Noto Naskh Arabic"', 'serif'],
+                        body: ['"Noto Naskh Arabic"', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '0.75rem',
+                        '2xl': '1rem',
+                        '3xl': '1.5rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Noto Naskh Arabic', serif;
+        }::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-gray-200 transition-colors duration-200 antialiased overflow-hidden">
+<div class="flex h-screen">
+<aside class="w-72 bg-primary text-white hidden md:flex flex-col shadow-xl z-20 relative">
+<div class="p-8 flex items-center gap-3 border-b border-white/10">
+<div class="bg-white/10 p-2 rounded-lg">
+<span class="material-icons-outlined text-3xl text-secondary">mosque</span>
+</div>
+<div>
+<h1 class="font-bold text-lg leading-tight">الشيخ السيد مراد</h1>
+<p class="text-xs text-gray-300 opacity-80">لوحة الإدارة العامة</p>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+<p class="px-4 text-xs font-bold text-gray-400 mb-2 mt-2">القائمة الرئيسية</p>
+<a class="flex items-center gap-4 px-4 py-3 bg-white/10 rounded-xl text-secondary font-medium transition-all" href="#">
+<span class="material-icons-outlined">dashboard</span>
+<span>لوحة التحكم</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all group" href="#">
+<span class="material-icons-outlined group-hover:text-secondary transition-colors">menu_book</span>
+<span>الدروس والمحاضرات</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all group" href="#">
+<span class="material-icons-outlined group-hover:text-secondary transition-colors">article</span>
+<span>المقالات العلمية</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all group" href="#">
+<span class="material-icons-outlined group-hover:text-secondary transition-colors">library_books</span>
+<span>مكتبة الكتب</span>
+</a>
+<p class="px-4 text-xs font-bold text-gray-400 mb-2 mt-6">الإدارة</p>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all group" href="#">
+<span class="material-icons-outlined group-hover:text-secondary transition-colors">people</span>
+<span>المستخدمين</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all group" href="#">
+<span class="material-icons-outlined group-hover:text-secondary transition-colors">settings</span>
+<span>الإعدادات</span>
+</a>
+</nav>
+<div class="p-4 border-t border-white/10 bg-black/10">
+<div class="flex items-center gap-3">
+<img alt="Admin" class="w-10 h-10 rounded-full border-2 border-secondary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAk5oO_PBN3gcPh9hqEsiVFu4nLNUj0jYhtf_EhwbNh75a3h_SQITKCj_CD39r1QZ9_-MYwqVbXPMCK5Ru_172TuLtDt8HVTCg1-eZPSpbcPg3g_HRb_KONdb91DfRMTNgtMurwtL21nVwlLzEfmG6QDtIP8Fk2AM49jB0-OCqNocW38r9gAFKDuhIrgIvUkxr1kgQDpEE6W_6Re5KV_ruWe0P1adUNuqp58Re20JDPpmJwTXvlPA__WkVeR2a65-Kx10YENFy0C4V"/>
+<div class="flex-1">
+<p class="text-sm font-bold">مدير الموقع</p>
+<p class="text-xs text-gray-400">admin@example.com</p>
+</div>
+<button class="text-gray-400 hover:text-white transition-colors">
+<span class="material-icons-outlined">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+<header class="h-20 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-8 z-10 shadow-sm">
+<div class="flex items-center flex-1 max-w-lg">
+<div class="relative w-full">
+<span class="material-icons-outlined absolute right-3 top-2.5 text-gray-400">search</span>
+<input class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl py-2.5 pr-10 pl-4 focus:ring-2 focus:ring-primary/20 transition-all text-sm placeholder-gray-400" placeholder="بحث في المحتوى، الدروس، المقالات..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-300 transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined">dark_mode</span>
+</button>
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-300 transition-colors relative">
+<span class="material-icons-outlined">notifications</span>
+<span class="absolute top-2 left-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+</button>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-md">
+<span class="material-icons-outlined text-lg">add</span>
+<span>إضافة جديد</span>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 pb-24">
+<div class="flex justify-between items-end mb-8">
+<div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-1">الأربعاء، 12 محرم 1445</p>
+<h2 class="text-3xl font-bold text-gray-800 dark:text-white font-display">مرحباً بك مجدداً، فضيلة الشيخ</h2>
+</div>
+<div class="hidden md:block">
+<span class="bg-secondary/10 text-primary dark:text-secondary px-4 py-2 rounded-lg text-sm font-medium border border-secondary/20">
+                            آخر تحديث للنظام: منذ ساعتين
+                        </span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 flex items-start justify-between">
+<div>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">إجمالي الدروس</p>
+<h3 class="text-3xl font-bold text-gray-800 dark:text-white">1,245</h3>
+<p class="text-xs text-green-600 mt-2 flex items-center gap-1">
+<span class="material-icons-outlined text-sm">trending_up</span>
+                                +12 هذا الشهر
+                            </p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons-outlined">mic</span>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 flex items-start justify-between">
+<div>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">الكتب المنشورة</p>
+<h3 class="text-3xl font-bold text-gray-800 dark:text-white">84</h3>
+<p class="text-xs text-gray-400 mt-2">مكتبة شاملة</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-yellow-600">
+<span class="material-icons-outlined">menu_book</span>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 flex items-start justify-between">
+<div>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">المقالات</p>
+<h3 class="text-3xl font-bold text-gray-800 dark:text-white">320</h3>
+<p class="text-xs text-green-600 mt-2 flex items-center gap-1">
+<span class="material-icons-outlined text-sm">trending_up</span>
+                                +5 هذا الأسبوع
+                            </p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
+<span class="material-icons-outlined">article</span>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 flex items-start justify-between">
+<div>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">الزوار اليوم</p>
+<h3 class="text-3xl font-bold text-gray-800 dark:text-white">4.2k</h3>
+<p class="text-xs text-green-600 mt-2 flex items-center gap-1">
+<span class="material-icons-outlined text-sm">trending_up</span>
+                                +18% زيادة
+                            </p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600">
+<span class="material-icons-outlined">visibility</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 space-y-8">
+<div class="bg-primary rounded-3xl p-8 relative overflow-hidden text-white shadow-lg">
+<div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+<svg height="100%" width="100%">
+<pattern height="40" id="pattern-circles" patternUnits="userSpaceOnUse" width="40" x="0" y="0">
+<circle cx="20" cy="20" fill="currentColor" r="2"></circle>
+</pattern>
+<rect fill="url(#pattern-circles)" height="100%" width="100%" x="0" y="0"></rect>
+</svg>
+</div>
+<div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+<div>
+<div class="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-medium mb-4 backdrop-blur-sm">
+<span class="material-icons-outlined text-sm">campaign</span>
+<span>إعلان جديد</span>
+</div>
+<h3 class="text-2xl md:text-3xl font-bold font-display mb-2">الخطب المنبرية الجديدة</h3>
+<p class="text-gray-200 text-sm leading-relaxed max-w-lg mb-6">
+                                        استمع إلى خطب الجمعة والأعياد والمناسبات الدينية. يمكنك الآن رفع خطبة الجمعة القادمة أو جدولة النشر.
+                                    </p>
+<div class="flex gap-3">
+<button class="bg-white text-primary hover:bg-gray-100 px-6 py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center gap-2">
+<span>رفع خطبة جديدة</span>
+<span class="material-icons-outlined text-sm flip-rtl">arrow_back</span>
+</button>
+<button class="bg-transparent border border-white/30 hover:bg-white/10 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors">
+                                            عرض الأرشيف
+                                        </button>
+</div>
+</div>
+<div class="hidden md:block opacity-80">
+<span class="material-icons-outlined text-[120px]">podcasts</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 overflow-hidden">
+<div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+<h3 class="font-bold text-lg flex items-center gap-2">
+<span class="w-1 h-6 bg-secondary rounded-full"></span>
+                                    أحدث الدروس الصوتية
+                                </h3>
+<a class="text-sm text-primary dark:text-secondary font-medium hover:underline" href="#">عرض الكل</a>
+</div>
+<div class="divide-y divide-gray-50 dark:divide-gray-700">
+<div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-outlined">play_arrow</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">أحكام الزكاة في الأموال المعاصرة</h4>
+<div class="flex items-center gap-3 mt-1">
+<span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-500">فقه</span>
+<span class="text-xs text-gray-400">منذ يومين</span>
+</div>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-gray-400 hover:text-primary"><span class="material-icons-outlined">edit</span></button>
+<button class="p-2 text-gray-400 hover:text-red-500"><span class="material-icons-outlined">delete</span></button>
+</div>
+</div>
+<div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-outlined">play_arrow</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">تأملات في سورة الكهف - الدرس الرابع</h4>
+<div class="flex items-center gap-3 mt-1">
+<span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-500">تفسير</span>
+<span class="text-xs text-gray-400">منذ 5 أيام</span>
+</div>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-gray-400 hover:text-primary"><span class="material-icons-outlined">edit</span></button>
+<button class="p-2 text-gray-400 hover:text-red-500"><span class="material-icons-outlined">delete</span></button>
+</div>
+</div>
+<div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-outlined">play_arrow</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">غزوة بدر الكبرى والدروس المستفادة</h4>
+<div class="flex items-center gap-3 mt-1">
+<span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-500">سيرة</span>
+<span class="text-xs text-gray-400">منذ أسبوع</span>
+</div>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-gray-400 hover:text-primary"><span class="material-icons-outlined">edit</span></button>
+<button class="p-2 text-gray-400 hover:text-red-500"><span class="material-icons-outlined">delete</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-8">
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 p-6">
+<h3 class="font-bold text-lg mb-4">الدرس القادم</h3>
+<div class="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-xl p-4 mb-4">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-white dark:bg-surface-dark text-orange-600 dark:text-orange-400 text-xs font-bold px-2 py-1 rounded shadow-sm">مباشر</span>
+<span class="text-xs text-gray-500">اليوم، 7:30 م</span>
+</div>
+<h4 class="font-bold text-lg text-gray-800 dark:text-white mb-1">مجلس الفقه</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">شرح كتاب "منهاج الطالبين" للإمام النووي</p>
+</div>
+<button class="w-full bg-transparent border border-gray-200 dark:border-gray-600 hover:border-primary hover:text-primary dark:hover:text-white text-gray-500 dark:text-gray-400 font-medium py-2 rounded-lg transition-colors text-sm">
+                                إدارة الجدول
+                            </button>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold text-lg">أحدث الكتب</h3>
+<button class="text-xs bg-primary/10 text-primary p-1.5 rounded-lg hover:bg-primary hover:text-white transition-colors">
+<span class="material-icons-outlined text-sm">add</span>
+</button>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4 items-start">
+<div class="w-16 h-20 bg-primary rounded shadow-md flex items-center justify-center text-white/50 text-xs text-center p-1">
+<span class="font-serif">فقه السنة</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">فقه السنة - دراسة منهجية</h4>
+<p class="text-xs text-gray-500 mt-1 mb-2">عدد التحميلات: 410</p>
+<a class="text-xs text-primary dark:text-secondary font-medium flex items-center gap-1" href="#">
+<span class="material-icons-outlined text-[14px]">edit</span>
+                                            تعديل
+                                        </a>
+</div>
+</div>
+<div class="flex gap-4 items-start pt-4 border-t border-gray-50 dark:border-gray-700">
+<div class="w-16 h-20 bg-primary rounded shadow-md flex items-center justify-center text-white/50 text-xs text-center p-1">
+<span class="font-serif">زاد المسلم</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">زاد المسلم اليومي</h4>
+<p class="text-xs text-gray-500 mt-1 mb-2">عدد التحميلات: 180</p>
+<a class="text-xs text-primary dark:text-secondary font-medium flex items-center gap-1" href="#">
+<span class="material-icons-outlined text-[14px]">edit</span>
+                                            تعديل
+                                        </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

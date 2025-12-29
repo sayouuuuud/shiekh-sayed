@@ -1,10 +1,7 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Bell, User, LogOut, Settings, Check, Globe, Menu } from "lucide-react"
-import { useStore } from "@/lib/store-context"
-import { useLanguage } from "@/lib/language-context"
+import { usePathname } from "next/navigation"
+import { useAuth } from "@/contexts/auth-context"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,140 +10,100 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-interface AdminHeaderProps {
-  onMenuClick?: () => void
+const pageTitles: Record<string, string> = {
+  "/admin": "لوحة التحكم",
+  "/admin/khutba": "إدارة الخطب",
+  "/admin/dars": "إدارة الدروس",
+  "/admin/articles": "إدارة المقالات",
+  "/admin/books": "إدارة الكتب",
+  "/admin/videos": "إدارة المرئيات",
+  "/admin/media": "إدارة المرئيات",
+  "/admin/categories": "التصنيفات",
+  "/admin/subscribers": "المشتركين",
+  "/admin/messages": "الرسائل",
+  "/admin/settings": "الإعدادات",
+  "/admin/about": "صفحة عن الشيخ",
+  "/admin/hero": "إدارة القسم الرئيسي", // Added hero page title
 }
 
-export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
-  const router = useRouter()
-  const { notifications, markNotificationAsRead, markAllNotificationsAsRead, adminSettings, adminTranslations } =
-    useStore()
-  const { locale, setLocale } = useLanguage()
+export function AdminHeader({ user }: { user: any }) {
+  const pathname = usePathname()
+  const { logout } = useAuth()
+  const title = pageTitles[pathname] || "لوحة التحكم"
 
-  const unreadCount = notifications.filter((n) => !n.read).length
-  const t = adminTranslations
-  const isRTL = locale === "ar"
-
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" })
-    router.push("/admin/login")
+  const getInitials = (email?: string) => {
+    if (email) {
+      return email[0].toUpperCase()
+    }
+    return "م"
   }
 
   return (
-    <header
-      className={`h-16 bg-card border-b border-border flex items-center justify-between px-4 md:px-6 gap-2 md:gap-4 ${isRTL ? "font-arabic" : ""}`}
-    >
-      <button onClick={onMenuClick} className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors">
-        <Menu className="w-5 h-5 text-muted-foreground" />
-      </button>
+    <header className="h-16 bg-surface dark:bg-card border-b border-border dark:border-border px-6 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex items-center gap-4">
+        {/* Mobile Menu Toggle */}
+        <button className="lg:hidden text-foreground dark:text-foreground">
+          <span className="material-icons-outlined">menu</span>
+        </button>
+        <h1 className="text-xl font-bold text-foreground dark:text-white">{title}</h1>
+      </div>
 
-      {/* Spacer for desktop */}
-      <div className="hidden lg:block" />
+      <div className="flex items-center gap-4">
+        {/* Search */}
+        <div className="hidden md:flex items-center gap-2 bg-background dark:bg-background-alt rounded-lg px-3 py-2 border border-border dark:border-border">
+          <span className="material-icons-outlined text-text-muted text-lg">search</span>
+          <input
+            type="text"
+            placeholder="بحث..."
+            className="bg-transparent border-none outline-none text-sm w-40 text-foreground dark:text-foreground placeholder:text-text-muted"
+          />
+        </div>
 
-      <div className="flex items-center gap-2 md:gap-4">
-        <button
-          onClick={() => setLocale(locale === "en" ? "ar" : "en")}
-          className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-lg hover:bg-accent transition-colors"
-        >
-          <Globe className="w-4 h-4 text-muted-foreground" />
-          <span
-            className={`text-sm font-medium text-muted-foreground hidden sm:inline ${locale === "en" ? "font-arabic" : ""}`}
-          >
-            {locale === "en" ? "العربية" : "EN"}
-          </span>
+        {/* Notifications */}
+        <button className="relative p-2 text-text-muted dark:text-text-subtext hover:text-foreground dark:hover:text-white transition-colors">
+          <span className="material-icons-outlined">notifications</span>
+          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
 
-        {/* Notifications Dropdown */}
+        {/* User Menu with Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="relative p-2 hover:bg-accent rounded-lg transition-colors">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className={`w-72 md:w-80 ${isRTL ? "font-arabic" : ""}`}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <h3 className="font-semibold text-foreground">{t.notifications.title[locale]}</h3>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllNotificationsAsRead}
-                  className="text-xs text-rose-600 hover:text-rose-700 flex items-center gap-1"
-                >
-                  <Check className="w-3 h-3" />
-                  <span className="hidden sm:inline">{t.notifications.markAllRead[locale]}</span>
-                </button>
-              )}
-            </div>
-            <div className="max-h-80 overflow-y-auto">
-              {notifications.length > 0 ? (
-                notifications.slice(0, 5).map((notification) => (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className={`px-4 py-3 cursor-pointer ${!notification.read ? "bg-rose-50 dark:bg-rose-950/20" : ""}`}
-                    onClick={() => markNotificationAsRead(notification.id)}
-                  >
-                    <div className="flex-1">
-                      <p
-                        className={`text-sm ${!notification.read ? "font-medium text-foreground" : "text-muted-foreground"}`}
-                      >
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
-                    </div>
-                    {!notification.read && <span className="w-2 h-2 bg-rose-500 rounded-full flex-shrink-0" />}
-                  </DropdownMenuItem>
-                ))
-              ) : (
-                <div className="px-4 py-8 text-center text-muted-foreground text-sm">
-                  {t.notifications.noNotifications[locale]}
-                </div>
-              )}
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link
-                href="/admin/notifications"
-                className="px-4 py-2 text-center text-rose-600 text-sm font-medium w-full justify-center"
-              >
-                {isRTL ? "عرض جميع الإشعارات" : "View All Notifications"}
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Admin Profile Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 p-2 hover:bg-accent rounded-lg transition-colors">
-              <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-rose-600" />
+            <button className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold">
+                {getInitials(user?.email)}
               </div>
+              <div className="hidden md:block text-right">
+                <p className="text-sm font-bold text-foreground dark:text-white">المدير</p>
+                <p className="text-xs text-text-muted dark:text-text-subtext">{user?.email || "admin@site.com"}</p>
+              </div>
+              <span className="material-icons-outlined text-text-muted text-lg hidden md:block">expand_more</span>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className={`w-56 ${isRTL ? "font-arabic" : ""}`}>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-sm font-medium text-foreground">{adminSettings.name || "Admin"}</p>
-              <p className="text-xs text-muted-foreground">{isRTL ? "مسؤول" : "Administrator"}</p>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium">المدير</p>
+              <p className="text-xs text-text-muted">{user?.email}</p>
             </div>
-            <DropdownMenuItem asChild>
-              <Link href="/admin/settings" className="flex items-center gap-2 px-4 py-2">
-                <Settings className="w-4 h-4" />
-                {t.header.settings[locale]}
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 w-full text-red-600 hover:text-red-700"
-              >
-                <LogOut className="w-4 h-4" />
-                {t.header.logout[locale]}
-              </button>
+              <a href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
+                <span className="material-icons-outlined text-lg">settings</span>
+                <span>الإعدادات</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/" target="_blank" className="flex items-center gap-2 cursor-pointer" rel="noreferrer">
+                <span className="material-icons-outlined text-lg">open_in_new</span>
+                <span>عرض الموقع</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={logout}
+              className="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+            >
+              <span className="material-icons-outlined text-lg">logout</span>
+              <span>تسجيل الخروج</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

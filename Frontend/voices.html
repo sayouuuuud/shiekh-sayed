@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>صفحة المرئيات والصوتيات</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1A4D3E", // Dark forest green from screenshot
+                        secondary: "#D1AC6B", // Gold accent
+                        "background-light": "#FAFAFA",
+                        "background-dark": "#121212",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1E1E1E",
+                        "text-primary-light": "#1A1A1A",
+                        "text-primary-dark": "#E5E5E5",
+                        "text-secondary-light": "#666666",
+                        "text-secondary-dark": "#A3A3A3",
+                        "border-light": "#E5E7EB",
+                        "border-dark": "#333333",
+                    },
+                    fontFamily: {
+                        display: ["Tajawal", "sans-serif"],
+                        body: ["Tajawal", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem", // Consistent rounded corners
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 2px 10px rgba(0, 0, 0, 0.03)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-300">
+<nav class="bg-surface-light dark:bg-surface-dark shadow-sm border-b border-border-light dark:border-border-dark sticky top-0 z-50">
+<div class="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-icons-round text-2xl">mosque</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-lg leading-none text-primary dark:text-white">الشيخ السيد مراد</span>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">عالم أزهري</span>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-8 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+<a class="hover:text-primary dark:hover:text-white transition-colors" href="#">الرئيسية</a>
+<a class="hover:text-primary dark:hover:text-white transition-colors" href="#">خطب</a>
+<a class="hover:text-primary dark:hover:text-white transition-colors" href="#">دروس</a>
+<a class="hover:text-primary dark:hover:text-white transition-colors" href="#">مقالات</a>
+<a class="hover:text-primary dark:hover:text-white transition-colors" href="#">كتب</a>
+<a class="text-primary dark:text-white font-bold border-b-2 border-primary pb-1" href="#">مرئيات</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary dark:hover:text-white">
+<span class="material-icons-outlined">search</span>
+</button>
+<button class="bg-primary hover:bg-opacity-90 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
+                    اشترك
+                </button>
+<button class="md:hidden text-text-secondary-light dark:text-text-secondary-dark">
+<span class="material-icons-outlined">menu</span>
+</button>
+</div>
+</div>
+</nav>
+<header class="relative overflow-hidden py-16 px-4">
+<div class="absolute inset-0 opacity-5 pointer-events-none">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+<path class="text-primary" d="M0 100 C 20 0 50 0 100 100 Z" fill="currentColor"></path>
+</svg>
+</div>
+<div class="container mx-auto text-center relative z-10">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium mb-4">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                مكتبة الوسائط
+            </div>
+<h1 class="text-4xl md:text-5xl font-bold text-primary dark:text-white mb-6 leading-tight">
+                المكتبة المرئية والصوتية
+            </h1>
+<p class="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-2xl mx-auto leading-relaxed">
+                مجموعة مختارة من الدروس والخطب والمحاضرات المسجلة بجودة عالية، لتعم الفائدة وتنشر المعرفة.
+            </p>
+</div>
+</header>
+<main class="container mx-auto px-4 lg:px-8 pb-20">
+<div class="flex justify-center mb-12">
+<div class="bg-surface-light dark:bg-surface-dark p-1.5 rounded-2xl shadow-sm border border-border-light dark:border-border-dark inline-flex">
+<button class="px-8 py-3 rounded-xl text-sm font-bold transition-all bg-primary text-white shadow-md">
+<span class="flex items-center gap-2">
+<span class="material-icons-round text-lg">play_circle</span>
+                        المرئيات
+                    </span>
+</button>
+<button class="px-8 py-3 rounded-xl text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+<span class="flex items-center gap-2">
+<span class="material-icons-round text-lg">mic</span>
+                        الصوتيات
+                    </span>
+</button>
+</div>
+</div>
+<div class="mb-16">
+<div class="grid lg:grid-cols-2 gap-8 items-center bg-surface-light dark:bg-surface-dark rounded-3xl p-6 shadow-card border border-border-light dark:border-border-dark group cursor-pointer hover:shadow-soft transition-all">
+<div class="relative aspect-video rounded-2xl overflow-hidden">
+<img alt="أحدث محاضرة" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAiVcDentrFvy8aTpTmrCAQ__ldVkQELWzbKOrcPvQ-CNLHpeBn1GWo36Vb4FSRwC8xNYRX2WlLcumXcqgWjHLnnlj7hhJ5MOE_07kBsrdazUlBGZKt74siQNInL-nxpdjWCD1dLUZncVnMnU12hH8BJ_RQ5pMArSX0V0GcCRmuWGwNKkze0zv24a_fxpabmXWXTakJ-N8k6ImdEkAtKkeSzey9PrFI2VSTrF1qNVfskjO7yLqWdPxgnTgeztdTZ77WvIMIRlR_bBW"/>
+<div class="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors">
+<div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/40 group-hover:scale-110 transition-transform">
+<span class="material-icons-round text-white text-4xl">play_arrow</span>
+</div>
+</div>
+<span class="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded font-medium">45:20</span>
+</div>
+<div class="p-2">
+<div class="flex items-center gap-2 mb-3">
+<span class="bg-secondary/10 text-secondary text-xs px-2 py-1 rounded-md font-bold">جديد</span>
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-sm">قبل يومين</span>
+</div>
+<h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark mb-4 group-hover:text-primary transition-colors">
+                        شرح حديث: "المؤمن للمؤمن كالبنيان يشد بعضه بعضاً"
+                    </h2>
+<p class="text-text-secondary-light dark:text-text-secondary-dark mb-6 line-clamp-3 leading-relaxed">
+                        حديث شريف يؤكد على أهمية التكاتف والتعاون بين المسلمين، فالمجتمع الإسلامي لا يستقيم إلا بوحدة صفه وتآلف قلوب أبنائه. في هذا الدرس نتناول شرحاً مفصلاً للمعاني السامية.
+                    </p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2">
+<img alt="الشيخ" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFKqWW-GZ1VO0MQQdgQ9CY9VyQxO3H_OhsXYVwKZ4aWhspe7ZSZv-uvyAe7lei2TPkH448XgiUs_BDhp7x5dbmWxeESCWVAhhoHR7IXgB1o2NIROFp56n32u4xJiRITahUKfsfjFT4Qz03X1OfPh3UbM2QHWpeWYZmcSFXBMB8KUactseSXpib3ilHCS7DlEuf3ivosl2IlaJrbxofo7ieoOjmW6TXuzmoXGNazO-F0dRUjzdTVEGEVQw5qdiWcmCNYK-dhUBw30oo"/>
+<span class="text-sm font-medium text-text-primary-light dark:text-text-primary-dark">الشيخ السيد مراد</span>
+</div>
+<button class="flex items-center gap-1 text-primary hover:text-primary/80 font-medium text-sm transition-colors">
+                            مشاهدة الدرس
+                            <span class="material-icons-outlined text-lg rtl:rotate-180">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-3 mb-8 overflow-x-auto pb-2 no-scrollbar">
+<button class="px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium whitespace-nowrap">الكل</button>
+<button class="px-5 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:border-primary hover:text-primary rounded-lg text-sm font-medium whitespace-nowrap transition-colors">دروس الفقه</button>
+<button class="px-5 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:border-primary hover:text-primary rounded-lg text-sm font-medium whitespace-nowrap transition-colors">السيرة النبوية</button>
+<button class="px-5 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:border-primary hover:text-primary rounded-lg text-sm font-medium whitespace-nowrap transition-colors">الرقائق</button>
+<button class="px-5 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:border-primary hover:text-primary rounded-lg text-sm font-medium whitespace-nowrap transition-colors">فتاوى معاصرة</button>
+</div>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+<article class="bg-surface-light dark:bg-surface-dark rounded-2xl overflow-hidden shadow-card hover:shadow-soft transition-all border border-border-light dark:border-border-dark group">
+<div class="relative aspect-video overflow-hidden">
+<img alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo_G8kJcwx6YFdWSzQL4L1wWr2N10AK-Vv6j3z2xh-EgFzefz-rUxZDFu3LWnzOvCVtbiI8RHW9cGuzIwtfXtS07SRxWb48n0tU_R57khKM2Fap2EvoAPzEUo48KBYNsEhvtHNz07qPLlk1iq_4fROAnJ2UyLuVQtlXSpSO5upaK3c-b0b6gO6966ljFpKCyFjfZbW_pSjd4wcW2D-kdiqIgPdNQsZUI7E50CccsZoHiBdMn4yHdpLmFNqSDj2kt7eG2rNB6lV_SwS"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-white text-5xl drop-shadow-lg scale-75 group-hover:scale-100 transition-transform">play_circle</span>
+</div>
+<span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">22:15</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-secondary uppercase tracking-wider">السيرة النبوية</span>
+<div class="flex items-center gap-1 text-text-secondary-light dark:text-text-secondary-dark text-[10px]">
+<span class="material-icons-outlined text-[12px]">visibility</span>
+<span>1.2k</span>
+</div>
+</div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-text-primary-dark mb-2 leading-snug group-hover:text-primary transition-colors">
+                        غزوة بدر الكبرى والدروس المستفادة منها
+                    </h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark line-clamp-2 mb-4">
+                        وقفات تربوية مع أحداث الغزوة وكيفية إسقاطها على واقعنا المعاصر.
+                    </p>
+<div class="flex items-center justify-between pt-4 border-t border-border-light dark:border-border-dark">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">منذ 5 أيام</span>
+<button class="text-xs font-bold text-primary hover:underline">مشاهدة الآن</button>
+</div>
+</div>
+</article>
+<article class="bg-surface-light dark:bg-surface-dark rounded-2xl overflow-hidden shadow-card hover:shadow-soft transition-all border border-border-light dark:border-border-dark group">
+<div class="relative aspect-video overflow-hidden">
+<div class="absolute inset-0 bg-primary/20 flex items-center justify-center"> 
+<span class="material-icons-outlined text-primary/40 text-6xl">movie</span>
+</div>
+<img alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 absolute inset-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWIxFCBJL3hg1g7cYdnGKdwp1oFxw5X2nvYRvr9uR9pYaLLd1ra5vra9FCTkRivyRqrPu_-LVD1psZ4tiOqEtaoB587KPDFi95RDKsK_zcxIttcCZcJpXNp_mvAOC75y0AP-CDwpWb66hLyaDd4njV6tOVEs1oi0dnX4lDMbwV20S9NFr8qFhnx8dAZFlDkRhZDLmrcljZlM4pRQf9wszqRpvd5_r1qFVmIAm83BLuuUgTXmN5kErzklrEohY46MziBfEkJhkTBhhi"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-white text-5xl drop-shadow-lg scale-75 group-hover:scale-100 transition-transform">play_circle</span>
+</div>
+<span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">14:30</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-secondary uppercase tracking-wider">فقه المعاملات</span>
+<div class="flex items-center gap-1 text-text-secondary-light dark:text-text-secondary-dark text-[10px]">
+<span class="material-icons-outlined text-[12px]">visibility</span>
+<span>850</span>
+</div>
+</div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-text-primary-dark mb-2 leading-snug group-hover:text-primary transition-colors">
+                        أحكام الزكاة في الأموال المعاصرة
+                    </h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark line-clamp-2 mb-4">
+                        شرح مبسط لكيفية حساب الزكاة في الأسهم والعملات الرقمية.
+                    </p>
+<div class="flex items-center justify-between pt-4 border-t border-border-light dark:border-border-dark">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">منذ أسبوع</span>
+<button class="text-xs font-bold text-primary hover:underline">مشاهدة الآن</button>
+</div>
+</div>
+</article>
+<article class="bg-surface-light dark:bg-surface-dark rounded-2xl overflow-hidden shadow-card hover:shadow-soft transition-all border border-border-light dark:border-border-dark group">
+<div class="relative aspect-video overflow-hidden bg-gray-200 dark:bg-gray-700">
+<img alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvgYQFPmG2pAv6jlsFRsji81RGjEcwa5gS2L3louRQs5CLkmZOx0LY4AxdzKR34tW73gmlEvzy3wUDHON-C2yIBDukpTZHCqw5a2ROmq_0ZuBb2eZ4Ty-gL_Yvid4p3souwxSUnbjGRTVZOD3Efh9iDhrx3PdXHW32XSvGf0BW5IBavOyrMmt06YetnM4cUvF8lIrKkgNT4cBNPeUoQZUX3phygr6m5Z6rf2o2J0z8xQQCYEPTp5lkb1G23reDY1ID3wgAW55VOEfX"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-white text-5xl drop-shadow-lg scale-75 group-hover:scale-100 transition-transform">play_circle</span>
+</div>
+<span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">58:00</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-secondary uppercase tracking-wider">تفسير</span>
+<div class="flex items-center gap-1 text-text-secondary-light dark:text-text-secondary-dark text-[10px]">
+<span class="material-icons-outlined text-[12px]">visibility</span>
+<span>3.5k</span>
+</div>
+</div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-text-primary-dark mb-2 leading-snug group-hover:text-primary transition-colors">
+                        تأملات في سورة الكهف - الدرس الرابع
+                    </h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark line-clamp-2 mb-4">
+                        سلسلة دروس تفسير القرآن الكريم، وقفات مع قصص سورة الكهف.
+                    </p>
+<div class="flex items-center justify-between pt-4 border-t border-border-light dark:border-border-dark">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">منذ أسبوعين</span>
+<button class="text-xs font-bold text-primary hover:underline">مشاهدة الآن</button>
+</div>
+</div>
+</article>
+<article class="bg-surface-light dark:bg-surface-dark rounded-2xl overflow-hidden shadow-card hover:shadow-soft transition-all border border-border-light dark:border-border-dark group">
+<div class="relative aspect-video overflow-hidden">
+<img alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-XI9QH61n1x_-tyv8HY8W690aK7W0EVQ2f2JkAWUHesOqLBgBroa1-BRGqh5I8S2rQfnTdjxMo_rJytG_g-xQV20kQlaPapqEa5wcmC4xMIWhRTDSdCow4adf8qUATZjS_Cs2j32xTgZn4GpniYCya1CHmHtddo1fwOeo2j_k9eCfKb1rPgtViJwvw2H50kM2I7089m4G6RjWa86FqdZCUp-enuMjcp7ILUf2IJ03DOLnl54ORa-rsF4kU8arRa32en4cDK-oPx3-"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-white text-5xl drop-shadow-lg scale-75 group-hover:scale-100 transition-transform">play_circle</span>
+</div>
+<span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">10:05</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-secondary uppercase tracking-wider">رقائق</span>
+<div class="flex items-center gap-1 text-text-secondary-light dark:text-text-secondary-dark text-[10px]">
+<span class="material-icons-outlined text-[12px]">visibility</span>
+<span>900</span>
+</div>
+</div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-text-primary-dark mb-2 leading-snug group-hover:text-primary transition-colors">
+                        كيف نربي أبناءنا في زمن الفتن؟
+                    </h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark line-clamp-2 mb-4">
+                        نصائح تربوية هامة لكل أب وأم للحفاظ على الفطرة السليمة.
+                    </p>
+<div class="flex items-center justify-between pt-4 border-t border-border-light dark:border-border-dark">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">منذ 3 أسابيع</span>
+<button class="text-xs font-bold text-primary hover:underline">مشاهدة الآن</button>
+</div>
+</div>
+</article>
+<article class="bg-surface-light dark:bg-surface-dark rounded-2xl overflow-hidden shadow-card hover:shadow-soft transition-all border border-border-light dark:border-border-dark group">
+<div class="relative aspect-video overflow-hidden">
+<img alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8ZeRkp9IJr3VVdj69TFdz93JGKP-XStuiyZdQmLFbz7B59wcZWt2HG2b3mK_XRQRnHFmH7xGc5P_CSZ-HRfYXjIX4vBPjxyd1CwB0pgAkSAoFeeBJPJUXXmJLdZKHOCkMiM1SDLfElWY1ITlItqoLv4P0loX6kY8CWt3C2OTQ3p47hrrEdPAG30BMAxH_5FN2p4xYU3D7_sfADIdrXk12ODh2nEuxQNNFK2HC1qhyML3hQopJVPgUxRRqVCYITP10kv1rfbTiBv5S"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-white text-5xl drop-shadow-lg scale-75 group-hover:scale-100 transition-transform">play_circle</span>
+</div>
+<span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">33:10</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-secondary uppercase tracking-wider">حديث</span>
+<div class="flex items-center gap-1 text-text-secondary-light dark:text-text-secondary-dark text-[10px]">
+<span class="material-icons-outlined text-[12px]">visibility</span>
+<span>2.1k</span>
+</div>
+</div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-text-primary-dark mb-2 leading-snug group-hover:text-primary transition-colors">
+                        شرح الأربعين النووية - الحديث الخامس
+                    </h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark line-clamp-2 mb-4">
+                        سلسلة شرح الأربعين النووية بأسلوب مبسط وميسر للجميع.
+                    </p>
+<div class="flex items-center justify-between pt-4 border-t border-border-light dark:border-border-dark">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">منذ شهر</span>
+<button class="text-xs font-bold text-primary hover:underline">مشاهدة الآن</button>
+</div>
+</div>
+</article>
+<article class="bg-surface-light dark:bg-surface-dark rounded-2xl overflow-hidden shadow-card hover:shadow-soft transition-all border border-border-light dark:border-border-dark group">
+<div class="relative aspect-video overflow-hidden">
+<img alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2KGAXUVSE01i1cldd6Bi_EATkyVGFaTPjD2in5MV98-MYfUEe0tDE0mP25p8hUeb9KEzqMJ6mMsHZ2j1yyt7a_J9mLPLJR4HPsFm2cSkN8c-95muJqjJ9PPrpYW04EJPOc8ECf-cz04kY9R_6Zi2_TEuQdmwVqVs8cS8iW0MqAmr6Pz6bgtNs4auazgj4R9h6gdvQciZQOIM5378X-DT1wGVRTm5T3B5bwvWvMiBa-NyyZT5z3zqEpJzi1NS76ehbEp7AhH-xaBmA"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-white text-5xl drop-shadow-lg scale-75 group-hover:scale-100 transition-transform">play_circle</span>
+</div>
+<span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">1:05:00</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-secondary uppercase tracking-wider">خطب الجمعة</span>
+<div class="flex items-center gap-1 text-text-secondary-light dark:text-text-secondary-dark text-[10px]">
+<span class="material-icons-outlined text-[12px]">visibility</span>
+<span>5.3k</span>
+</div>
+</div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-text-primary-dark mb-2 leading-snug group-hover:text-primary transition-colors">
+                        خطبة الجمعة: فضل صلة الرحم
+                    </h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark line-clamp-2 mb-4">
+                        الترغيب في صلة الأرحام والتحذير من قطيعتها في ضوء الكتاب والسنة.
+                    </p>
+<div class="flex items-center justify-between pt-4 border-t border-border-light dark:border-border-dark">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">منذ شهرين</span>
+<button class="text-xs font-bold text-primary hover:underline">مشاهدة الآن</button>
+</div>
+</div>
+</article>
+</div>
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-lg text-primary dark:text-white dark:bg-primary/30">
+<span class="material-icons-outlined">headset</span>
+</div>
+<h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">أحدث الصوتيات</h2>
+</div>
+<a class="text-sm font-medium text-primary hover:text-primary/80 dark:text-gray-300 dark:hover:text-white flex items-center gap-1 transition-colors" href="#">
+                 عرض الكل
+                 <span class="material-icons-outlined text-base rtl:rotate-180">arrow_forward</span>
+</a>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-3xl shadow-card border border-border-light dark:border-border-dark overflow-hidden">
+<div class="p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-1">
+<button class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+<span class="material-icons-round text-xl">play_arrow</span>
+</button>
+<div>
+<h4 class="font-bold text-text-primary-light dark:text-text-primary-dark text-base mb-1 group-hover:text-primary transition-colors">فضل العشر من ذي الحجة</h4>
+<div class="flex items-center gap-3 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+<span>خطب منبرية</span>
+<span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+<span>15 دقيقة</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="تحميل">
+<span class="material-icons-outlined text-xl">download</span>
+</button>
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="مشاركة">
+<span class="material-icons-outlined text-xl">share</span>
+</button>
+</div>
+</div>
+<div class="p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-1">
+<button class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+<span class="material-icons-round text-xl">play_arrow</span>
+</button>
+<div>
+<h4 class="font-bold text-text-primary-light dark:text-text-primary-dark text-base mb-1 group-hover:text-primary transition-colors">أحكام الأضحية وشروطها</h4>
+<div class="flex items-center gap-3 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+<span>فتاوى</span>
+<span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+<span>8 دقائق</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="تحميل">
+<span class="material-icons-outlined text-xl">download</span>
+</button>
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="مشاركة">
+<span class="material-icons-outlined text-xl">share</span>
+</button>
+</div>
+</div>
+<div class="p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-1">
+<button class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+<span class="material-icons-round text-xl">play_arrow</span>
+</button>
+<div>
+<h4 class="font-bold text-text-primary-light dark:text-text-primary-dark text-base mb-1 group-hover:text-primary transition-colors">حقوق الجار في الإسلام</h4>
+<div class="flex items-center gap-3 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+<span>درس عام</span>
+<span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+<span>22 دقيقة</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="تحميل">
+<span class="material-icons-outlined text-xl">download</span>
+</button>
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="مشاركة">
+<span class="material-icons-outlined text-xl">share</span>
+</button>
+</div>
+</div>
+<div class="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-1">
+<button class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+<span class="material-icons-round text-xl">play_arrow</span>
+</button>
+<div>
+<h4 class="font-bold text-text-primary-light dark:text-text-primary-dark text-base mb-1 group-hover:text-primary transition-colors">فضل صيام الأيام البيض</h4>
+<div class="flex items-center gap-3 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+<span>موعظة</span>
+<span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+<span>5 دقائق</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="تحميل">
+<span class="material-icons-outlined text-xl">download</span>
+</button>
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="مشاركة">
+<span class="material-icons-outlined text-xl">share</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center">
+<button class="inline-flex items-center gap-2 px-8 py-3 border border-border-light dark:border-border-dark rounded-xl text-text-primary-light dark:text-text-primary-dark hover:bg-gray-50 dark:hover:bg-white/5 font-bold transition-all">
+                تحميل المزيد
+                <span class="material-icons-outlined">expand_more</span>
+</button>
+</div>
+</main>
+<footer class="bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark pt-16 pb-8">
+<div class="container mx-auto px-4 lg:px-8">
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-icons-round text-2xl">mosque</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-lg leading-none text-primary dark:text-white">الشيخ السيد مراد</span>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">عالم أزهري</span>
+</div>
+</div>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                        علم نافع للقلب السليم، ومنهج وسطى قويم يجمع بين الأصالة والمعاصرة. نسعى لنشر الخير والمعرفة.
+                    </p>
+<div class="flex gap-3">
+<a class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">facebook</span></a>
+<a class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">ondemand_video</span></a> 
+<a class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">alternate_email</span></a>
+</div>
+</div>
+<div>
+<h3 class="font-bold text-text-primary-light dark:text-text-primary-dark mb-4">روابط سريعة</h3>
+<ul class="space-y-2 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+<li><a class="hover:text-primary transition-colors" href="#">عن الشيخ</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">اتصل بنا</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">سياسة الخصوصية</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">الشروط والأحكام</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-text-primary-light dark:text-text-primary-dark mb-4">أقسام المحتوى</h3>
+<ul class="space-y-2 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+<li><a class="hover:text-primary transition-colors" href="#">أحدث الفتاوى</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">البث المباشر</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">المجتمع</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">المشاريع الدعوية</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-text-primary-light dark:text-text-primary-dark mb-4">إبق على تواصل</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
+                        اشترك في القائمة البريدية لاستقبال الدروس والمقالات الجديدة مباشرة.
+                    </p>
+<div class="space-y-2">
+<input class="w-full px-4 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-border-light dark:border-border-dark focus:ring-1 focus:ring-primary focus:border-primary text-sm" placeholder="البريد الإلكتروني" type="email"/>
+<button class="w-full bg-primary hover:bg-opacity-90 text-white font-bold py-2 rounded-lg text-sm transition-colors">
+                            اشتراك الآن
+                        </button>
+</div>
+</div>
+</div>
+<div class="border-t border-border-light dark:border-border-dark pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+<p>© 2024 الشيخ السيد مراد سلامة. جميع الحقوق محفوظة.</p>
+<div class="flex items-center gap-1">
+<span>صمم بإتقان ومحبة</span>
+<span class="text-red-500 material-icons-round text-sm">favorite</span>
+</div>
+</div>
+</div>
+</footer>
+
+</body></html>

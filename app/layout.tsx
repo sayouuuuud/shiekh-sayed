@@ -1,47 +1,68 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Poppins, Playfair_Display, Cairo, Aref_Ruqaa } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import { LanguageProvider } from "@/lib/language-context"
-import { StoreProvider } from "@/lib/store-context"
+import { Amiri, Noto_Kufi_Arabic } from "next/font/google"
+import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/contexts/auth-context"
 import "./globals.css"
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-})
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-playfair",
-})
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-cairo",
-})
-
-const arefRuqaa = Aref_Ruqaa({
+const amiri = Amiri({
   subsets: ["arabic", "latin"],
   weight: ["400", "700"],
-  variable: "--font-aref-ruqaa",
+  variable: "--font-amiri",
+})
+
+const notoKufi = Noto_Kufi_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-noto-kufi",
 })
 
 export const metadata: Metadata = {
-  title: "Whispering Petals | Artisan Flower Boutique",
+  title: {
+    default: "الشيخ السيد مراد - عالم أزهري",
+    template: "%s | الشيخ السيد مراد",
+  },
   description:
-    "Discover our curated collection of handcrafted floral arrangements for moments of love and grace. Premium flowers delivered with elegance.",
-  keywords: ["flowers", "bouquets", "floral arrangements", "gift flowers", "rose bouquet", "flower shop"],
-  generator: "v0.app",
+    "الموقع الرسمي للشيخ السيد مراد - منصة إسلامية شاملة تضم الخطب والدروس العلمية والمقالات والكتب. تعلم العلم الشرعي بفهم وسطي مستنير.",
+  keywords: [
+    "الشيخ السيد مراد",
+    "دروس إسلامية",
+    "خطب الجمعة",
+    "علم شرعي",
+    "فقه إسلامي",
+    "سيرة نبوية",
+    "مقالات دينية",
+    "كتب إسلامية",
+  ],
+  authors: [{ name: "الشيخ السيد مراد" }],
+  creator: "الشيخ السيد مراد",
+  openGraph: {
+    type: "website",
+    locale: "ar_EG",
+    siteName: "الشيخ السيد مراد",
+    title: "الشيخ السيد مراد - عالم أزهري",
+    description: "منصة إسلامية شاملة تضم الخطب والدروس والمقالات والكتب للشيخ السيد مراد",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "الشيخ السيد مراد - عالم أزهري",
+    description: "منصة إسلامية شاملة تضم الخطب والدروس والمقالات والكتب للشيخ السيد مراد",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+    generator: 'v0.app'
 }
 
 export const viewport: Viewport = {
-  themeColor: "#fdf2f4",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#1e5631" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
 }
 
 export default function RootLayout({
@@ -50,14 +71,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${poppins.variable} ${playfair.variable} ${cairo.variable} ${arefRuqaa.variable} font-sans antialiased`}
-      >
-        <LanguageProvider>
-          <StoreProvider>{children}</StoreProvider>
-        </LanguageProvider>
-        <Analytics />
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <head>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+      </head>
+      <body className={`${amiri.variable} ${notoKufi.variable} font-sans antialiased`}>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange={false}>
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>صفحة الخطب - الشيخ السيد مراد</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1f4e45", // Dark green from the screenshot
+              secondary: "#d4a065", // Gold accent
+              "primary-hover": "#163a33",
+              "background-light": "#f8f8f8",
+              "background-dark": "#121212",
+              "card-light": "#ffffff",
+              "card-dark": "#1e1e1e",
+              "text-light": "#333333",
+              "text-dark": "#e0e0e0",
+              "subtext-light": "#666666",
+              "subtext-dark": "#a0a0a0",
+              "accent-light": "#f0fdf4", // Very light green bg
+              "accent-dark": "#1f2937",
+            },
+            fontFamily: {
+              display: ['"Noto Kufi Arabic"', 'sans-serif'],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              "lg": "1rem",
+              "xl": "1.5rem",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        body {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-200">
+<header class="bg-card-light dark:bg-card-dark py-4 px-6 shadow-sm sticky top-0 z-50">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="text-primary text-3xl">
+<span class="material-icons-outlined">mosque</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-lg text-primary dark:text-white leading-tight">الشيخ السيد مراد</span>
+<span class="text-xs text-subtext-light dark:text-subtext-dark">عالم أزهري</span>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-secondary font-medium transition" href="#">الرئيسية</a>
+<a class="text-primary dark:text-secondary font-bold transition border-b-2 border-primary dark:border-secondary pb-1" href="#">خطب</a>
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-secondary font-medium transition" href="#">دروس</a>
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-secondary font-medium transition" href="#">مقالات</a>
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-secondary font-medium transition" href="#">كتب</a>
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-secondary font-medium transition" href="#">مرئيات</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-secondary">
+<span class="material-icons-outlined">search</span>
+</button>
+<button class="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-lg font-medium transition">
+                    اشترك
+                </button>
+</div>
+</div>
+</header>
+<section class="bg-accent-light dark:bg-accent-dark py-12">
+<div class="max-w-7xl mx-auto px-6 text-center">
+<span class="inline-block bg-white dark:bg-card-dark text-secondary px-3 py-1 rounded-full text-sm mb-4 border border-secondary/20 shadow-sm">
+                مكتبة المنبر
+            </span>
+<h1 class="text-4xl md:text-5xl font-bold text-primary dark:text-white mb-4">الخطب المنبرية</h1>
+<p class="text-subtext-light dark:text-subtext-dark max-w-2xl mx-auto text-lg leading-relaxed">
+                مجموعة متكاملة من خطب الجمعة والأعياد والمناسبات الدينية، مرتبة ومؤرشفة للرجوع إليها في أي وقت.
+            </p>
+</div>
+</section>
+<main class="max-w-7xl mx-auto px-6 py-12">
+<div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-gray-100 dark:border-gray-700">
+<div class="flex items-center gap-2 w-full md:w-auto">
+<span class="material-icons-outlined text-primary dark:text-secondary">filter_list</span>
+<span class="font-bold text-text-light dark:text-text-dark">تصفية الخطب:</span>
+</div>
+<div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+<div class="relative group">
+<select class="appearance-none bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-text-light dark:text-text-dark py-2 pr-10 pl-8 rounded-lg focus:outline-none focus:border-primary cursor-pointer min-w-[150px]">
+<option>أحدث الخطب</option>
+<option>الأقدم</option>
+<option>الأكثر مشاهدة</option>
+</select>
+<span class="material-icons-outlined absolute right-3 top-2.5 text-gray-400 pointer-events-none text-sm">calendar_today</span>
+</div>
+<div class="relative group">
+<select class="appearance-none bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-text-light dark:text-text-dark py-2 pr-10 pl-8 rounded-lg focus:outline-none focus:border-primary cursor-pointer min-w-[150px]">
+<option>جميع الموضوعات</option>
+<option>العقيدة</option>
+<option>الفقه</option>
+<option>التزكية</option>
+<option>السيرة</option>
+</select>
+<span class="material-icons-outlined absolute right-3 top-2.5 text-gray-400 pointer-events-none text-sm">category</span>
+</div>
+<div class="relative group">
+<select class="appearance-none bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-text-light dark:text-text-dark py-2 pr-10 pl-8 rounded-lg focus:outline-none focus:border-primary cursor-pointer min-w-[120px]">
+<option>1445 هـ</option>
+<option>1444 هـ</option>
+<option>1443 هـ</option>
+</select>
+<span class="material-icons-outlined absolute right-3 top-2.5 text-gray-400 pointer-events-none text-sm">history</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<article class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full group">
+<div class="relative h-48 bg-primary/5 dark:bg-primary/20 rounded-t-xl overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80')] bg-cover bg-center opacity-10 group-hover:opacity-15 transition-opacity"></div>
+<span class="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">mic</span>
+<div class="absolute top-4 left-4 bg-white dark:bg-card-dark text-xs font-bold px-2 py-1 rounded shadow-sm text-subtext-light dark:text-subtext-dark">
+                        12 محرم 1445
+                    </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
+<span class="material-icons-outlined text-sm">label</span>
+<span>فقه المعاملات</span>
+</div>
+<h3 class="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
+                        أهمية الصدق في المعاملات التجارية و أثره على المجتمع
+                    </h3>
+<p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed mb-6 line-clamp-3">
+                        الصدق هو أساس البركة في التجارة، وكيف حث الإسلام التاجر المسلم على التحلي بالأمانة وتجنب الغش والتدليس في البيع والشراء.
+                    </p>
+<div class="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+<a class="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" href="#">
+<span class="material-icons-outlined text-sm">visibility</span>
+                            اقرأ الخطبة
+                        </a>
+<button class="text-primary dark:text-white hover:text-secondary dark:hover:text-secondary p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-secondary transition" title="تحميل PDF">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+</button>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full group">
+<div class="relative h-48 bg-primary/5 dark:bg-primary/20 rounded-t-xl overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596483756353-b4507567793d?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80')] bg-cover bg-center opacity-10 group-hover:opacity-15 transition-opacity"></div>
+<span class="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">mic</span>
+<div class="absolute top-4 left-4 bg-white dark:bg-card-dark text-xs font-bold px-2 py-1 rounded shadow-sm text-subtext-light dark:text-subtext-dark">
+                        5 محرم 1445
+                    </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
+<span class="material-icons-outlined text-sm">label</span>
+<span>العبادات</span>
+</div>
+<h3 class="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
+                        فضل صيام الأيام البيض والحث على المداومة
+                    </h3>
+<p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed mb-6 line-clamp-3">
+                        الأحكام الفقهية والفوائد الروحية والصحية للمداومة على صيام الأيام البيض من كل شهر هجري، وفضل اتباع السنة النبوية.
+                    </p>
+<div class="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+<a class="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" href="#">
+<span class="material-icons-outlined text-sm">visibility</span>
+                            اقرأ الخطبة
+                        </a>
+<button class="text-primary dark:text-white hover:text-secondary dark:hover:text-secondary p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-secondary transition" title="تحميل PDF">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+</button>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full group">
+<div class="relative h-48 bg-primary/5 dark:bg-primary/20 rounded-t-xl overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596483756353-b4507567793d?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80')] bg-cover bg-center opacity-10 group-hover:opacity-15 transition-opacity"></div>
+<span class="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">mic</span>
+<div class="absolute top-4 left-4 bg-white dark:bg-card-dark text-xs font-bold px-2 py-1 rounded shadow-sm text-subtext-light dark:text-subtext-dark">
+                        28 ذو الحجة 1444
+                    </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
+<span class="material-icons-outlined text-sm">label</span>
+<span>السيرة النبوية</span>
+</div>
+<h3 class="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
+                        دروس مستفادة من الهجرة النبوية الشريفة
+                    </h3>
+<p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed mb-6 line-clamp-3">
+                        وقفات تأملية في حادثة الهجرة النبوية الشريفة وكيف نطبق معانيها في واقعنا المعاصر، من التوكل والأخذ بالأسباب.
+                    </p>
+<div class="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+<a class="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" href="#">
+<span class="material-icons-outlined text-sm">visibility</span>
+                            اقرأ الخطبة
+                        </a>
+<button class="text-primary dark:text-white hover:text-secondary dark:hover:text-secondary p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-secondary transition" title="تحميل PDF">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+</button>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full group">
+<div class="relative h-48 bg-primary/5 dark:bg-primary/20 rounded-t-xl overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80')] bg-cover bg-center opacity-10 group-hover:opacity-15 transition-opacity"></div>
+<span class="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">mic</span>
+<div class="absolute top-4 left-4 bg-white dark:bg-card-dark text-xs font-bold px-2 py-1 rounded shadow-sm text-subtext-light dark:text-subtext-dark">
+                        20 ذو الحجة 1444
+                    </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
+<span class="material-icons-outlined text-sm">label</span>
+<span>أخلاق</span>
+</div>
+<h3 class="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
+                        الاستقامة بعد رمضان ومواسم الطاعات
+                    </h3>
+<p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed mb-6 line-clamp-3">
+                         أهمية الثبات على الطاعة بعد انتهاء مواسم الخير، وعلامات قبول العمل الصالح، وكيف يتجنب المسلم الفتور في العبادة.
+                    </p>
+<div class="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+<a class="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" href="#">
+<span class="material-icons-outlined text-sm">visibility</span>
+                            اقرأ الخطبة
+                        </a>
+<button class="text-primary dark:text-white hover:text-secondary dark:hover:text-secondary p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-secondary transition" title="تحميل PDF">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+</button>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full group">
+<div class="relative h-48 bg-primary/5 dark:bg-primary/20 rounded-t-xl overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596483756353-b4507567793d?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80')] bg-cover bg-center opacity-10 group-hover:opacity-15 transition-opacity"></div>
+<span class="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">mic</span>
+<div class="absolute top-4 left-4 bg-white dark:bg-card-dark text-xs font-bold px-2 py-1 rounded shadow-sm text-subtext-light dark:text-subtext-dark">
+                        15 ذو القعدة 1444
+                    </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
+<span class="material-icons-outlined text-sm">label</span>
+<span>تفسير</span>
+</div>
+<h3 class="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
+                        تأملات في خواتيم سورة البقرة
+                    </h3>
+<p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed mb-6 line-clamp-3">
+                        وقفة مع الآيات الأخيرة من سورة البقرة، وفضل قراءتها، وما تضمنته من دعاء للمؤمنين وطلب المغفرة والرحمة.
+                    </p>
+<div class="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+<a class="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" href="#">
+<span class="material-icons-outlined text-sm">visibility</span>
+                            اقرأ الخطبة
+                        </a>
+<button class="text-primary dark:text-white hover:text-secondary dark:hover:text-secondary p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-secondary transition" title="تحميل PDF">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+</button>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full group">
+<div class="relative h-48 bg-primary/5 dark:bg-primary/20 rounded-t-xl overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80')] bg-cover bg-center opacity-10 group-hover:opacity-15 transition-opacity"></div>
+<span class="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">mic</span>
+<div class="absolute top-4 left-4 bg-white dark:bg-card-dark text-xs font-bold px-2 py-1 rounded shadow-sm text-subtext-light dark:text-subtext-dark">
+                        5 ذو القعدة 1444
+                    </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
+<span class="material-icons-outlined text-sm">label</span>
+<span>العقيدة</span>
+</div>
+<h3 class="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
+                        الإيمان بالقضاء والقدر وآثاره
+                    </h3>
+<p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed mb-6 line-clamp-3">
+                        مفهوم القضاء والقدر في الإسلام، وكيف يبعث الطمأنينة في قلب المؤمن، والفرق بين التواكل والتوكل.
+                    </p>
+<div class="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+<a class="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" href="#">
+<span class="material-icons-outlined text-sm">visibility</span>
+                            اقرأ الخطبة
+                        </a>
+<button class="text-primary dark:text-white hover:text-secondary dark:hover:text-secondary p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-secondary transition" title="تحميل PDF">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<div class="mt-12 flex items-center justify-center gap-2">
+<button class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-primary hover:text-white dark:text-text-dark transition">
+<span class="material-icons-outlined text-lg">chevron_right</span>
+</button>
+<button class="w-10 h-10 rounded-lg bg-primary text-white font-bold flex items-center justify-center shadow-lg shadow-primary/30">1</button>
+<button class="w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark font-medium transition flex items-center justify-center">2</button>
+<button class="w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark font-medium transition flex items-center justify-center">3</button>
+<span class="text-gray-400 dark:text-gray-600">...</span>
+<button class="w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark font-medium transition flex items-center justify-center">12</button>
+<button class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-primary hover:text-white dark:text-text-dark transition">
+<span class="material-icons-outlined text-lg">chevron_left</span>
+</button>
+</div>
+</main>
+<footer class="bg-card-light dark:bg-card-dark border-t border-gray-200 dark:border-gray-800 pt-16 pb-8">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="text-primary text-3xl">
+<span class="material-icons-outlined">mosque</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-lg text-primary dark:text-white leading-tight">الشيخ السيد مراد</span>
+<span class="text-xs text-subtext-light dark:text-subtext-dark">عالم أزهري</span>
+</div>
+</div>
+<p class="text-sm text-subtext-light dark:text-subtext-dark leading-relaxed">
+                    علم نافع للقلب السليم، ومنهج وسطي قويم يجمع بين الأصالة والمعاصرة. الموقع الرسمي لفضيلة الشيخ السيد مراد.
+                </p>
+<div class="flex gap-4 mt-2">
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary transition" href="#"><span class="material-icons-outlined">facebook</span></a>
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary transition" href="#"><span class="material-icons-outlined">smart_display</span></a>
+<a class="text-subtext-light dark:text-subtext-dark hover:text-primary transition" href="#"><span class="material-icons-outlined">alternate_email</span></a>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-primary dark:text-white mb-6">روابط سريعة</h4>
+<ul class="space-y-3 text-sm text-subtext-light dark:text-subtext-dark">
+<li><a class="hover:text-primary transition" href="#">عن الشيخ</a></li>
+<li><a class="hover:text-primary transition" href="#">اتصل بنا</a></li>
+<li><a class="hover:text-primary transition" href="#">سياسة الخصوصية</a></li>
+<li><a class="hover:text-primary transition" href="#">الشروط والأحكام</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-primary dark:text-white mb-6">أقسام المحتوى</h4>
+<ul class="space-y-3 text-sm text-subtext-light dark:text-subtext-dark">
+<li><a class="hover:text-primary transition" href="#">أحدث الفتاوى</a></li>
+<li><a class="hover:text-primary transition" href="#">البث المباشر</a></li>
+<li><a class="hover:text-primary transition" href="#">المجتمع</a></li>
+<li><a class="hover:text-primary transition" href="#">المشاريع الدعوية</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-primary dark:text-white mb-6">إبق على تواصل</h4>
+<p class="text-sm text-subtext-light dark:text-subtext-dark mb-4">
+                    اشترك في القائمة البريدية لاستقبال الدروس والمقالات الجديدة مباشرة.
+                </p>
+<form class="space-y-3">
+<input class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary text-text-light dark:text-text-dark" placeholder="البريد الإلكتروني" type="email"/>
+<button class="w-full bg-primary hover:bg-primary-hover text-white py-2 rounded-lg text-sm font-bold transition">
+                        اشترك الآن
+                    </button>
+</form>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-6 pt-8 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between text-xs text-subtext-light dark:text-subtext-dark">
+<p>© 2024 الشيخ السيد مراد سلامة. جميع الحقوق محفوظة.</p>
+<p class="flex items-center gap-1 mt-2 md:mt-0">
+                صمم بإتقان ومحبة <span class="text-red-500 material-icons-outlined text-xs">favorite</span>
+</p>
+</div>
+</footer>
+
+</body></html>
