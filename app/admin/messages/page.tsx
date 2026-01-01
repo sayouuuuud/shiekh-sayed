@@ -106,7 +106,7 @@ export default function AdminMessagesPage() {
           </div>
         </div>
         <div className="bg-card p-5 rounded-xl border border-border flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600">
+          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600">
             <span className="material-icons-outlined">mark_email_read</span>
           </div>
           <div>

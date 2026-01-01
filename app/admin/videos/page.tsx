@@ -380,12 +380,12 @@ export default function ManageVideosPage() {
           </div>
         </div>
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
             <Eye className="h-7 w-7" />
           </div>
           <div>
             <p className="text-sm text-text-muted">المنشورة</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">
+            <p className="text-2xl font-bold text-red-600 mt-1">
               {items.filter((i) => i.publish_status === "published").length}
             </p>
           </div>
@@ -468,7 +468,7 @@ export default function ManageVideosPage() {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold ${
                           item.publish_status === "published"
-                            ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                            ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
                             : "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
                         }`}
                       >
