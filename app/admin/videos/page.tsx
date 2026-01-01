@@ -52,6 +52,32 @@ export default function ManageVideosPage() {
 
   const supabase = createClient()
 
+  // Auto-focus effect for add modal
+  useEffect(() => {
+    if (isAddModalOpen) {
+      const firstInput = document.querySelector('.modal-input') as HTMLInputElement
+      if (firstInput) {
+        setTimeout(() => {
+          firstInput.focus()
+          firstInput.select()
+        }, 100)
+      }
+    }
+  }, [isAddModalOpen])
+
+  // Auto-focus effect for edit modal
+  useEffect(() => {
+    if (isEditModalOpen) {
+      const firstInput = document.querySelector('.modal-input') as HTMLInputElement
+      if (firstInput) {
+        setTimeout(() => {
+          firstInput.focus()
+          firstInput.select()
+        }, 100)
+      }
+    }
+  }, [isEditModalOpen])
+
   const fetchItems = async () => {
     setLoading(true)
     const start = (currentPage - 1) * ITEMS_PER_PAGE
@@ -162,7 +188,7 @@ export default function ManageVideosPage() {
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           placeholder="عنوان الفيديو"
-          className="bg-muted dark:bg-background-alt"
+          className="bg-muted dark:bg-background-alt modal-input"
           required
         />
       </div>
@@ -183,7 +209,7 @@ export default function ManageVideosPage() {
             value={formData.media_type}
             onValueChange={(value) => setFormData({ ...formData, media_type: value })}
           >
-            <SelectTrigger className="bg-muted dark:bg-background-alt">
+            <SelectTrigger className="bg-muted dark:bg-background-alt modal-input">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -198,7 +224,7 @@ export default function ManageVideosPage() {
             value={formData.media_source}
             onValueChange={(value) => setFormData({ ...formData, media_source: value })}
           >
-            <SelectTrigger className="bg-muted dark:bg-background-alt">
+            <SelectTrigger className="bg-muted dark:bg-background-alt modal-input">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -224,7 +250,7 @@ export default function ManageVideosPage() {
             value={formData.media_path_or_url}
             onChange={(e) => setFormData({ ...formData, media_path_or_url: e.target.value })}
             placeholder="https://youtube.com/watch?v=..."
-            className="bg-muted dark:bg-background-alt"
+            className="bg-muted dark:bg-background-alt modal-input"
             dir="ltr"
             required
           />
@@ -246,7 +272,7 @@ export default function ManageVideosPage() {
             value={formData.publish_status}
             onValueChange={(value) => setFormData({ ...formData, publish_status: value })}
           >
-            <SelectTrigger className="bg-muted dark:bg-background-alt">
+            <SelectTrigger className="bg-muted dark:bg-background-alt modal-input">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
