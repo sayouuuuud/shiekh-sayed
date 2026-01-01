@@ -1,0 +1,11 @@
+<div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
+  <div className="w-14 h-14 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
+    <Eye className="h-7 w-7" />
+  </div>
+  <div>
+    <p className="text-sm text-text-muted">المنشورة</p>
+    <p className="text-2xl font-bold text-green-600 mt-1">
+      {items.filter((i) => i.publish_status === "published").length}
+    </p>
+  </div>
+</div>
