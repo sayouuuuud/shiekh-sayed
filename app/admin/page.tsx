@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { ViewsChart } from "@/components/admin/views-chart"
 
 const quickActions = [
   { label: "إضافة خطبة", href: "/admin/khutba", icon: "add_circle", color: "text-blue-500" },
@@ -21,6 +22,7 @@ export default async function AdminDashboard() {
     { data: recentSermons },
     { data: recentLessons },
     { data: recentArticles },
+    { data: analyticsData },
   ] = await Promise.all([
     supabase.from("sermons").select("*", { count: "exact", head: true }),
     supabase.from("lessons").select("*", { count: "exact", head: true }),
@@ -42,6 +44,11 @@ export default async function AdminDashboard() {
       .select("id, title, publish_status, created_at")
       .order("created_at", { ascending: false })
       .limit(2),
+    supabase
+      .from("site_analytics")
+      .select("*")
+      .gte("date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0])
+      .order("date", { ascending: true }),
   ])
 
   const stats = [
@@ -133,6 +140,9 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
+      {/* Views Chart */}
+      <ViewsChart data={analyticsData || []} />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Items */}
         <div className="lg:col-span-2 bg-surface dark:bg-card rounded-xl border border-border dark:border-border">
@@ -185,6 +195,8 @@ export default async function AdminDashboard() {
                 { label: "إدارة الكتب", href: "/admin/books", icon: "menu_book" },
                 { label: "إدارة الفيديوهات", href: "/admin/media", icon: "videocam" },
                 { label: "إعدادات الموقع", href: "/admin/settings", icon: "settings" },
+                { label: "الملف الشخصي", href: "/admin/profile", icon: "person" },
+                { label: "المظهر والألوان", href: "/admin/appearance", icon: "palette" },
               ].map((link) => (
                 <Link
                   key={link.href}

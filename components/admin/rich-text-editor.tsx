@@ -5,10 +5,10 @@ import StarterKit from "@tiptap/starter-kit"
 import Underline from "@tiptap/extension-underline"
 import TextAlign from "@tiptap/extension-text-align"
 import Link from "@tiptap/extension-link"
-import TextStyle from "@tiptap/extension-text-style"
+import { TextStyle } from "@tiptap/extension-text-style"
+import { Color } from "@tiptap/extension-color"
 import { Button } from "@/components/ui/button"
 import { useEffect } from "react"
-import { AlignLeft, AlignCenter, AlignRight } from "lucide-react"
 
 interface RichTextEditorProps {
   content: string
@@ -18,6 +18,7 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
   const editor = useEditor({
+      immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
@@ -32,6 +33,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         openOnClick: false,
       }),
       TextStyle,
+      Color,
     ],
     content: content,
     onUpdate: ({ editor }) => {
@@ -141,7 +143,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           variant={editor.isActive({ textAlign: "right" }) ? "default" : "ghost"}
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
         >
-          <AlignRight className="w-4 h-4" />
+          <span className="material-icons-outlined text-sm">format_align_right</span>
         </Button>
         <Button
           type="button"
@@ -149,7 +151,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           variant={editor.isActive({ textAlign: "center" }) ? "default" : "ghost"}
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
         >
-          <AlignCenter className="w-4 h-4" />
+          <span className="material-icons-outlined text-sm">format_align_center</span>
         </Button>
         <Button
           type="button"
@@ -157,7 +159,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           variant={editor.isActive({ textAlign: "left" }) ? "default" : "ghost"}
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
         >
-          <AlignLeft className="w-4 h-4" />
+          <span className="material-icons-outlined text-sm">format_align_left</span>
         </Button>
       </div>
 

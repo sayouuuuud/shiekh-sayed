@@ -9,6 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { NotificationBell } from "@/components/admin/notification-bell"
 
 const pageTitles: Record<string, string> = {
   "/admin": "لوحة التحكم",
@@ -23,7 +25,14 @@ const pageTitles: Record<string, string> = {
   "/admin/messages": "الرسائل",
   "/admin/settings": "الإعدادات",
   "/admin/about": "صفحة عن الشيخ",
-  "/admin/hero": "إدارة القسم الرئيسي", // Added hero page title
+  "/admin/hero": "إدارة القسم الرئيسي",
+  "/admin/schedule": "جدول الدروس",
+  "/admin/navbar": "القائمة العلوية",
+  "/admin/notifications": "الإشعارات",
+  "/admin/appearance": "المظهر",
+  "/admin/security": "الأمان",
+  "/admin/contact-form": "نموذج التواصل",
+  "/admin/profile": "الملف الشخصي",
 }
 
 export function AdminHeader({ user }: { user: any }) {
@@ -39,7 +48,7 @@ export function AdminHeader({ user }: { user: any }) {
   }
 
   return (
-    <header className="h-16 bg-surface dark:bg-card border-b border-border dark:border-border px-6 flex items-center justify-between sticky top-0 z-30">
+    <header className="sticky top-0 z-50 w-full border-b bg-background h-16 px-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
         {/* Mobile Menu Toggle */}
         <button className="lg:hidden text-foreground dark:text-foreground">
@@ -48,9 +57,9 @@ export function AdminHeader({ user }: { user: any }) {
         <h1 className="text-xl font-bold text-foreground dark:text-white">{title}</h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {/* Search */}
-        <div className="hidden md:flex items-center gap-2 bg-background dark:bg-background-alt rounded-lg px-3 py-2 border border-border dark:border-border">
+        <div className="hidden md:flex items-center gap-2 bg-muted dark:bg-background-alt rounded-lg px-3 py-2 border border-border dark:border-border">
           <span className="material-icons-outlined text-text-muted text-lg">search</span>
           <input
             type="text"
@@ -59,11 +68,9 @@ export function AdminHeader({ user }: { user: any }) {
           />
         </div>
 
-        {/* Notifications */}
-        <button className="relative p-2 text-text-muted dark:text-text-subtext hover:text-foreground dark:hover:text-white transition-colors">
-          <span className="material-icons-outlined">notifications</span>
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+        <ThemeToggle />
+
+        <NotificationBell />
 
         {/* User Menu with Dropdown */}
         <DropdownMenu>
@@ -85,6 +92,12 @@ export function AdminHeader({ user }: { user: any }) {
               <p className="text-xs text-text-muted">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a href="/admin/profile" className="flex items-center gap-2 cursor-pointer">
+                <span className="material-icons-outlined text-lg">person</span>
+                <span>الملف الشخصي</span>
+              </a>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
                 <span className="material-icons-outlined text-lg">settings</span>

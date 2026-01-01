@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { AudioPlayer } from "@/components/audio-player"
 import { ShareButtons } from "@/components/share-buttons"
 import { PrintButton } from "@/components/print-button"
+import { ExportPDFButton } from "@/components/export-pdf-button"
 
 async function getSermon(id: string) {
   const supabase = await createClient()
@@ -14,6 +15,7 @@ async function getSermon(id: string) {
     .select("*, category:categories(name)")
     .eq("id", id)
     .eq("publish_status", "published")
+    .eq("is_active", true)
     .single()
 
   if (!sermon) return null
@@ -29,11 +31,36 @@ async function getSermon(id: string) {
     .from("sermons")
     .select("id, title, created_at")
     .eq("publish_status", "published")
+    .eq("is_active", true)
     .neq("id", id)
     .order("created_at", { ascending: false })
     .limit(3)
 
   return { sermon, relatedSermons: relatedSermons || [] }
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = await createClient()
+
+  const { data: sermon } = await supabase.from("sermons").select("title, content").eq("id", id).single()
+
+  if (!sermon) {
+    return {
+      title: "خطبة غير موجودة",
+    }
+  }
+
+  const description = sermon.content?.replace(/<[^>]*>/g, "").substring(0, 160) || ""
+
+  return {
+    title: sermon.title,
+    description,
+    openGraph: {
+      title: sermon.title,
+      description,
+    },
+  }
 }
 
 export default async function KhutbaDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -43,6 +70,14 @@ export default async function KhutbaDetailPage({ params }: { params: Promise<{ i
   if (!data) notFound()
 
   const { sermon, relatedSermons } = data
+
+  // Parse content for PDF export
+  const plainContent = sermon.content?.replace(/<[^>]*>/g, "") || ""
+
+  const getYouTubeId = (url: string) => {
+    const match = url?.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\n?#]+)/)
+    return match ? match[1] : null
+  }
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-screen">
@@ -94,15 +129,35 @@ export default async function KhutbaDetailPage({ params }: { params: Promise<{ i
                 {sermon.title}
               </h1>
 
-              {sermon.audio_file_path && (
+              {sermon.media_source === "youtube" && sermon.youtube_url && (
+                <div className="mb-6 aspect-video rounded-xl overflow-hidden">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYouTubeId(sermon.youtube_url)}`}
+                    className="w-full h-full"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  />
+                </div>
+              )}
+
+              {(sermon.media_source === "local" || !sermon.media_source) && sermon.audio_file_path && (
                 <div className="mb-6">
                   <AudioPlayer src={sermon.audio_file_path} title="استمع للخطبة" />
+                  <a
+                    href={sermon.audio_file_path}
+                    download
+                    className="inline-flex items-center gap-2 mt-3 text-sm text-primary hover:underline"
+                  >
+                    <span className="material-icons-outlined text-base">download</span>
+                    تحميل الملف الصوتي
+                  </a>
                 </div>
               )}
 
               <div className="flex flex-wrap items-center gap-4 pt-6 border-t border-border dark:border-border">
                 <ShareButtons title={sermon.title} />
                 <PrintButton title={sermon.title} content={sermon.content} />
+                <ExportPDFButton title={sermon.title} content={plainContent} type="sermon" />
               </div>
             </div>
           </div>

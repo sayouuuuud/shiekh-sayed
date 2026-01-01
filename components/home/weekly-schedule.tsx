@@ -7,7 +7,7 @@ interface ScheduleItem {
   title: string
   description: string | null
   is_active: boolean
-  display_order: number
+  sort_order: number
 }
 
 interface WeeklyScheduleProps {
@@ -19,46 +19,58 @@ export function WeeklySchedule({ schedule }: WeeklyScheduleProps) {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-300 p-2 rounded-full">
-            <span className="material-icons-outlined">calendar_today</span>
+          <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-300 p-2.5 rounded-xl shadow-sm">
+            <span className="material-icons-outlined text-xl">calendar_today</span>
           </span>
-          <h3 className="text-2xl font-bold font-serif dark:text-white">جدول الدروس الأسبوعية</h3>
+          <h3 className="text-2xl font-bold font-serif text-foreground dark:text-white">جدول الدروس الأسبوعية</h3>
         </div>
-        <span className="text-xs text-text-muted bg-background dark:bg-background-alt px-2 py-1 rounded">
+        <span className="text-xs text-text-muted bg-muted dark:bg-background-alt px-3 py-1.5 rounded-full flex items-center gap-1">
+          <span className="material-icons-outlined text-xs">schedule</span>
           بتوقيت القاهرة
         </span>
       </div>
 
-      <div className="bg-background dark:bg-background-alt rounded-xl p-6 border border-border dark:border-border space-y-6">
+      <div className="bg-surface dark:bg-background-alt rounded-2xl p-6 border border-border shadow-sm space-y-5">
         {schedule.length === 0 ? (
-          <p className="text-text-muted dark:text-text-subtext text-center py-8">لا يوجد جدول حالياً</p>
+          <div className="text-center py-12">
+            <span className="material-icons-outlined text-5xl text-text-muted mb-4">event_busy</span>
+            <p className="text-text-muted dark:text-text-subtext">لا يوجد جدول حالياً</p>
+          </div>
         ) : (
           schedule.map((item, index) => (
             <div key={item.id}>
-              {index > 0 && <div className="border-t border-border dark:border-border mb-6" />}
-              <div className="flex items-start gap-4">
-                <div className="bg-surface dark:bg-card border border-border rounded-lg p-2 text-center min-w-[70px] shadow-sm">
-                  <span className="block text-xs text-text-muted">{item.day_name}</span>
-                  <span className="block text-lg font-bold text-primary">{item.time_text}</span>
+              {index > 0 && <div className="border-t border-border mb-5" />}
+              <div className="flex items-start gap-4 group">
+                <div className="bg-card border border-border rounded-xl p-3 text-center min-w-[80px] shadow-sm group-hover:border-primary/30 transition-colors">
+                  <span className="block text-xs text-text-muted font-medium">{item.day_name}</span>
+                  <span className="block text-xl font-bold text-primary mt-1">{item.time_text}</span>
                 </div>
-                <div>
-                  <h4 className="font-bold text-lg dark:text-white">{item.title}</h4>
+                <div className="flex-1">
+                  <h4 className="font-bold text-lg text-foreground dark:text-white group-hover:text-primary dark:group-hover:text-secondary transition-colors">
+                    {item.title}
+                  </h4>
                   {item.description && (
-                    <p className="text-sm text-text-muted dark:text-text-subtext mt-1">{item.description}</p>
+                    <p className="text-sm text-text-muted dark:text-text-subtext mt-1 line-clamp-2">
+                      {item.description}
+                    </p>
                   )}
+                </div>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="material-icons-outlined text-primary text-sm">arrow_back</span>
                 </div>
               </div>
             </div>
           ))
         )}
 
-        <div className="mt-4 pt-4 border-t border-border dark:border-border text-center">
+        <div className="pt-4 border-t border-border">
           <Link
             href="/schedule"
-            className="text-sm text-text-muted hover:text-primary flex items-center justify-center gap-2"
+            className="flex items-center justify-center gap-2 text-sm text-text-muted hover:text-primary dark:hover:text-secondary transition-colors py-2 rounded-lg hover:bg-muted"
           >
             <span className="material-icons-outlined text-sm">calendar_month</span>
             عرض الجدول الشهري الكامل
+            <span className="material-icons-outlined text-sm rtl-flip">arrow_back</span>
           </Link>
         </div>
       </div>

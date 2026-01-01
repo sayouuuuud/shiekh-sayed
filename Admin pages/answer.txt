@@ -1,0 +1,1101 @@
+# V0 - CRITICAL FIXES & COMPLETE IMPLEMENTATION
+## Local Storage Strategy - Comprehensive Prompt
+
+---
+
+## ⚠️ CRITICAL INSTRUCTION
+Work on ONE section at a time. Complete it 100% and TEST before moving to the next section.
+DO NOT skip any section. DO NOT use mock data. EVERYTHING must connect to Supabase database.
+
+---
+
+## 📁 FILE STORAGE STRATEGY (LOCAL)
+
+All media files will be stored locally in the `/public` folder structure:
+
+```
+/public
+  /images
+    /sermons
+    /lessons
+    /articles
+    /books
+    /sheikh
+    /logos
+  /audio
+    /sermons
+    /lessons
+  /videos
+    (optional - prefer YouTube links)
+  /pdfs
+    /books
+```
+
+**IMPORTANT**: 
+- Admin uploads files to `/public` folders MANUALLY (outside the application)
+- Admin panel forms ONLY accept file PATHS (e.g., `/images/sermons/sermon1.jpg`)
+- NO file upload UI components
+- All file inputs are TEXT inputs for file paths
+- Database stores PATHS only, not files
+
+---
+
+## 🔴 SECTION 1: FIX UPLOAD ERRORS (HIGHEST PRIORITY)
+
+### Problem
+Getting "Bucket not found" error because code tries to upload to Supabase Storage.
+
+### Solution
+**REMOVE ALL Supabase Storage upload code completely.**
+
+Replace all upload functions with simple path input fields:
+
+```typescript
+// lib/storage.ts - DELETE THIS FILE ENTIRELY
+// Remove all imports of this file from all components
+
+// In all admin forms, replace file upload components with:
+<div>
+  <Label>صورة الغلاف</Label>
+  <Input
+    type="text"
+    placeholder="/images/sermons/sermon1.jpg"
+    value={thumbnailPath}
+    onChange={(e) => setThumbnailPath(e.target.value)}
+  />
+  <p className="text-xs text-muted-foreground mt-1">
+    ارفع الصورة يدوياً إلى /public/images/sermons/ ثم اكتب المسار هنا
+  </p>
+</div>
+```
+
+Apply this pattern to ALL file inputs:
+- Sermon thumbnails & audio
+- Lesson thumbnails & audio/video
+- Article images
+- Book covers & PDFs
+- Sheikh photo
+- Site logo
+
+---
+
+## 🎨 SECTION 2: IMPLEMENT PROPER DARK MODE
+
+### Current Problem
+Dark mode is broken/random.
+
+### Solution - Complete Dark Mode Implementation
+
+**Step 1: Create Theme Provider with System Default**
+
+```typescript
+// components/theme-provider.tsx
+"use client"
+
+import * as React from "react"
+import { ThemeProvider as NextThemesProvider } from "next-themes"
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange={false}
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  )
+}
+```
+
+**Step 2: Create Theme Toggle Component**
+
+```typescript
+// components/theme-toggle.tsx
+"use client"
+
+import * as React from "react"
+import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import { Button } from "@/components/ui/button"
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return <Button variant="ghost" size="icon"><Sun className="h-5 w-5" /></Button>
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+    >
+      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
+  )
+}
+```
+
+**Step 3: Add to Navbar (Public)**
+
+```tsx
+// In components/navbar.tsx or header component
+import { ThemeToggle } from "@/components/theme-toggle"
+
+// Add next to search button:
+<ThemeToggle />
+```
+
+**Step 4: Add to Admin Header**
+
+```tsx
+// In admin layout header
+import { ThemeToggle } from "@/components/theme-toggle"
+
+// Add next to notifications bell:
+<ThemeToggle />
+<Button variant="ghost" size="icon">
+  <Bell className="h-5 w-5" />
+</Button>
+```
+
+**Step 5: Update Tailwind Config**
+
+```javascript
+// tailwind.config.ts
+module.exports = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: "#1c5b45",
+          dark: "#2d8659"
+        },
+        // ... rest of colors
+      }
+    }
+  }
+}
+```
+
+---
+
+## 📄 SECTION 3: CREATE /SCHEDULE PAGE
+
+Implement EXACTLY as in `date.html` with database connection.
+
+### Database Schema
+```sql
+-- Add to Supabase
+CREATE TABLE schedule_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  description TEXT,
+  event_type TEXT NOT NULL CHECK (event_type IN ('fiqh', 'seerah', 'friday', 'aqeedah')),
+  event_date DATE NOT NULL,
+  event_time TIME,
+  location TEXT,
+  is_live BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Create Page
+
+```tsx
+// app/schedule/page.tsx
+import { createServerComponentClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export default async function SchedulePage() {
+  const supabase = createServerComponentClient({ cookies })
+  
+  const { data: events } = await supabase
+    .from('schedule_events')
+    .select('*')
+    .order('event_date', { ascending: true })
+
+  // Implement EXACT design from date.html
+  // Calendar grid with events from database
+  // Color coding by event_type
+  
+  return (
+    <div>
+      {/* Copy exact HTML structure from date.html */}
+      {/* Replace hardcoded events with {events.map(...)} */}
+    </div>
+  )
+}
+```
+
+**Admin Panel - Add Schedule Management**
+
+```tsx
+// app/admin/schedule/page.tsx
+// Full CRUD for schedule_events table
+// Form with: title, description, event_type dropdown, date picker, time, location, is_live toggle
+```
+
+---
+
+## 📚 SECTION 4: CREATE /LESSONS (DARS) PAGE
+
+Implement EXACTLY as in `dars.html` with THREE sections:
+
+### Database Changes
+
+```sql
+-- Add lesson_type to lessons table
+ALTER TABLE lessons ADD COLUMN lesson_type TEXT CHECK (lesson_type IN ('fiqh', 'seerah', 'general'));
+
+-- Add is_archive field
+ALTER TABLE lessons ADD COLUMN is_archived BOOLEAN DEFAULT false;
+```
+
+### Page Structure
+
+```tsx
+// app/lessons/page.tsx
+
+export default async function LessonsPage() {
+  const supabase = createServerComponentClient({ cookies })
+  
+  // Get Fiqh lessons (audio only)
+  const { data: fiqhLessons } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('lesson_type', 'fiqh')
+    .eq('type', 'audio')
+    .eq('publish_status', 'published')
+    .eq('is_archived', false)
+    .order('created_at', { ascending: false })
+    .limit(3)
+
+  // Get Seerah lessons (audio only)
+  const { data: seerahLessons } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('lesson_type', 'seerah')
+    .eq('type', 'audio')
+    .eq('publish_status', 'published')
+    .eq('is_archived', false)
+    .order('created_at', { ascending: false })
+    .limit(1) // Featured one + list of previous
+
+  // Get General lessons (audio or video)
+  const { data: generalLessons } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('lesson_type', 'general')
+    .eq('publish_status', 'published')
+    .order('created_at', { ascending: false })
+
+  return (
+    <div>
+      {/* Section 1: Fiqh Lessons - EXACT design from dars.html */}
+      {/* Section 2: Seerah Lessons - EXACT design with live badge */}
+      {/* Section 3: Available Lessons (General) - Grid view */}
+    </div>
+  )
+}
+```
+
+**Archive Pages**
+
+```tsx
+// app/lessons/fiqh-archive/page.tsx
+// List ALL fiqh lessons
+
+// app/lessons/seerah-archive/page.tsx
+// List ALL seerah lessons
+```
+
+---
+
+## 🏠 SECTION 5: FIX HOME PAGE DATA CONNECTIONS
+
+### Problem
+Weekly schedule and latest lessons show fake data not connected to database.
+
+### Fix Weekly Schedule Section
+
+```tsx
+// app/page.tsx or components/weekly-schedule.tsx
+
+const { data: weeklyEvents } = await supabase
+  .from('schedule_events')
+  .select('*')
+  .gte('event_date', new Date().toISOString())
+  .order('event_date', { ascending: true })
+  .limit(7)
+
+// Map through weeklyEvents and display with proper day names
+```
+
+### Fix Latest Lessons Section
+
+```tsx
+const { data: latestLessons } = await supabase
+  .from('lessons')
+  .select('*')
+  .eq('publish_status', 'published')
+  .order('created_at', { ascending: false })
+  .limit(4)
+
+// Display actual lessons from database
+```
+
+**CRITICAL**: Remove ALL hardcoded/mock data arrays. Only show data from Supabase.
+
+---
+
+## 🎯 SECTION 6: FIX HERO SECTION - HADITH STYLING
+
+### Database Schema
+
+```sql
+-- Update hero_section table
+ALTER TABLE hero_section ADD COLUMN hadith_styled_words JSONB;
+
+-- Format:
+-- {
+--   "words": [
+--     {"text": "من", "underline": false, "color": null},
+--     {"text": "كان", "underline": true, "color": "#10b981"},
+--     {"text": "يؤمن", "underline": false, "color": null}
+--   ]
+-- }
+```
+
+### Admin Interface
+
+```tsx
+// app/admin/hero/page.tsx
+
+const [hadithText, setHadithText] = useState("")
+const [styledWords, setStyledWords] = useState<Array<{text: string, underline: boolean, color: string | null}>>([])
+
+// Split hadith into words
+useEffect(() => {
+  const words = hadithText.split(' ').map(word => ({
+    text: word,
+    underline: false,
+    color: null
+  }))
+  setStyledWords(words)
+}, [hadithText])
+
+// UI to style each word
+return (
+  <div>
+    <Label>نص الحديث</Label>
+    <Textarea
+      value={hadithText}
+      onChange={(e) => setHadithText(e.target.value)}
+    />
+    
+    <div className="mt-4">
+      <Label>تنسيق الكلمات</Label>
+      <div className="flex flex-wrap gap-2">
+        {styledWords.map((word, index) => (
+          <div key={index} className="flex items-center gap-2 p-2 border rounded">
+            <span>{word.text}</span>
+            <button
+              onClick={() => {
+                const updated = [...styledWords]
+                updated[index].underline = !updated[index].underline
+                setStyledWords(updated)
+              }}
+              className={word.underline ? "text-primary font-bold" : ""}
+            >
+              خط تحت
+            </button>
+            <input
+              type="color"
+              value={word.color || "#000000"}
+              onChange={(e) => {
+                const updated = [...styledWords]
+                updated[index].color = e.target.value
+                setStyledWords(updated)
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)
+```
+
+### Display on Frontend
+
+```tsx
+// Render styled hadith
+<div className="text-2xl">
+  {styledWords.map((word, i) => (
+    <span
+      key={i}
+      className={word.underline ? "underline" : ""}
+      style={{ color: word.color || "inherit" }}
+    >
+      {word.text}{" "}
+    </span>
+  ))}
+</div>
+```
+
+---
+
+## 📱 SECTION 7: DYNAMIC NAVBAR MANAGEMENT
+
+### Database Schema
+
+```sql
+CREATE TABLE navbar_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  label TEXT NOT NULL,
+  href TEXT NOT NULL,
+  parent_id UUID REFERENCES navbar_items(id),
+  display_order INTEGER NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Sample data
+INSERT INTO navbar_items (label, href, display_order) VALUES
+('الرئيسية', '/', 1),
+('الخطب', '/sermons', 2),
+('الدروس', '/lessons', 3);
+```
+
+### Admin Interface
+
+```tsx
+// app/admin/navbar/page.tsx
+// Full CRUD with:
+// - Add/Edit/Delete items
+// - Drag & drop reordering
+// - Dropdown creation (set parent_id)
+// - Toggle active/inactive
+```
+
+### Frontend Implementation
+
+```tsx
+// components/navbar.tsx
+const { data: navItems } = await supabase
+  .from('navbar_items')
+  .select('*')
+  .is('parent_id', null)
+  .eq('is_active', true)
+  .order('display_order', { ascending: true })
+
+// For each item, get children
+const { data: childItems } = await supabase
+  .from('navbar_items')
+  .select('*')
+  .eq('parent_id', item.id)
+  .eq('is_active', true)
+  .order('display_order', { ascending: true })
+
+// Render with dropdown if has children
+```
+
+---
+
+## 📤 SECTION 8: PDF EXPORT FOR ARTICLES & SERMONS
+
+Install library:
+
+```bash
+npm install jspdf jspdf-autotable
+```
+
+### Implementation
+
+```tsx
+// components/export-pdf-button.tsx
+"use client"
+
+import { jsPDF } from "jspdf"
+import "jspdf-autotable"
+import { Download } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+// Add Arabic font support
+import "@/lib/fonts/amiri-regular" // You'll need to convert font to base64
+
+export function ExportPDFButton({ 
+  title, 
+  content, 
+  type 
+}: { 
+  title: string
+  content: string
+  type: 'sermon' | 'article'
+}) {
+  const handleExport = () => {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    })
+
+    // Set Arabic font
+    doc.setFont('Amiri-Regular')
+    doc.setFontSize(16)
+    doc.setR2L(true)
+
+    // Add title
+    doc.text(title, 105, 20, { align: 'center' })
+
+    // Add content with text wrapping
+    const splitContent = doc.splitTextToSize(content, 170)
+    doc.setFontSize(12)
+    doc.text(splitContent, 20, 40)
+
+    // Add footer
+    doc.setFontSize(10)
+    doc.text('الشيخ السيد مراد', 105, 280, { align: 'center' })
+
+    // Save
+    doc.save(`${title}.pdf`)
+  }
+
+  return (
+    <Button onClick={handleExport} variant="outline" size="sm">
+      <Download className="h-4 w-4 ml-2" />
+      تصدير PDF
+    </Button>
+  )
+}
+```
+
+Add to sermon and article detail pages.
+
+---
+
+## 👤 SECTION 9: SHEIKH PROFILE PAGE - FULL ADMIN CONTROL
+
+### Database Schema
+
+```sql
+CREATE TABLE sheikh_profile (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  title TEXT NOT NULL,
+  bio TEXT NOT NULL,
+  photo_path TEXT NOT NULL,
+  tags JSONB NOT NULL,
+  -- tags format: [
+  --   {"icon": "school", "text": "دكتوراه في الفقه المقارن"},
+  --   {"icon": "location_on", "text": "القاهرة، مصر"},
+  --   {"icon": "mic", "text": "خطيب وإمام"}
+  -- ]
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Admin Form
+
+```tsx
+// app/admin/profile/page.tsx
+
+const [tags, setTags] = useState([
+  { icon: "school", text: "" },
+  { icon: "location_on", text: "" },
+  { icon: "mic", text: "" }
+])
+
+// Form with:
+// - Name input
+// - Title input
+// - Bio rich text editor
+// - Photo path input
+// - Dynamic tags with icon picker and text input
+// - Add/remove tag buttons
+```
+
+### Frontend Display
+
+```tsx
+// app/about/page.tsx - Use data from sheikh_profile table
+```
+
+---
+
+## 📊 SECTION 10: ADMIN SIDEBAR REORGANIZATION
+
+### New Structure
+
+```tsx
+// components/admin/sidebar.tsx
+
+const sidebarSections = [
+  {
+    title: "لوحة التحكم",
+    items: [
+      { icon: Home, label: "الرئيسية", href: "/admin" }
+    ]
+  },
+  {
+    title: "إدارة المحتوى",
+    items: [
+      { icon: Mic, label: "الخطب", href: "/admin/sermons" },
+      { icon: BookOpen, label: "الدروس", href: "/admin/lessons" },
+      { icon: FileText, label: "المقالات", href: "/admin/articles" },
+      { icon: Book, label: "الكتب", href: "/admin/books" },
+      { icon: Video, label: "المرئيات", href: "/admin/media" }
+    ]
+  },
+  {
+    title: "إدارة الصفحات",
+    items: [
+      { icon: User, label: "عن الشيخ", href: "/admin/profile" },
+      { icon: Layout, label: "الصفحة الرئيسية", href: "/admin/hero" },
+      { icon: Calendar, label: "الجدول الزمني", href: "/admin/schedule" },
+      { icon: Menu, label: "القائمة العلوية", href: "/admin/navbar" },
+      { icon: Mail, label: "نموذج التواصل", href: "/admin/contact-form" }
+    ]
+  },
+  {
+    title: "الإعدادات",
+    items: [
+      { icon: Tags, label: "التصنيفات", href: "/admin/categories" },
+      { icon: MessageSquare, label: "التعليقات", href: "/admin/comments" },
+      { icon: Bell, label: "الإشعارات", href: "/admin/notifications" },
+      { icon: Search, label: "SEO", href: "/admin/seo" },
+      { icon: Palette, label: "المظهر", href: "/admin/appearance" },
+      { icon: Shield, label: "الأمان", href: "/admin/security" }
+    ]
+  }
+]
+
+// Render with section headers
+```
+
+---
+
+## 🎬 SECTION 11: SERMONS & LESSONS - MEDIA SOURCE CHOICE
+
+### Update Forms
+
+```tsx
+// app/admin/sermons/create/page.tsx
+
+const [mediaSource, setMediaSource] = useState<'youtube' | 'local'>('youtube')
+const [youtubeUrl, setYoutubeUrl] = useState('')
+const [audioPath, setAudioPath] = useState('')
+
+<div>
+  <Label>مصدر الصوت</Label>
+  <RadioGroup value={mediaSource} onValueChange={setMediaSource}>
+    <div className="flex items-center space-x-2">
+      <RadioGroupItem value="youtube" id="youtube" />
+      <Label htmlFor="youtube">رابط يوتيوب</Label>
+    </div>
+    <div className="flex items-center space-x-2">
+      <RadioGroupItem value="local" id="local" />
+      <Label htmlFor="local">ملف محلي</Label>
+    </div>
+  </RadioGroup>
+
+  {mediaSource === 'youtube' && (
+    <Input
+      placeholder="https://youtube.com/watch?v=..."
+      value={youtubeUrl}
+      onChange={(e) => setYoutubeUrl(e.target.value)}
+    />
+  )}
+
+  {mediaSource === 'local' && (
+    <Input
+      placeholder="/audio/sermons/sermon1.mp3"
+      value={audioPath}
+      onChange={(e) => setAudioPath(e.target.value)}
+    />
+  )}
+</div>
+```
+
+### Audio Player on Detail Pages
+
+```tsx
+// For local files
+<audio controls className="w-full">
+  <source src={sermon.audio_file_path} type="audio/mpeg" />
+</audio>
+
+// For YouTube
+<iframe
+  src={`https://www.youtube.com/embed/${getYouTubeId(sermon.youtube_url)}`}
+  className="w-full h-64"
+/>
+```
+
+**Add Download Button for Local Audio**
+
+```tsx
+{sermon.media_source === 'local' && (
+  <Button asChild>
+    <a href={sermon.audio_file_path} download>
+      <Download className="mr-2" /> تحميل الصوت
+    </a>
+  </Button>
+)}
+```
+
+---
+
+## 🔔 SECTION 12: NOTIFICATIONS SYSTEM
+
+### Database Schema
+
+```sql
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT CHECK (type IN ('info', 'success', 'warning', 'error')),
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Admin Page
+
+```tsx
+// app/admin/notifications/page.tsx
+// List all notifications
+// Mark as read/unread
+// Delete notifications
+```
+
+### Bell Icon with Badge
+
+```tsx
+// components/admin/notification-bell.tsx
+"use client"
+
+const { data: unreadCount } = await supabase
+  .from('notifications')
+  .select('count', { count: 'exact' })
+  .eq('is_read', false)
+
+<Button variant="ghost" size="icon" className="relative">
+  <Bell className="h-5 w-5" />
+  {unreadCount > 0 && (
+    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+      {unreadCount}
+    </span>
+  )}
+</Button>
+```
+
+---
+
+## 🏷️ SECTION 13: HIERARCHICAL CATEGORIES
+
+### Database Schema
+
+```sql
+ALTER TABLE categories ADD COLUMN parent_category_id UUID REFERENCES categories(id);
+ALTER TABLE categories ADD COLUMN description TEXT;
+
+-- Add category_type field
+ALTER TABLE categories RENAME COLUMN content_type TO category_type;
+```
+
+### Admin Interface
+
+```tsx
+// app/admin/categories/page.tsx
+
+// Tree view with parent-child relationship
+// Add category form with parent dropdown
+// Shows: Main Category → Sub Category → Sub-Sub Category
+```
+
+---
+
+## 🔘 SECTION 14: ACTIVE/INACTIVE TOGGLE FOR ALL CONTENT
+
+### Database Update
+
+```sql
+-- Add is_active column to all content tables
+ALTER TABLE sermons ADD COLUMN is_active BOOLEAN DEFAULT true;
+ALTER TABLE lessons ADD COLUMN is_active BOOLEAN DEFAULT true;
+ALTER TABLE articles ADD COLUMN is_active BOOLEAN DEFAULT true;
+ALTER TABLE books ADD COLUMN is_active BOOLEAN DEFAULT true;
+```
+
+### Add Toggle to All Forms
+
+```tsx
+<div className="flex items-center space-x-2">
+  <Switch
+    id="is_active"
+    checked={isActive}
+    onCheckedChange={setIsActive}
+  />
+  <Label htmlFor="is_active">نشط في الموقع</Label>
+</div>
+```
+
+### Filter in Frontend Queries
+
+```typescript
+.eq('is_active', true)
+.eq('publish_status', 'published')
+```
+
+---
+
+## 📧 SECTION 15: CONTACT FORM MANAGEMENT
+
+### Database Schema
+
+```sql
+CREATE TABLE contact_form_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  fields JSONB NOT NULL,
+  -- Format: [
+  --   {"name": "name", "label": "الاسم", "type": "text", "required": true},
+  --   {"name": "email", "label": "البريد", "type": "email", "required": true}
+  -- ]
+  subject_options JSONB,
+  important_notice TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE contact_submissions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  form_data JSONB NOT NULL,
+  submitted_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Admin Pages
+
+```tsx
+// app/admin/contact-form/settings/page.tsx
+// Configure form fields
+// Add/remove/reorder fields
+// Set subject options
+// Edit important notice
+
+// app/admin/contact-form/submissions/page.tsx
+// View all submissions
+// Export to CSV
+```
+
+---
+
+## 🔐 SECTION 16: ADMIN ACCOUNT & SECURITY SETTINGS
+
+### Create Settings Page
+
+```tsx
+// app/admin/security/page.tsx
+
+// Tabs:
+// 1. Change Password
+// 2. Two-Factor Authentication (optional for future)
+// 3. Session Management
+// 4. Login History
+```
+
+### Change Password Form
+
+```tsx
+<form onSubmit={handleChangePassword}>
+  <Input
+    type="password"
+    placeholder="كلمة المرور الحالية"
+    value={currentPassword}
+    onChange={(e) => setCurrentPassword(e.target.value)}
+  />
+  <Input
+    type="password"
+    placeholder="كلمة المرور الجديدة"
+    value={newPassword}
+    onChange={(e) => setNewPassword(e.target.value)}
+  />
+  <Input
+    type="password"
+    placeholder="تأكيد كلمة المرور"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+  />
+  <Button type="submit">تحديث</Button>
+</form>
+```
+
+---
+
+## 🎨 SECTION 17: APPEARANCE SETTINGS (COLORS & HIJRI DATE)
+
+### Database Schema
+
+```sql
+CREATE TABLE appearance_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  primary_color TEXT DEFAULT '#1c5b45',
+  secondary_color TEXT DEFAULT '#d4a04c',
+  show_hijri_date BOOLEAN DEFAULT true,
+  site_logo_path TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Admin Page
+
+```tsx
+// app/admin/appearance/page.tsx
+
+<div>
+  <Label>اللون الأساسي</Label>
+  <Input
+    type="color"
+    value={primaryColor}
+    onChange={(e) => setPrimaryColor(e.target.value)}
+  />
+</div>
+
+<div>
+  <Label>اللون الثانوي</Label>
+  <Input
+    type="color"
+    value={secondaryColor}
+    onChange={(e) => setSecondaryColor(e.target.value)}
+  />
+</div>
+
+<div>
+  <Label>شعار الموقع</Label>
+  <Input
+    placeholder="/images/logos/logo.png"
+    value={logoPath}
+    onChange={(e) => setLogoPath(e.target.value)}
+  />
+</div>
+
+<div className="flex items-center space-x-2">
+  <Switch
+    checked={showHijriDate}
+    onCheckedChange={setShowHijriDate}
+  />
+  <Label>إظهار التاريخ الهجري</Label>
+</div>
+```
+
+### Apply Colors Dynamically
+
+```tsx
+// app/layout.tsx
+const settings = await getAppearanceSettings()
+
+<style>{`
+  :root {
+    --primary: ${settings.primary_color};
+    --secondary: ${settings.secondary_color};
+  }
+`}</style>
+```
+
+### Hijri Date Display
+
+```bash
+npm install moment-hijri
+```
+
+```tsx
+// components/hijri-date.tsx
+import moment from 'moment-hijri'
+
+const hijriDate = moment().format('iYYYY/iM/iD')
+const hijriMonth = moment().format('iMMMM')
+```
+
+---
+
+## 📈 SECTION 18: ANALYTICS DASHBOARD - IMPLEMENT EXACT CHART
+
+Use the provided `earnings-chart.tsx` as template.
+
+### Database Schema
+
+```sql
+CREATE TABLE site_analytics (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  date DATE NOT NULL,
+  views_count INTEGER DEFAULT 0,
+  unique_visitors INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Implement Chart
+
+```tsx
+// app/admin/page.tsx - Dashboard
+
+import { ViewsChart } from "@/components/admin/views-chart"
+
+// Fetch data
+const { data: analyticsData } = await supabase
+  .from('site_analytics')
+  .select('*')
+  .gte('date', thirtyDaysAgo)
+  .order('date', { ascending: true })
+
+<ViewsChart data={analyticsData} />
+```
+
+### Create ViewsChart Component
+
+```tsx
+// components/admin/views-chart.tsx
+// Copy the EXACT implementation from earnings-chart.tsx
+// Change labels to Arabic
+// Change "Earnings" to "المشاهدات"
+// Use dots pattern exactly as in the file
+```
+
+---
+
+## 🔧 SECTION 19: FIX ICON COLORS
+
+### Problem
+Icons appear white on white background in light mode.
+
+### Solution
+
+```tsx
+// Find all icon components and ensure proper colors:
+
+// Light mode
+className="text-gray-600 dark:text-gray-300"
+
+// For primary icons
+className="text-primary dark:text-green-400"
+
+// Review ALL icon instances in:
+// - Navbar
+// - Footer

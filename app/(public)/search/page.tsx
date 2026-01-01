@@ -1,9 +1,15 @@
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Search, Mic, BookOpen, FileText, BookMarked } from "lucide-react"
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>
+}
+
+export const metadata = {
+  title: "البحث في الموقع",
+  description: "ابحث في الخطب والدروس والمقالات والكتب",
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
@@ -25,43 +31,42 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (query && query.trim()) {
     const searchTerm = `%${query}%`
 
-    // Search sermons
-    const { data: sermons } = await supabase
-      .from("sermons")
-      .select("id, title, content, created_at")
-      .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
-      .eq("publish_status", "published")
-      .limit(10)
-
-    // Search lessons
-    const { data: lessons } = await supabase
-      .from("lessons")
-      .select("id, title, description, type, created_at")
-      .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
-      .eq("publish_status", "published")
-      .limit(10)
-
-    // Search articles
-    const { data: articles } = await supabase
-      .from("articles")
-      .select("id, title, content, author, created_at")
-      .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
-      .eq("publish_status", "published")
-      .limit(10)
-
-    // Search books
-    const { data: books } = await supabase
-      .from("books")
-      .select("id, title, author, description, cover_image_path, created_at")
-      .or(`title.ilike.${searchTerm},description.ilike.${searchTerm},author.ilike.${searchTerm}`)
-      .eq("publish_status", "published")
-      .limit(10)
+    const [sermonsResult, lessonsResult, articlesResult, booksResult] = await Promise.all([
+      supabase
+        .from("sermons")
+        .select("id, title, content, created_at")
+        .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
+        .eq("publish_status", "published")
+        .eq("is_active", true)
+        .limit(10),
+      supabase
+        .from("lessons")
+        .select("id, title, description, type, created_at")
+        .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
+        .eq("publish_status", "published")
+        .eq("is_active", true)
+        .limit(10),
+      supabase
+        .from("articles")
+        .select("id, title, content, author, created_at")
+        .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
+        .eq("publish_status", "published")
+        .eq("is_active", true)
+        .limit(10),
+      supabase
+        .from("books")
+        .select("id, title, author, description, cover_image_path, created_at")
+        .or(`title.ilike.${searchTerm},description.ilike.${searchTerm},author.ilike.${searchTerm}`)
+        .eq("publish_status", "published")
+        .eq("is_active", true)
+        .limit(10),
+    ])
 
     results = {
-      sermons: sermons || [],
-      lessons: lessons || [],
-      articles: articles || [],
-      books: books || [],
+      sermons: sermonsResult.data || [],
+      lessons: lessonsResult.data || [],
+      articles: articlesResult.data || [],
+      books: booksResult.data || [],
     }
   }
 
@@ -87,7 +92,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               className="flex-1 px-6 py-4 bg-card border border-border rounded-xl text-foreground placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <Button type="submit" className="bg-primary hover:bg-primary-hover text-white px-8 rounded-xl">
-              <span className="material-icons-outlined ml-2">search</span>
+              <Search className="h-5 w-5 ml-2" />
               بحث
             </Button>
           </div>
@@ -102,7 +107,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
             {totalResults === 0 ? (
               <div className="text-center py-16 bg-card rounded-2xl border border-border">
-                <span className="material-icons-outlined text-6xl text-text-muted mb-4">search_off</span>
+                <Search className="h-16 w-16 mx-auto mb-4 text-text-muted opacity-30" />
                 <h3 className="text-xl font-bold text-foreground mb-2">لم يتم العثور على نتائج</h3>
                 <p className="text-text-muted">جرب استخدام كلمات مختلفة أو أكثر عمومية</p>
               </div>
@@ -112,7 +117,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 {results.sermons.length > 0 && (
                   <div className="space-y-4">
                     <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                      <span className="material-icons-outlined text-primary">mic</span>
+                      <Mic className="h-5 w-5 text-primary" />
                       الخطب ({results.sermons.length})
                     </h2>
                     <div className="space-y-3">
@@ -123,7 +128,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                           className="block bg-card p-4 rounded-xl border border-border hover:border-primary transition-colors"
                         >
                           <h3 className="font-bold text-foreground mb-1">{sermon.title}</h3>
-                          <p className="text-sm text-text-muted line-clamp-2">{sermon.content?.substring(0, 150)}...</p>
+                          <p className="text-sm text-text-muted line-clamp-2">
+                            {sermon.content?.replace(/<[^>]*>/g, "").substring(0, 150)}...
+                          </p>
                         </Link>
                       ))}
                     </div>
@@ -134,7 +141,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 {results.lessons.length > 0 && (
                   <div className="space-y-4">
                     <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                      <span className="material-icons-outlined text-secondary">school</span>
+                      <BookOpen className="h-5 w-5 text-secondary" />
                       الدروس ({results.lessons.length})
                     </h2>
                     <div className="space-y-3">
@@ -159,7 +166,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 {results.articles.length > 0 && (
                   <div className="space-y-4">
                     <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                      <span className="material-icons-outlined text-blue-500">article</span>
+                      <FileText className="h-5 w-5 text-blue-500" />
                       المقالات ({results.articles.length})
                     </h2>
                     <div className="space-y-3">
@@ -171,7 +178,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         >
                           <h3 className="font-bold text-foreground mb-1">{article.title}</h3>
                           <p className="text-sm text-text-muted line-clamp-2">
-                            {article.content?.substring(0, 150)}...
+                            {article.content?.replace(/<[^>]*>/g, "").substring(0, 150)}...
                           </p>
                           <span className="text-xs text-text-muted mt-2 block">{article.author}</span>
                         </Link>
@@ -184,7 +191,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 {results.books.length > 0 && (
                   <div className="space-y-4">
                     <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                      <span className="material-icons-outlined text-amber-500">menu_book</span>
+                      <BookMarked className="h-5 w-5 text-amber-500" />
                       الكتب ({results.books.length})
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -216,7 +223,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         {/* No query yet */}
         {!query && (
           <div className="text-center py-16 bg-card rounded-2xl border border-border">
-            <span className="material-icons-outlined text-6xl text-primary/30 mb-4">search</span>
+            <Search className="h-16 w-16 mx-auto mb-4 text-primary/30" />
             <h3 className="text-xl font-bold text-foreground mb-2">ابدأ البحث</h3>
             <p className="text-text-muted">أدخل كلمة أو عبارة للبحث في محتوى الموقع</p>
           </div>

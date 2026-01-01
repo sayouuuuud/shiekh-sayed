@@ -4,7 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-noto-kufi), "Noto Kufi Arabic", sans-serif;
+  /* Updated font-sans to use Cairo */
+  --font-sans: var(--font-cairo), "Cairo", sans-serif;
   --font-serif: var(--font-amiri), "Amiri", serif;
 
   /* Primary Islamic Green */
@@ -126,7 +127,8 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: "Noto Kufi Arabic", sans-serif;
+    /* Updated to Cairo font */
+    font-family: "Cairo", sans-serif;
   }
 
   h1,

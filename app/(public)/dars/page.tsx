@@ -6,275 +6,377 @@ export const metadata: Metadata = {
   title: "الدروس العلمية",
   description: "جداول الدروس العلمية الأسبوعية في الفقه والسيرة النبوية والعقيدة من الشيخ السيد مراد",
   keywords: ["دروس إسلامية", "فقه", "سيرة نبوية", "عقيدة"],
-  openGraph: {
-    title: "الدروس العلمية",
-    description: "دروس علمية متخصصة في الفقه والسيرة والعقيدة",
-    type: "website",
-  },
 }
 
-export default async function DarsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string; type?: string; category?: string }>
-}) {
-  const params = await searchParams
+export default async function DarsPage() {
   const supabase = await createClient()
-  const currentPage = Number(params.page) || 1
-  const itemsPerPage = 12
-  const offset = (currentPage - 1) * itemsPerPage
 
-  // Fetch categories for lessons
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("type", "lesson")
-    .order("name", { ascending: true })
-
-  // Build query
-  let query = supabase
+  // Fetch Fiqh lessons (audio only, latest 3)
+  const { data: fiqhLessons } = await supabase
     .from("lessons")
-    .select("*", { count: "exact" })
+    .select("*")
+    .eq("lesson_type", "fiqh")
     .eq("publish_status", "published")
+    .eq("is_active", true)
+    .eq("is_archived", false)
     .order("created_at", { ascending: false })
-    .range(offset, offset + itemsPerPage - 1)
+    .limit(3)
 
-  if (params.type && params.type !== "all") {
-    query = query.eq("type", params.type)
-  }
+  // Fetch Seerah lessons (with featured one)
+  const { data: seerahLessons } = await supabase
+    .from("lessons")
+    .select("*")
+    .eq("lesson_type", "seerah")
+    .eq("publish_status", "published")
+    .eq("is_active", true)
+    .eq("is_archived", false)
+    .order("created_at", { ascending: false })
+    .limit(4)
 
-  if (params.category && params.category !== "الكل") {
-    query = query.eq("category", params.category)
-  }
+  // Fetch General lessons
+  const { data: generalLessons } = await supabase
+    .from("lessons")
+    .select("*")
+    .eq("lesson_type", "general")
+    .eq("publish_status", "published")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(6)
 
-  const { data: lessons, count } = await query
-  const totalPages = Math.ceil((count || 0) / itemsPerPage)
+  const featuredSeerah = seerahLessons?.[0]
+  const previousSeerah = seerahLessons?.slice(1) || []
 
-  // Helper to get YouTube thumbnail
-  function getYoutubeThumbnail(url: string): string | null {
-    if (!url) return null
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)
-    if (match) {
-      return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
-    }
-    return null
+  // Helper to format relative time
+  function getRelativeTime(dateStr: string): string {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) return "اليوم"
+    if (diffDays === 1) return "أمس"
+    if (diffDays < 7) return `منذ ${diffDays} أيام`
+    if (diffDays < 14) return "منذ أسبوع"
+    if (diffDays < 21) return "منذ أسبوعين"
+    if (diffDays < 30) return "منذ 3 أسابيع"
+    return `منذ ${Math.floor(diffDays / 30)} شهر`
   }
 
   return (
-    <>
+    <main className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-accent-light dark:bg-card py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-block bg-surface dark:bg-card text-secondary px-3 py-1 rounded-full text-sm mb-4 border border-secondary/20 shadow-sm">
-            مكتبة العلم
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-primary dark:text-white mb-4 font-serif">
-            الدروس العلمية
-          </h1>
-          <p className="text-text-muted dark:text-text-subtext max-w-2xl mx-auto text-lg leading-relaxed">
-            دروس علمية متخصصة في الفقه والسيرة النبوية والعقيدة، متاحة للاستماع والمشاهدة في أي وقت.
-          </p>
-        </div>
-      </section>
+      <div className="text-center py-16 relative">
+        <span className="text-sm font-semibold text-primary/80 dark:text-primary bg-primary/5 dark:bg-primary/20 px-4 py-1.5 rounded-full inline-block mb-4">
+          العلم الشرعي
+        </span>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-primary dark:text-white mb-6 relative inline-block font-serif">
+          جداول الدروس العلمية
+          <div className="absolute -bottom-2 left-0 w-full h-2 bg-secondary/30 -z-10 rounded-full"></div>
+        </h1>
+        <p className="text-lg text-text-muted dark:text-text-subtext max-w-2xl mx-auto leading-relaxed">
+          متابعة دورية للدروس العلمية الأسبوعية، حيث نغوص في بحور الفقه والسيرة النبوية لنتعلم ديننا الحنيف بفهم وسطي
+          مستنير.
+        </p>
+      </div>
 
-      {/* Filters */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-surface dark:bg-card p-4 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-border dark:border-border">
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <span className="material-icons-outlined text-primary dark:text-secondary">filter_list</span>
-            <span className="font-bold text-foreground dark:text-foreground">تصفية الدروس:</span>
+      <div className="container mx-auto px-4 lg:px-8 pb-12">
+        {/* Section 1: Fiqh Lessons */}
+        <section className="mb-20">
+          <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <span className="material-icons-outlined text-2xl">menu_book</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">دروس الفقه</h2>
+                <p className="text-sm text-text-muted">{'شرح كتاب "منهاج الطالبين" للإمام النووي'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-lg">
+              <span className="material-icons-outlined text-lg">calendar_today</span>
+              كل يوم اثنين
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            {/* Type Filter */}
-            <Link
-              href="/dars"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                !params.type || params.type === "all"
-                  ? "bg-primary text-white"
-                  : "bg-background dark:bg-background-alt border border-border text-foreground hover:border-primary"
-              }`}
-            >
-              الكل
-            </Link>
-            <Link
-              href="/dars?type=video"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 ${
-                params.type === "video"
-                  ? "bg-primary text-white"
-                  : "bg-background dark:bg-background-alt border border-border text-foreground hover:border-primary"
-              }`}
-            >
-              <span className="material-icons-outlined text-sm">play_circle</span>
-              مرئي
-            </Link>
-            <Link
-              href="/dars?type=audio"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 ${
-                params.type === "audio"
-                  ? "bg-primary text-white"
-                  : "bg-background dark:bg-background-alt border border border-border text-foreground hover:border-primary"
-              }`}
-            >
-              <span className="material-icons-outlined text-sm">audiotrack</span>
-              صوتي
-            </Link>
-          </div>
-        </div>
 
-        {/* Category Pills */}
-        {categories && categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8">
-            <Link
-              href={`/dars${params.type ? `?type=${params.type}` : ""}`}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                !params.category || params.category === "الكل"
-                  ? "bg-secondary text-white"
-                  : "bg-secondary/10 text-secondary hover:bg-secondary/20"
-              }`}
-            >
-              جميع التصنيفات
-            </Link>
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/dars?category=${encodeURIComponent(cat.name)}${params.type ? `&type=${params.type}` : ""}`}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                  params.category === cat.name
-                    ? "bg-secondary text-white"
-                    : "bg-secondary/10 text-secondary hover:bg-secondary/20"
-                }`}
-              >
-                {cat.name}
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Lessons Grid */}
-        {!lessons || lessons.length === 0 ? (
-          <div className="text-center py-16 text-text-muted dark:text-text-subtext">
-            <span className="material-icons-outlined text-6xl mb-4">school</span>
-            <p className="text-lg">لا توجد دروس منشورة حالياً</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lessons.map((lesson) => {
-              const thumbnail =
-                lesson.thumbnail_path ||
-                (lesson.media_source === "youtube" ? getYoutubeThumbnail(lesson.media_path_or_url) : null)
-
-              return (
-                <article
+          {!fiqhLessons || fiqhLessons.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-xl border border-border">
+              <span className="material-icons-outlined text-5xl text-text-muted mb-4">school</span>
+              <p className="text-text-muted">لا توجد دروس فقه حالياً</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {fiqhLessons.map((lesson, index) => (
+                <div
                   key={lesson.id}
-                  className="bg-surface dark:bg-card rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-border dark:border-border flex flex-col h-full group"
+                  className={`group bg-card rounded-xl shadow-sm hover:shadow-lg border transition-all duration-300 relative overflow-hidden ${
+                    index === 0
+                      ? "border-primary/20 dark:border-primary/20"
+                      : "border-border dark:border-border hover:shadow-md"
+                  }`}
                 >
-                  <div className="relative h-48 bg-primary/5 dark:bg-primary/20 rounded-t-xl overflow-hidden">
-                    {thumbnail ? (
-                      <img
-                        src={thumbnail || "/placeholder.svg"}
-                        alt={lesson.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">
+                  {index === 0 && (
+                    <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg z-10">
+                      الدرس القادم
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-5xl font-black text-gray-100 dark:text-gray-800 absolute -left-2 -top-2 opacity-50 select-none">
+                        {fiqhLessons.length - index}
+                      </span>
+                      <div
+                        className={`w-10 h-10 rounded-full ${index === 0 ? "bg-green-50 dark:bg-green-900/30 text-primary dark:text-primary" : "bg-gray-50 dark:bg-gray-800 text-gray-400"} flex items-center justify-center mb-4 z-10 relative`}
+                      >
+                        <span className="material-icons-outlined">{index === 0 ? "play_arrow" : "done"}</span>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground dark:text-white mb-2 group-hover:text-primary dark:group-hover:text-primary transition-colors">
+                      {lesson.title}
+                    </h3>
+                    <p className="text-sm text-text-muted mb-6 line-clamp-2">
+                      {lesson.description?.replace(/<[^>]*>/g, "").substring(0, 100)}...
+                    </p>
+                    <div className="flex items-center justify-between pt-4 border-t border-border">
+                      <div className="flex items-center gap-2 text-xs text-text-muted">
+                        <span className="material-icons-outlined text-sm">{index === 0 ? "schedule" : "event"}</span>
+                        {index === 0
+                          ? "7:30 مساءً"
+                          : new Date(lesson.created_at).toLocaleDateString("ar-EG", {
+                              day: "numeric",
+                              month: "long",
+                            })}
+                      </div>
+                      {index === 0 ? (
+                        <Link
+                          href={`/dars/${lesson.id}`}
+                          className="text-sm font-semibold text-primary hover:underline"
+                        >
+                          التفاصيل
+                        </Link>
+                      ) : (
+                        <div className="flex gap-2">
+                          <button className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white dark:hover:bg-primary transition">
+                            <span className="material-icons-outlined text-sm">download</span>
+                          </button>
+                          <Link
+                            href={`/dars/${lesson.id}`}
+                            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white dark:hover:bg-primary transition"
+                          >
+                            <span className="material-icons-outlined text-sm">play_arrow</span>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/dars/fiqh"
+              className="text-sm font-semibold text-text-muted hover:text-primary flex items-center justify-center gap-2 mx-auto transition"
+            >
+              عرض أرشيف الفقه
+              <span className="material-icons-outlined text-sm transform rotate-180">arrow_right_alt</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* Section 2: Seerah Lessons */}
+        <section className="mb-20">
+          <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+                <span className="material-icons-outlined text-2xl">history_edu</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">دروس السيرة النبوية</h2>
+                <p className="text-sm text-text-muted">وقفات تربوية مع أحداث السيرة العطرة</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm font-bold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 px-4 py-2 rounded-lg">
+              <span className="material-icons-outlined text-lg">live_tv</span>
+              بث مباشر (الأربعاء)
+            </div>
+          </div>
+
+          {!seerahLessons || seerahLessons.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-xl border border-border">
+              <span className="material-icons-outlined text-5xl text-text-muted mb-4">history_edu</span>
+              <p className="text-text-muted">لا توجد دروس سيرة حالياً</p>
+            </div>
+          ) : (
+            <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden flex flex-col md:flex-row">
+              {/* Featured Lesson */}
+              {featuredSeerah && (
+                <div className="md:w-1/3 bg-primary/5 dark:bg-primary/10 p-8 flex flex-col justify-center border-l border-border relative overflow-hidden">
+                  <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 animate-pulse">
+                    <span className="w-2 h-2 bg-white rounded-full"></span>
+                    مباشر
+                  </div>
+                  <div className="mb-6 mt-8">
+                    <span className="text-xs font-bold text-primary dark:text-primary uppercase tracking-wider mb-2 block">
+                      درس الأسبوع
+                    </span>
+                    <h3 className="text-3xl font-extrabold text-primary dark:text-white mb-3 leading-tight font-serif">
+                      {featuredSeerah.title}
+                    </h3>
+                    <p className="text-sm text-text-muted leading-relaxed">
+                      {featuredSeerah.description?.replace(/<[^>]*>/g, "").substring(0, 150)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-3 mt-auto">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <span className="material-icons-outlined text-primary">schedule</span>
+                      الساعة 8:00 مساءً بتوقيت مكة
+                    </div>
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <span className="material-icons-outlined text-primary">place</span>
+                      مسجد الرحمن - مدينة نصر
+                    </div>
+                  </div>
+                  <Link
+                    href={`/dars/${featuredSeerah.id}`}
+                    className="mt-8 w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-hover transition flex items-center justify-center gap-2 shadow-lg shadow-primary/30"
+                  >
+                    <span className="material-icons-outlined">play_circle</span>
+                    شاهد البث المباشر
+                  </Link>
+                </div>
+              )}
+
+              {/* Previous Lessons */}
+              <div className="md:w-2/3 p-6 md:p-8">
+                <h4 className="text-lg font-bold text-foreground mb-6">دروس سابقة</h4>
+                <div className="space-y-4">
+                  {previousSeerah.map((lesson) => (
+                    <Link
+                      key={lesson.id}
+                      href={`/dars/${lesson.id}`}
+                      className="flex items-center justify-between group p-4 rounded-xl hover:bg-muted transition border border-transparent hover:border-border cursor-pointer"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-700 dark:text-yellow-400 group-hover:scale-110 transition-transform">
+                          <span className="material-icons-outlined">play_arrow</span>
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-foreground group-hover:text-primary transition">
+                            {lesson.title}
+                          </h5>
+                          <span className="text-xs text-text-muted">
+                            {getRelativeTime(lesson.created_at)} • {lesson.duration || "45"} دقيقة
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button className="text-text-muted hover:text-primary">
+                          <span className="material-icons-outlined">download</span>
+                        </button>
+                        <button className="text-text-muted hover:text-primary">
+                          <span className="material-icons-outlined">share</span>
+                        </button>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/dars/seerah"
+              className="text-sm font-semibold text-text-muted hover:text-primary flex items-center justify-center gap-2 mx-auto transition"
+            >
+              عرض أرشيف السيرة
+              <span className="material-icons-outlined text-sm transform rotate-180">arrow_right_alt</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* Section 3: General Lessons */}
+        {generalLessons && generalLessons.length > 0 && (
+          <section className="mb-20">
+            <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
+                  <span className="material-icons-outlined text-2xl">school</span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">دروس متنوعة</h2>
+                  <p className="text-sm text-text-muted">دروس عامة في مختلف العلوم الشرعية</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {generalLessons.map((lesson) => (
+                <Link
+                  key={lesson.id}
+                  href={`/dars/${lesson.id}`}
+                  className="group bg-card rounded-xl shadow-sm hover:shadow-md border border-border transition-all duration-300"
+                >
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${lesson.type === "video" ? "bg-purple-50 dark:bg-purple-900/20 text-purple-600" : "bg-blue-50 dark:bg-blue-900/20 text-blue-600"}`}
+                      >
+                        <span className="material-icons-outlined">
                           {lesson.type === "video" ? "play_circle" : "audiotrack"}
                         </span>
-                      </div>
-                    )}
-                    <div className="absolute top-4 left-4 flex gap-2">
-                      <span className="bg-surface dark:bg-card text-xs font-bold px-2 py-1 rounded shadow-sm">
+                      </span>
+                      <span className="text-xs bg-muted px-2 py-1 rounded text-text-muted">
                         {lesson.type === "video" ? "مرئي" : "صوتي"}
                       </span>
                     </div>
-                    <div className="absolute top-4 right-4 bg-surface dark:bg-card text-xs font-bold px-2 py-1 rounded shadow-sm text-text-muted dark:text-text-subtext">
-                      {new Date(lesson.created_at).toLocaleDateString("ar-EG")}
-                    </div>
-                  </div>
-                  <div className="p-6 flex flex-col flex-grow">
-                    {lesson.category && (
-                      <div className="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
-                        <span className="material-icons-outlined text-sm">label</span>
-                        <span>{lesson.category}</span>
-                      </div>
-                    )}
-                    <h3 className="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
+                    <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition mb-2">
                       {lesson.title}
                     </h3>
-                    <p className="text-text-muted dark:text-text-subtext text-sm leading-relaxed mb-6 line-clamp-3">
-                      {lesson.description?.replace(/<[^>]*>/g, "").substring(0, 150)}...
+                    <p className="text-sm text-text-muted line-clamp-2 mb-4">
+                      {lesson.description?.replace(/<[^>]*>/g, "").substring(0, 80)}...
                     </p>
-                    <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-border dark:border-border">
-                      <Link
-                        href={`/dars/${lesson.id}`}
-                        className="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
-                      >
-                        <span className="material-icons-outlined text-sm">
-                          {lesson.type === "video" ? "play_circle" : "headphones"}
-                        </span>
-                        {lesson.type === "video" ? "شاهد الدرس" : "استمع للدرس"}
-                      </Link>
-                      <div className="flex items-center gap-1 text-xs text-text-muted">
+                    <div className="flex items-center justify-between text-xs text-text-muted">
+                      <span className="flex items-center gap-1">
                         <span className="material-icons-outlined text-sm">visibility</span>
                         {lesson.views_count || 0}
-                      </div>
+                      </span>
+                      <span>{new Date(lesson.created_at).toLocaleDateString("ar-EG")}</span>
                     </div>
                   </div>
-                </article>
-              )
-            })}
-          </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-12">
-            <nav className="flex items-center gap-2">
-              {currentPage > 1 && (
-                <Link
-                  href={`/dars?page=${currentPage - 1}${params.type ? `&type=${params.type}` : ""}${params.category ? `&category=${params.category}` : ""}`}
-                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-border dark:border-border text-text-muted dark:text-text-subtext hover:bg-background dark:hover:bg-background-alt"
+        {/* Newsletter CTA */}
+        <section className="bg-primary dark:bg-primary/40 rounded-2xl p-8 md:p-12 relative overflow-hidden">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="md:w-1/2">
+              <h2 className="text-2xl font-bold text-white mb-2 font-serif">اشترك في القائمة البريدية</h2>
+              <p className="text-white/80 text-sm">
+                احصل على تنبيهات بالدروس الجديدة والملفات العلمية مباشرة إلى بريدك الإلكتروني.
+              </p>
+            </div>
+            <div className="md:w-1/2 w-full">
+              <form className="flex flex-col sm:flex-row gap-3">
+                <input
+                  className="flex-1 rounded-lg border-none focus:ring-2 focus:ring-secondary px-4 py-3 text-foreground bg-white/95 dark:bg-black/40 backdrop-blur-sm"
+                  placeholder="أدخل بريدك الإلكتروني"
+                  type="email"
+                />
+                <button
+                  type="submit"
+                  className="bg-secondary hover:bg-secondary-hover text-white font-bold px-6 py-3 rounded-lg transition shadow-lg whitespace-nowrap"
                 >
-                  <span className="material-icons-outlined text-lg">chevron_right</span>
-                </Link>
-              )}
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum: number
-                if (totalPages <= 5) {
-                  pageNum = i + 1
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i
-                } else {
-                  pageNum = currentPage - 2 + i
-                }
-                return (
-                  <Link
-                    key={pageNum}
-                    href={`/dars?page=${pageNum}${params.type ? `&type=${params.type}` : ""}${params.category ? `&category=${params.category}` : ""}`}
-                    className={`w-10 h-10 flex items-center justify-center rounded-lg font-medium ${
-                      currentPage === pageNum
-                        ? "bg-primary text-white"
-                        : "border border-border dark:border-border text-text-muted dark:text-text-subtext hover:bg-background dark:hover:bg-background-alt"
-                    }`}
-                  >
-                    {pageNum}
-                  </Link>
-                )
-              })}
-              {currentPage < totalPages && (
-                <Link
-                  href={`/dars?page=${currentPage + 1}${params.type ? `&type=${params.type}` : ""}${params.category ? `&category=${params.category}` : ""}`}
-                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-border dark:border-border text-text-muted dark:text-text-subtext hover:bg-background dark:hover:bg-background-alt"
-                >
-                  <span className="material-icons-outlined text-lg">chevron_left</span>
-                </Link>
-              )}
-            </nav>
+                  اشتراك الآن
+                </button>
+              </form>
+            </div>
           </div>
-        )}
-      </main>
-    </>
+        </section>
+      </div>
+    </main>
   )
 }

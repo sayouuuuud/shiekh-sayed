@@ -4,26 +4,54 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-const menuItems = [
+const sidebarSections = [
+  {
+    title: "لوحة التحكم",
+    items: [{ title: "الرئيسية", href: "/admin", icon: "dashboard" }],
+  },
+  {
+    title: "إدارة المحتوى",
+    items: [
+      { title: "الخطب", href: "/admin/khutba", icon: "mic" },
+      { title: "الدروس", href: "/admin/dars", icon: "school" },
+      { title: "المقالات", href: "/admin/articles", icon: "article" },
+      { title: "الكتب", href: "/admin/books", icon: "menu_book" },
+      { title: "المرئيات", href: "/admin/media", icon: "video_library" },
+      { title: "المجتمع", href: "/admin/community", icon: "groups" },
+    ],
+  },
+  {
+    title: "إدارة الصفحات",
+    items: [
+      { title: "عن الشيخ", href: "/admin/about", icon: "person" },
+      { title: "الصفحة الرئيسية", href: "/admin/hero", icon: "star" },
+      { title: "الجدول الزمني", href: "/admin/schedule", icon: "calendar_today" },
+      { title: "القائمة العلوية", href: "/admin/navbar", icon: "menu" },
+      { title: "نموذج التواصل", href: "/admin/contact-form", icon: "mail" },
+    ],
+  },
+  {
+    title: "الإعدادات",
+    items: [
+      { title: "التصنيفات", href: "/admin/categories", icon: "category" },
+      { title: "المشتركين", href: "/admin/subscribers", icon: "group" },
+      { title: "الرسائل", href: "/admin/messages", icon: "inbox" },
+      { title: "الإشعارات", href: "/admin/notifications", icon: "notifications" },
+      { title: "إعدادات SEO", href: "/admin/seo", icon: "search" },
+      { title: "المظهر", href: "/admin/appearance", icon: "palette" },
+      { title: "الأمان", href: "/admin/security", icon: "shield" },
+      { title: "الإعدادات العامة", href: "/admin/settings", icon: "settings" },
+    ],
+  },
+]
+
+// Flatten for mobile nav - include community
+const mobileItems = [
   { title: "الرئيسية", href: "/admin", icon: "dashboard" },
   { title: "الخطب", href: "/admin/khutba", icon: "mic" },
   { title: "الدروس", href: "/admin/dars", icon: "school" },
   { title: "المقالات", href: "/admin/articles", icon: "article" },
-  { title: "الكتب", href: "/admin/books", icon: "menu_book" },
-  { title: "المرئيات", href: "/admin/media", icon: "video_library" },
-  { title: "التصنيفات", href: "/admin/categories", icon: "category" },
-  { title: "القسم الرئيسي", href: "/admin/hero", icon: "star" },
-  { title: "عن الشيخ", href: "/admin/about", icon: "person" },
-  { title: "الشعار", href: "/admin/logo", icon: "image" },
-  { title: "جدول الدروس", href: "/admin/schedule", icon: "calendar_today" },
-  { title: "المشتركين", href: "/admin/subscribers", icon: "group" },
-  { title: "الرسائل", href: "/admin/messages", icon: "mail" },
-  { title: "صفحات المجتمع", href: "/admin/community", icon: "people" },
-  { title: "مشاريع الدعوة", href: "/admin/projects", icon: "favorite" },
-  { title: "سياسة الخصوصية", href: "/admin/privacy", icon: "security" },
-  { title: "شروط الاستخدام", href: "/admin/terms", icon: "gavel" },
-  { title: "إعدادات SEO", href: "/admin/seo", icon: "search" },
-  { title: "الإعدادات", href: "/admin/settings", icon: "settings" },
+  { title: "المجتمع", href: "/admin/community", icon: "groups" },
 ]
 
 export function AdminSidebar() {
@@ -44,29 +72,36 @@ export function AdminSidebar() {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation with Sections */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
-          <ul className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium",
-                      isActive
-                        ? "bg-primary text-white"
-                        : "text-foreground dark:text-foreground hover:bg-background dark:hover:bg-background-alt",
-                    )}
-                  >
-                    <span className="material-icons-outlined text-lg">{item.icon}</span>
-                    <span>{item.title}</span>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
+          {sidebarSections.map((section, sectionIndex) => (
+            <div key={section.title} className={cn(sectionIndex > 0 && "mt-6")}>
+              <h3 className="px-3 mb-2 text-xs font-semibold text-text-muted dark:text-text-subtext uppercase tracking-wider">
+                {section.title}
+              </h3>
+              <ul className="space-y-1">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium",
+                          isActive
+                            ? "bg-primary text-white"
+                            : "text-foreground dark:text-foreground hover:bg-background dark:hover:bg-background-alt",
+                        )}
+                      >
+                        <span className="material-icons-outlined text-lg">{item.icon}</span>
+                        <span>{item.title}</span>
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         {/* Footer */}
@@ -84,7 +119,7 @@ export function AdminSidebar() {
       {/* Mobile Bottom Nav */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface dark:bg-card border-t border-border dark:border-border z-40 lg:hidden">
         <div className="flex items-center justify-around py-2">
-          {menuItems.slice(0, 5).map((item) => {
+          {mobileItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
             return (
               <Link
