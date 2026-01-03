@@ -3,55 +3,82 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import {
+  LayoutDashboard,
+  Mic,
+  GraduationCap,
+  FileText,
+  BookOpen,
+  Video,
+  Users,
+  User,
+  LinkIcon,
+  Star,
+  Calendar,
+  CalendarDays,
+  Menu,
+  Mail,
+  Settings,
+  FolderTree,
+  Bell,
+  Search,
+  Palette,
+  Shield,
+  Database,
+  ExternalLink,
+  MoreHorizontal,
+} from "lucide-react"
 
 const sidebarSections = [
   {
     title: "لوحة التحكم",
-    items: [{ title: "الرئيسية", href: "/admin", icon: "dashboard" }],
+    items: [{ title: "الرئيسية", href: "/admin", icon: LayoutDashboard }],
   },
   {
     title: "إدارة المحتوى",
     items: [
-      { title: "الخطب", href: "/admin/khutba", icon: "mic" },
-      { title: "الدروس", href: "/admin/dars", icon: "school" },
-      { title: "المقالات", href: "/admin/articles", icon: "article" },
-      { title: "الكتب", href: "/admin/books", icon: "menu_book" },
-      { title: "المرئيات", href: "/admin/media", icon: "video_library" },
-      { title: "المجتمع", href: "/admin/community", icon: "groups" },
+      { title: "الخطب", href: "/admin/khutba", icon: Mic },
+      { title: "الدروس", href: "/admin/dars", icon: GraduationCap },
+      { title: "المقالات", href: "/admin/articles", icon: FileText },
+      { title: "الكتب", href: "/admin/books", icon: BookOpen },
+      { title: "المرئيات", href: "/admin/videos", icon: Video },
+      { title: "المجتمع", href: "/admin/community", icon: Users },
     ],
   },
   {
     title: "إدارة الصفحات",
     items: [
-      { title: "عن الشيخ", href: "/admin/about", icon: "person" },
-      { title: "الصفحة الرئيسية", href: "/admin/hero", icon: "star" },
-      { title: "الجدول الزمني", href: "/admin/schedule", icon: "calendar_today" },
-      { title: "القائمة العلوية", href: "/admin/navbar", icon: "menu" },
-      { title: "نموذج التواصل", href: "/admin/contact-form", icon: "mail" },
+      { title: "عن الشيخ", href: "/admin/about", icon: User },
+      { title: "روابط التواصل", href: "/admin/profile", icon: LinkIcon },
+      { title: "الصفحة الرئيسية", href: "/admin/hero", icon: Star },
+      { title: "الجدول الزمني", href: "/admin/schedule", icon: Calendar },
+      { title: "الجدول الأسبوعي", href: "/admin/schedule/weekly", icon: CalendarDays },
+      { title: "القائمة العلوية", href: "/admin/navbar", icon: Menu },
+      { title: "نموذج التواصل", href: "/admin/contact-form", icon: Mail },
+      { title: "حقول التواصل", href: "/admin/contact-settings", icon: Settings },
     ],
   },
   {
     title: "الإعدادات",
     items: [
-      { title: "التصنيفات", href: "/admin/categories", icon: "category" },
-      { title: "المشتركين", href: "/admin/subscribers", icon: "group" },
-      { title: "الرسائل", href: "/admin/messages", icon: "inbox" },
-      { title: "الإشعارات", href: "/admin/notifications", icon: "notifications" },
-      { title: "إعدادات SEO", href: "/admin/seo", icon: "search" },
-      { title: "المظهر", href: "/admin/appearance", icon: "palette" },
-      { title: "الأمان", href: "/admin/security", icon: "shield" },
-      { title: "الإعدادات العامة", href: "/admin/settings", icon: "settings" },
+      { title: "التصنيفات", href: "/admin/categories", icon: FolderTree },
+      { title: "المشتركين", href: "/admin/subscribers", icon: Users },
+      { title: "الإشعارات", href: "/admin/notifications", icon: Bell },
+      { title: "إعدادات SEO", href: "/admin/seo", icon: Search },
+      { title: "المظهر", href: "/admin/appearance", icon: Palette },
+      { title: "الأمان", href: "/admin/security", icon: Shield },
+      { title: "النسخ الاحتياطي", href: "/admin/settings", icon: Database },
     ],
   },
 ]
 
-// Flatten for mobile nav - include community
 const mobileItems = [
-  { title: "الرئيسية", href: "/admin", icon: "dashboard" },
-  { title: "الخطب", href: "/admin/khutba", icon: "mic" },
-  { title: "الدروس", href: "/admin/dars", icon: "school" },
-  { title: "المقالات", href: "/admin/articles", icon: "article" },
-  { title: "المجتمع", href: "/admin/community", icon: "groups" },
+  { title: "الرئيسية", href: "/admin", icon: LayoutDashboard },
+  { title: "الخطب", href: "/admin/khutba", icon: Mic },
+  { title: "الدروس", href: "/admin/dars", icon: GraduationCap },
+  { title: "المقالات", href: "/admin/articles", icon: FileText },
+  { title: "المرئيات", href: "/admin/videos", icon: Video },
+  { title: "المجتمع", href: "/admin/community", icon: Users },
 ]
 
 export function AdminSidebar() {
@@ -82,6 +109,7 @@ export function AdminSidebar() {
               <ul className="space-y-1">
                 {section.items.map((item) => {
                   const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
+                  const Icon = item.icon
                   return (
                     <li key={item.href}>
                       <Link
@@ -93,7 +121,7 @@ export function AdminSidebar() {
                             : "text-foreground dark:text-foreground hover:bg-background dark:hover:bg-background-alt",
                         )}
                       >
-                        <span className="material-icons-outlined text-lg">{item.icon}</span>
+                        <Icon className="h-5 w-5" />
                         <span>{item.title}</span>
                       </Link>
                     </li>
@@ -110,7 +138,7 @@ export function AdminSidebar() {
             href="/"
             className="flex items-center gap-2 text-sm text-text-muted dark:text-text-subtext hover:text-primary dark:hover:text-secondary transition-colors"
           >
-            <span className="material-icons-outlined text-lg">open_in_new</span>
+            <ExternalLink className="h-5 w-5" />
             <span>عرض الموقع</span>
           </Link>
         </div>
@@ -121,6 +149,7 @@ export function AdminSidebar() {
         <div className="flex items-center justify-around py-2">
           {mobileItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
+            const Icon = item.icon
             return (
               <Link
                 key={item.href}
@@ -130,7 +159,7 @@ export function AdminSidebar() {
                   isActive ? "text-primary dark:text-secondary" : "text-text-muted dark:text-text-subtext",
                 )}
               >
-                <span className="material-icons-outlined text-xl">{item.icon}</span>
+                <Icon className="h-5 w-5" />
                 <span className="text-[10px]">{item.title}</span>
               </Link>
             )
@@ -144,7 +173,7 @@ export function AdminSidebar() {
                 : "text-text-muted dark:text-text-subtext",
             )}
           >
-            <span className="material-icons-outlined text-xl">more_horiz</span>
+            <MoreHorizontal className="h-5 w-5" />
             <span className="text-[10px]">المزيد</span>
           </Link>
         </div>

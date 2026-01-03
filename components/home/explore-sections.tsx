@@ -6,7 +6,7 @@ const sections = [
     description: "سلاسل علمية متكاملة في الفقه والعقيدة والسيرة.",
     icon: "school",
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
-    iconColor: "text-yellow-600 dark:text-yellow-300",
+    iconColor: "text-yellow-700 dark:text-yellow-300",
     href: "/dars",
   },
   {
@@ -14,7 +14,7 @@ const sections = [
     description: "كتابات دورية تناقش القضايا المعاصرة برؤية شرعية.",
     icon: "article",
     bgColor: "bg-blue-50 dark:bg-blue-900/20",
-    iconColor: "text-blue-600 dark:text-blue-300",
+    iconColor: "text-blue-700 dark:text-blue-300",
     href: "/articles",
   },
   {
@@ -22,7 +22,7 @@ const sections = [
     description: "مؤلفات الشيخ وكتب مختارة للتحميل بصيغة PDF.",
     icon: "library_books",
     bgColor: "bg-gray-100 dark:bg-gray-700",
-    iconColor: "text-gray-600 dark:text-gray-300",
+    iconColor: "text-gray-800 dark:text-gray-200",
     href: "/books",
   },
   {
@@ -30,7 +30,7 @@ const sections = [
     description: "مقاطع مرئية قصيرة ومحاضرات مصورة بجودة عالية.",
     icon: "play_circle_filled",
     bgColor: "bg-red-50 dark:bg-red-900/20",
-    iconColor: "text-red-600 dark:text-red-300",
+    iconColor: "text-red-700 dark:text-red-300",
     href: "/videos",
   },
 ]
@@ -60,14 +60,14 @@ export function ExploreSections() {
           >
             <div className="absolute top-0 left-0 p-40 bg-white opacity-5 rounded-full blur-2xl transform -translate-x-1/2 -translate-y-1/2"></div>
             <div className="relative z-10">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-                <span className="material-icons-outlined text-2xl">mic</span>
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                <span className="material-icons-outlined text-2xl text-white">mic</span>
               </div>
               <h3 className="text-3xl font-bold mb-2 font-serif">الخطب المنبرية</h3>
               <p className="text-green-100 text-sm mb-6 leading-relaxed opacity-90">
                 استمع إلى خطب الجمعة والأعياد والمناسبات الدينية، مرتبة ومؤرشفة للرجوع إليها في أي وقت.
               </p>
-              <span className="flex items-center gap-2 bg-white bg-opacity-10 group-hover:bg-opacity-20 transition px-4 py-2 rounded-lg text-sm font-medium w-fit">
+              <span className="flex items-center gap-2 bg-secondary text-primary-foreground group-hover:bg-secondary-hover transition px-4 py-2 rounded-lg text-sm font-bold w-fit">
                 استمع الآن
                 <span className="material-icons-outlined text-sm rtl-flip">arrow_right_alt</span>
               </span>

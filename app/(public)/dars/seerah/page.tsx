@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { ChevronLeft, History, Play, Headphones, Calendar, Eye } from "lucide-react"
 
 export const metadata = {
   title: "دروس السيرة النبوية | الشيخ السيد مراد",
@@ -9,12 +10,12 @@ export const metadata = {
 export default async function SeerahLessonsPage() {
   const supabase = await createClient()
 
-  // Fetch seerah lessons
+  // Fetch seerah lessons by lesson_type
   const { data: lessons } = await supabase
     .from("lessons")
     .select("*")
     .eq("publish_status", "published")
-    .or("title.ilike.%سيرة%,description.ilike.%سيرة%")
+    .eq("lesson_type", "seerah")
     .order("created_at", { ascending: false })
 
   return (
@@ -24,18 +25,18 @@ export default async function SeerahLessonsPage() {
         <Link href="/" className="hover:text-primary">
           الرئيسية
         </Link>
-        <span className="material-icons-outlined text-xs mx-2">chevron_left</span>
+        <ChevronLeft className="h-4 w-4 mx-2" />
         <Link href="/dars" className="hover:text-primary">
           الدروس
         </Link>
-        <span className="material-icons-outlined text-xs mx-2">chevron_left</span>
+        <ChevronLeft className="h-4 w-4 mx-2" />
         <span className="text-primary font-medium">دروس السيرة</span>
       </nav>
 
       {/* Header */}
       <div className="text-center mb-16 relative">
         <div className="w-16 h-16 rounded-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400 mx-auto mb-4">
-          <span className="material-icons-outlined text-3xl">history_edu</span>
+          <History className="h-8 w-8" />
         </div>
         <h1 className="text-4xl md:text-5xl font-extrabold text-primary dark:text-white mb-6 font-serif">
           دروس السيرة النبوية
@@ -43,12 +44,16 @@ export default async function SeerahLessonsPage() {
         <p className="text-lg text-text-muted dark:text-text-subtext max-w-2xl mx-auto leading-relaxed">
           وقفات تربوية مع أحداث السيرة النبوية العطرة، واستخلاص الدروس والعبر منها.
         </p>
+        <div className="flex items-center justify-center gap-2 text-sm font-bold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 px-4 py-2 rounded-lg mt-6 w-fit mx-auto">
+          <Calendar className="h-4 w-4" />
+          كل يوم أربعاء
+        </div>
       </div>
 
       {/* Lessons Grid */}
       {!lessons || lessons.length === 0 ? (
         <div className="text-center py-16 text-text-muted dark:text-text-subtext">
-          <span className="material-icons-outlined text-6xl mb-4">school</span>
+          <History className="h-16 w-16 mx-auto mb-4 opacity-50" />
           <p className="text-lg">لا توجد دروس سيرة منشورة حالياً</p>
           <Link href="/dars" className="text-primary hover:underline mt-4 inline-block">
             العودة لجميع الدروس
@@ -62,23 +67,29 @@ export default async function SeerahLessonsPage() {
               href={`/dars/${lesson.id}`}
               className="group bg-surface dark:bg-card rounded-xl shadow-sm hover:shadow-lg border border-border dark:border-border transition-all duration-300 overflow-hidden"
             >
+              {lesson.thumbnail_path && (
+                <div className="aspect-video overflow-hidden">
+                  <img
+                    src={lesson.thumbnail_path || "/placeholder.svg"}
+                    alt={lesson.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              )}
               <div className="p-6">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center mb-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400">
-                  <span className="material-icons-outlined">
-                    {lesson.type === "video" ? "play_circle" : "headphones"}
-                  </span>
+                  {lesson.type === "video" ? <Play className="h-5 w-5" /> : <Headphones className="h-5 w-5" />}
                 </div>
                 <h3 className="text-xl font-bold text-foreground dark:text-foreground mb-2 group-hover:text-primary dark:group-hover:text-secondary transition-colors">
                   {lesson.title}
                 </h3>
-                <p className="text-sm text-text-muted dark:text-text-subtext mb-6 line-clamp-2">{lesson.description}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-border dark:border-border">
                   <div className="flex items-center gap-2 text-xs text-text-muted dark:text-text-subtext">
-                    <span className="material-icons-outlined text-sm">event</span>
+                    <Calendar className="h-4 w-4" />
                     {new Date(lesson.created_at).toLocaleDateString("ar-EG")}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-text-muted">
-                    <span className="material-icons-outlined text-sm">visibility</span>
+                    <Eye className="h-4 w-4" />
                     {lesson.views_count || 0}
                   </div>
                 </div>

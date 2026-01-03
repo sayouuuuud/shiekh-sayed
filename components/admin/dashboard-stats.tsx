@@ -1,43 +1,113 @@
-const stats = [
-  {
-    label: "إجمالي الدروس",
-    value: "1,245",
-    change: "+12 هذا الشهر",
-    changeType: "positive",
-    icon: "mic",
-    iconBg: "bg-primary/10",
-    iconColor: "text-primary",
-  },
-  {
-    label: "الكتب المنشورة",
-    value: "84",
-    change: "مكتبة شاملة",
-    changeType: "neutral",
-    icon: "menu_book",
-    iconBg: "bg-secondary/10",
-    iconColor: "text-yellow-600",
-  },
-  {
-    label: "المقالات",
-    value: "320",
-    change: "+5 هذا الأسبوع",
-    changeType: "positive",
-    icon: "article",
-    iconBg: "bg-blue-50 dark:bg-blue-900/20",
-    iconColor: "text-blue-600",
-  },
-  {
-    label: "الزوار اليوم",
-    value: "4.2k",
-    change: "+18% زيادة",
-    changeType: "positive",
-    icon: "visibility",
-    iconBg: "bg-purple-50 dark:bg-purple-900/20",
-    iconColor: "text-purple-600",
-  },
-]
+"use client"
+
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
+
+interface StatData {
+  label: string
+  value: string
+  change: string
+  changeType: "positive" | "neutral"
+  icon: string
+  iconBg: string
+  iconColor: string
+}
 
 export function DashboardStats() {
+  const [stats, setStats] = useState<StatData[]>([
+    {
+      label: "إجمالي الدروس",
+      value: "...",
+      change: "جاري التحميل",
+      changeType: "neutral",
+      icon: "mic",
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+    },
+    {
+      label: "الكتب المنشورة",
+      value: "...",
+      change: "مكتبة شاملة",
+      changeType: "neutral",
+      icon: "menu_book",
+      iconBg: "bg-secondary/10",
+      iconColor: "text-yellow-600",
+    },
+    {
+      label: "المقالات",
+      value: "...",
+      change: "جاري التحميل",
+      changeType: "neutral",
+      icon: "article",
+      iconBg: "bg-blue-50 dark:bg-blue-900/20",
+      iconColor: "text-blue-600",
+    },
+    {
+      label: "المشتركين",
+      value: "...",
+      change: "جاري التحميل",
+      changeType: "neutral",
+      icon: "group",
+      iconBg: "bg-purple-50 dark:bg-purple-900/20",
+      iconColor: "text-purple-600",
+    },
+  ])
+
+  useEffect(() => {
+    async function fetchStats() {
+      const supabase = createClient()
+
+      // Fetch counts from database
+      const [lessonsRes, booksRes, articlesRes, subscribersRes] = await Promise.all([
+        supabase.from("lessons").select("*", { count: "exact", head: true }),
+        supabase.from("books").select("*", { count: "exact", head: true }),
+        supabase.from("articles").select("*", { count: "exact", head: true }),
+        supabase.from("subscribers").select("*", { count: "exact", head: true }),
+      ])
+
+      setStats([
+        {
+          label: "إجمالي الدروس",
+          value: (lessonsRes.count || 0).toLocaleString(),
+          change: "دروس علمية",
+          changeType: "positive",
+          icon: "mic",
+          iconBg: "bg-primary/10",
+          iconColor: "text-primary",
+        },
+        {
+          label: "الكتب المنشورة",
+          value: (booksRes.count || 0).toLocaleString(),
+          change: "مكتبة شاملة",
+          changeType: "neutral",
+          icon: "menu_book",
+          iconBg: "bg-secondary/10",
+          iconColor: "text-yellow-600",
+        },
+        {
+          label: "المقالات",
+          value: (articlesRes.count || 0).toLocaleString(),
+          change: "مقالات علمية",
+          changeType: "positive",
+          icon: "article",
+          iconBg: "bg-blue-50 dark:bg-blue-900/20",
+          iconColor: "text-blue-600",
+        },
+        {
+          label: "المشتركين",
+          value: (subscribersRes.count || 0).toLocaleString(),
+          change: "مشترك في القائمة",
+          changeType: "positive",
+          icon: "group",
+          iconBg: "bg-purple-50 dark:bg-purple-900/20",
+          iconColor: "text-purple-600",
+        },
+      ])
+    }
+
+    fetchStats()
+  }, [])
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (

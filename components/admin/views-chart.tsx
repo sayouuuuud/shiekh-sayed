@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Download } from "lucide-react"
+import { ChevronDown, Download, TrendingUp, Eye, Users } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 
@@ -18,7 +18,7 @@ interface ViewsChartProps {
 export function ViewsChart({ data }: ViewsChartProps) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [hoveredDay, setHoveredDay] = useState<number | null>(null)
-  const [metric, setMetric] = useState("المشاهدات")
+  const [metric, setMetric] = useState<"views" | "visitors">("views")
   const [period, setPeriod] = useState("آخر 30 يوم")
 
   // Generate chart data from props or use sample data
@@ -26,16 +26,20 @@ export function ViewsChart({ data }: ViewsChartProps) {
     data.length > 0
       ? data.map((item, index) => ({
           day: index + 1,
-          value: metric === "المشاهدات" ? item.views_count : item.unique_visitors,
+          value: metric === "views" ? item.views_count : item.unique_visitors,
           date: new Date(item.date).toLocaleDateString("ar-EG", { month: "short", day: "numeric" }),
+          fullDate: item.date,
         }))
       : Array.from({ length: 30 }, (_, i) => ({
           day: i + 1,
           value: Math.floor(Math.random() * 280) + 20,
           date: `${i + 1}`,
+          fullDate: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString(),
         }))
 
   const maxValue = Math.max(...chartData.map((d) => d.value), 300)
+  const totalValue = chartData.reduce((sum, d) => sum + d.value, 0)
+  const avgValue = Math.round(totalValue / chartData.length)
   const dotSize = 8
   const dotsPerColumn = 10
 
@@ -47,11 +51,17 @@ export function ViewsChart({ data }: ViewsChartProps) {
 
     return (
       <div
-        className="flex flex-col-reverse gap-[2px] cursor-pointer"
+        className="flex flex-col-reverse gap-[2px] cursor-pointer relative group"
         onMouseEnter={() => setHoveredDay(day)}
         onMouseLeave={() => setHoveredDay(null)}
-        onClick={() => setSelectedDay(day)}
+        onClick={() => setSelectedDay(selectedDay === day ? null : day)}
       >
+        {/* Tooltip */}
+        {isHovered && (
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-foreground text-background px-2 py-1 rounded text-xs whitespace-nowrap z-10">
+            {chartData[day - 1]?.date}: {value.toLocaleString("ar-EG")} {metric === "views" ? "مشاهدة" : "زائر"}
+          </div>
+        )}
         {Array.from({ length: dotsPerColumn }).map((_, index) => (
           <div
             key={index}
@@ -59,7 +69,12 @@ export function ViewsChart({ data }: ViewsChartProps) {
             style={{
               width: dotSize,
               height: dotSize,
-              backgroundColor: index < filledDots ? (isSelected || isHovered ? "#1c5b45" : "#86efac") : "transparent",
+              backgroundColor:
+                index < filledDots
+                  ? isSelected || isHovered
+                    ? "var(--color-primary)"
+                    : "var(--color-primary-light, #86efac)"
+                  : "transparent",
             }}
           />
         ))}
@@ -72,21 +87,35 @@ export function ViewsChart({ data }: ViewsChartProps) {
   return (
     <div className="w-full p-6 bg-card rounded-xl border border-border">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h3 className="font-bold text-lg text-foreground dark:text-white">إحصائيات الزيارات</h3>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h3 className="font-bold text-lg text-foreground dark:text-white">إحصائيات الزيارات</h3>
+          <p className="text-sm text-text-muted">
+            الإجمالي: {totalValue.toLocaleString("ar-EG")} | المتوسط: {avgValue.toLocaleString("ar-EG")} يومياً
+          </p>
+        </div>
         <div className="flex items-center gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="text-text-muted gap-1">
-                {metric}
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setMetric("المشاهدات")}>المشاهدات</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMetric("الزوار")}>الزوار</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Metric Toggle */}
+          <div className="flex items-center gap-2 bg-background rounded-lg p-1">
+            <button
+              onClick={() => setMetric("views")}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm transition-colors ${
+                metric === "views" ? "bg-primary text-white" : "text-text-muted hover:text-foreground"
+              }`}
+            >
+              <Eye className="h-4 w-4" />
+              المشاهدات
+            </button>
+            <button
+              onClick={() => setMetric("visitors")}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm transition-colors ${
+                metric === "visitors" ? "bg-primary text-white" : "text-text-muted hover:text-foreground"
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              الزوار
+            </button>
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -108,6 +137,24 @@ export function ViewsChart({ data }: ViewsChartProps) {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-background rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-foreground">{totalValue.toLocaleString("ar-EG")}</p>
+          <p className="text-xs text-text-muted">إجمالي {metric === "views" ? "المشاهدات" : "الزوار"}</p>
+        </div>
+        <div className="bg-background rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-foreground">{avgValue.toLocaleString("ar-EG")}</p>
+          <p className="text-xs text-text-muted">متوسط يومي</p>
+        </div>
+        <div className="bg-background rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-foreground">
+            {Math.max(...chartData.map((d) => d.value)).toLocaleString("ar-EG")}
+          </p>
+          <p className="text-xs text-text-muted">أعلى يوم</p>
+        </div>
+      </div>
+
       {/* Chart Area */}
       <div className="relative">
         {/* Y-axis labels */}
@@ -123,7 +170,10 @@ export function ViewsChart({ data }: ViewsChartProps) {
           className="absolute right-12 left-0 flex items-center"
           style={{ top: `${((maxValue - targetValue) / maxValue) * 100}%` }}
         >
-          <div className="bg-primary text-white text-xs px-2 py-1 rounded">{targetValue}</div>
+          <div className="bg-primary text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+            <TrendingUp className="h-3 w-3" />
+            {targetValue}
+          </div>
           <div className="flex-1 border-t-2 border-dashed border-primary/40" style={{ marginRight: 8 }} />
         </div>
 

@@ -6,7 +6,26 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { createClient } from "@/lib/supabase/client"
-import { Save, Search, Globe, ImageIcon, RefreshCw, Plus, Pencil, Trash2, X, FileText } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import {
+  Save,
+  Search,
+  Globe,
+  RefreshCw,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  FileText,
+  Trash,
+  Share2,
+  BarChart3,
+  Code,
+  LinkIcon,
+  Shield,
+  Eye,
+} from "lucide-react"
+import { FileUpload } from "@/components/admin/file-upload"
 
 interface SEOSettings {
   meta_title: string
@@ -18,9 +37,16 @@ interface SEOSettings {
   twitter_title: string
   twitter_description: string
   twitter_image: string
+  twitter_handle: string
   robots_txt: string
   google_verification: string
   bing_verification: string
+  google_analytics_id: string
+  facebook_pixel_id: string
+  canonical_url: string
+  structured_data: string
+  sitemap_enabled: boolean
+  auto_generate_meta: boolean
 }
 
 interface PageSEO {
@@ -33,13 +59,17 @@ interface PageSEO {
   og_description: string
   og_image: string
   robots: string
+  canonical_url: string
+  priority: number
 }
 
 export default function SEOManagementPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
-  const [activeTab, setActiveTab] = useState<"general" | "social" | "verification" | "pages">("general")
+  const [activeTab, setActiveTab] = useState<
+    "general" | "social" | "verification" | "pages" | "analytics" | "advanced" | "cache"
+  >("general")
 
   // Page-specific SEO
   const [pageSEOList, setPageSEOList] = useState<PageSEO[]>([])
@@ -54,6 +84,8 @@ export default function SEOManagementPage() {
     og_description: "",
     og_image: "",
     robots: "index, follow",
+    canonical_url: "",
+    priority: 0.5,
   })
 
   const [settings, setSettings] = useState<SEOSettings>({
@@ -66,9 +98,16 @@ export default function SEOManagementPage() {
     twitter_title: "",
     twitter_description: "",
     twitter_image: "",
+    twitter_handle: "",
     robots_txt: "",
     google_verification: "",
     bing_verification: "",
+    google_analytics_id: "",
+    facebook_pixel_id: "",
+    canonical_url: "",
+    structured_data: "",
+    sitemap_enabled: true,
+    auto_generate_meta: true,
   })
 
   const supabase = createClient()
@@ -80,12 +119,21 @@ export default function SEOManagementPage() {
 
   async function loadSettings() {
     setLoading(true)
-    const { data } = await supabase.from("site_settings").select("key, value").in("key", Object.keys(settings))
+    const { data } = await supabase.from("site_settings").select("*")
 
     if (data) {
-      const settingsObj: Record<string, string> = {}
-      data.forEach((item) => {
-        settingsObj[item.key] = item.value || ""
+      const settingsObj: Record<string, any> = {}
+      data.forEach((item: Record<string, unknown>) => {
+        const key = (item.key || item.setting_key || "") as string
+        const value = (item.value || item.setting_value || "") as string
+        if (key && Object.keys(settings).includes(key)) {
+          // Handle boolean values
+          if (value === "true" || value === "false") {
+            settingsObj[key] = value === "true"
+          } else {
+            settingsObj[key] = value
+          }
+        }
       })
       setSettings((prev) => ({ ...prev, ...settingsObj }))
     }
@@ -107,7 +155,7 @@ export default function SEOManagementPage() {
         await supabase.from("site_settings").upsert(
           {
             key: key,
-            value: value,
+            value: String(value),
             updated_at: new Date().toISOString(),
           },
           { onConflict: "key" },
@@ -162,6 +210,8 @@ export default function SEOManagementPage() {
       og_description: page.og_description || "",
       og_image: page.og_image || "",
       robots: page.robots || "index, follow",
+      canonical_url: page.canonical_url || "",
+      priority: page.priority || 0.5,
     })
     setEditingPageId(page.id)
     setIsAddingPage(true)
@@ -177,9 +227,34 @@ export default function SEOManagementPage() {
       og_description: "",
       og_image: "",
       robots: "index, follow",
+      canonical_url: "",
+      priority: 0.5,
     })
     setEditingPageId(null)
     setIsAddingPage(false)
+  }
+
+  async function clearCache() {
+    try {
+      await fetch("/api/revalidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paths: ["/", "/khutba", "/dars", "/articles", "/books", "/videos", "/about"] }),
+      })
+      setMessage("تم مسح الكاش بنجاح! قد يستغرق التحديث بضع ثوانٍ.")
+    } catch (error) {
+      setMessage("حدث خطأ أثناء مسح الكاش")
+    }
+  }
+
+  async function generateSitemap() {
+    try {
+      setMessage("جاري إنشاء خريطة الموقع...")
+      await fetch("/api/sitemap/generate", { method: "POST" })
+      setMessage("تم إنشاء خريطة الموقع بنجاح!")
+    } catch (error) {
+      setMessage("حدث خطأ أثناء إنشاء خريطة الموقع")
+    }
   }
 
   if (loading) {
@@ -198,26 +273,25 @@ export default function SEOManagementPage() {
       {/* Header */}
       <div className="text-center">
         <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold mb-3">
-          تحسين محركات البحث
+          تحسين محركات البحث المتقدم
         </span>
         <h1 className="text-4xl font-bold mb-4">
-          إعدادات <span className="text-primary">SEO</span>
+          إعدادات <span className="text-primary">SEO</span> الاحترافية
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          تحسين ظهور موقعك في محركات البحث وشبكات التواصل الاجتماعي
+          تحسين شامل لظهور موقعك في محركات البحث وشبكات التواصل الاجتماعي مع أدوات تحليل متقدمة
         </p>
       </div>
 
       {/* Message */}
       {message && (
         <div
-          className={`p-4 rounded-xl text-center ${message.includes("خطأ") ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
+          className={`p-4 rounded-xl text-center ${message.includes("خطأ") ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"}`}
         >
           {message}
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex gap-2 justify-center flex-wrap">
         <Button
           variant={activeTab === "general" ? "default" : "outline"}
@@ -232,15 +306,23 @@ export default function SEOManagementPage() {
           onClick={() => setActiveTab("social")}
           className="gap-2"
         >
-          <Globe className="h-4 w-4" />
+          <Share2 className="h-4 w-4" />
           الشبكات الاجتماعية
+        </Button>
+        <Button
+          variant={activeTab === "analytics" ? "default" : "outline"}
+          onClick={() => setActiveTab("analytics")}
+          className="gap-2"
+        >
+          <BarChart3 className="h-4 w-4" />
+          التحليلات
         </Button>
         <Button
           variant={activeTab === "verification" ? "default" : "outline"}
           onClick={() => setActiveTab("verification")}
           className="gap-2"
         >
-          <ImageIcon className="h-4 w-4" />
+          <Shield className="h-4 w-4" />
           التحقق من الملكية
         </Button>
         <Button
@@ -250,6 +332,22 @@ export default function SEOManagementPage() {
         >
           <FileText className="h-4 w-4" />
           SEO الصفحات
+        </Button>
+        <Button
+          variant={activeTab === "advanced" ? "default" : "outline"}
+          onClick={() => setActiveTab("advanced")}
+          className="gap-2"
+        >
+          <Code className="h-4 w-4" />
+          إعدادات متقدمة
+        </Button>
+        <Button
+          variant={activeTab === "cache" ? "default" : "outline"}
+          onClick={() => setActiveTab("cache")}
+          className="gap-2"
+        >
+          <Trash className="h-4 w-4" />
+          الكاش والخرائط
         </Button>
       </div>
 
@@ -270,7 +368,12 @@ export default function SEOManagementPage() {
                 placeholder="الشيخ السيد مراد - العلم الشرعي"
                 className="bg-muted"
               />
-              <p className="text-xs text-muted-foreground">يظهر في نتائج البحث - يفضل 50-60 حرفاً</p>
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">يظهر في نتائج البحث - يفضل 50-60 حرفاً</span>
+                <span className={settings.meta_title.length > 60 ? "text-red-500" : "text-green-500"}>
+                  {settings.meta_title.length}/60
+                </span>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -282,7 +385,12 @@ export default function SEOManagementPage() {
                 rows={3}
                 className="bg-muted resize-none"
               />
-              <p className="text-xs text-muted-foreground">يظهر في نتائج البحث - يفضل 150-160 حرفاً</p>
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">يظهر في نتائج البحث - يفضل 150-160 حرفاً</span>
+                <span className={settings.meta_description.length > 160 ? "text-red-500" : "text-green-500"}>
+                  {settings.meta_description.length}/160
+                </span>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -295,6 +403,37 @@ export default function SEOManagementPage() {
               />
               <p className="text-xs text-muted-foreground">افصل بين الكلمات بفواصل</p>
             </div>
+
+            <div className="space-y-2">
+              <Label>الرابط الأساسي (Canonical URL)</Label>
+              <Input
+                value={settings.canonical_url}
+                onChange={(e) => setSettings({ ...settings, canonical_url: e.target.value })}
+                placeholder="https://example.com"
+                dir="ltr"
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">الرابط الرسمي للموقع لتجنب المحتوى المكرر</p>
+            </div>
+
+            {/* SEO Preview */}
+            <div className="bg-muted/50 rounded-xl p-6 mt-6">
+              <h3 className="font-bold mb-4 flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                معاينة نتائج البحث
+              </h3>
+              <div className="bg-white dark:bg-background rounded-lg p-4 border">
+                <p className="text-blue-600 dark:text-blue-400 text-lg hover:underline cursor-pointer">
+                  {settings.meta_title || "عنوان الموقع"}
+                </p>
+                <p className="text-green-700 dark:text-green-500 text-sm" dir="ltr">
+                  {settings.canonical_url || "https://example.com"}
+                </p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                  {settings.meta_description || "وصف الموقع يظهر هنا..."}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -304,7 +443,7 @@ export default function SEOManagementPage() {
             <div className="space-y-6">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <Globe className="h-5 w-5 text-blue-600" />
-                Open Graph (Facebook, WhatsApp)
+                Open Graph (Facebook, WhatsApp, Telegram)
               </h2>
 
               <div className="grid gap-4">
@@ -327,13 +466,13 @@ export default function SEOManagementPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>رابط صورة OG</Label>
-                  <Input
-                    value={settings.og_image}
-                    onChange={(e) => setSettings({ ...settings, og_image: e.target.value })}
-                    placeholder="https://example.com/og-image.jpg"
-                    dir="ltr"
-                    className="bg-muted"
+                  <Label>صورة OG</Label>
+                  <FileUpload
+                    accept="image/*"
+                    folder="seo"
+                    label="رفع صورة OG"
+                    onUploadComplete={(path) => setSettings({ ...settings, og_image: path })}
+                    currentFile={settings.og_image}
                   />
                   <p className="text-xs text-muted-foreground">الأبعاد المثالية: 1200x630 بكسل</p>
                 </div>
@@ -348,6 +487,16 @@ export default function SEOManagementPage() {
               </h2>
 
               <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label>حساب Twitter</Label>
+                  <Input
+                    value={settings.twitter_handle}
+                    onChange={(e) => setSettings({ ...settings, twitter_handle: e.target.value })}
+                    placeholder="@username"
+                    dir="ltr"
+                    className="bg-muted"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label>عنوان Twitter</Label>
                   <Input
@@ -366,14 +515,59 @@ export default function SEOManagementPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>رابط صورة Twitter</Label>
-                  <Input
-                    value={settings.twitter_image}
-                    onChange={(e) => setSettings({ ...settings, twitter_image: e.target.value })}
-                    dir="ltr"
-                    className="bg-muted"
+                  <Label>صورة Twitter</Label>
+                  <FileUpload
+                    accept="image/*"
+                    folder="seo"
+                    label="رفع صورة Twitter"
+                    onUploadComplete={(path) => setSettings({ ...settings, twitter_image: path })}
+                    currentFile={settings.twitter_image}
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "analytics" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              أدوات التحليلات والتتبع
+            </h2>
+
+            <div className="grid gap-6">
+              <div className="space-y-2">
+                <Label>Google Analytics ID</Label>
+                <Input
+                  value={settings.google_analytics_id}
+                  onChange={(e) => setSettings({ ...settings, google_analytics_id: e.target.value })}
+                  placeholder="G-XXXXXXXXXX أو UA-XXXXXXXX-X"
+                  dir="ltr"
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">معرف Google Analytics لتتبع زيارات الموقع</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Facebook Pixel ID</Label>
+                <Input
+                  value={settings.facebook_pixel_id}
+                  onChange={(e) => setSettings({ ...settings, facebook_pixel_id: e.target.value })}
+                  placeholder="XXXXXXXXXXXXXXXX"
+                  dir="ltr"
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">معرف Facebook Pixel للتتبع والإعلانات</p>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2">نصائح التحليلات</h3>
+                <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
+                  <li>استخدم Google Analytics 4 (GA4) للحصول على تحليلات أفضل</li>
+                  <li>راجع تقارير الزيارات أسبوعياً لفهم سلوك الزوار</li>
+                  <li>تتبع الصفحات الأكثر زيارة وحسّن محتواها</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -382,7 +576,7 @@ export default function SEOManagementPage() {
         {activeTab === "verification" && (
           <div className="space-y-6">
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-primary" />
+              <Shield className="h-5 w-5 text-primary" />
               التحقق من ملكية الموقع
             </h2>
 
@@ -395,6 +589,17 @@ export default function SEOManagementPage() {
                 dir="ltr"
                 className="bg-muted"
               />
+              <p className="text-xs text-muted-foreground">
+                احصل على الرمز من{" "}
+                <a
+                  href="https://search.google.com/search-console"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-primary hover:underline"
+                >
+                  Google Search Console
+                </a>
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -405,18 +610,6 @@ export default function SEOManagementPage() {
                 placeholder="رمز التحقق من Bing"
                 dir="ltr"
                 className="bg-muted"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Robots.txt (إضافات مخصصة)</Label>
-              <Textarea
-                value={settings.robots_txt}
-                onChange={(e) => setSettings({ ...settings, robots_txt: e.target.value })}
-                rows={5}
-                dir="ltr"
-                className="bg-muted font-mono text-sm resize-none"
-                placeholder="User-agent: *&#10;Allow: /"
               />
             </div>
           </div>
@@ -492,6 +685,31 @@ export default function SEOManagementPage() {
                       className="bg-background"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Canonical URL</Label>
+                    <Input
+                      value={pageFormData.canonical_url}
+                      onChange={(e) => setPageFormData({ ...pageFormData, canonical_url: e.target.value })}
+                      placeholder="https://..."
+                      dir="ltr"
+                      className="bg-background"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>الأولوية في خريطة الموقع (0-1)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={pageFormData.priority}
+                      onChange={(e) =>
+                        setPageFormData({ ...pageFormData, priority: Number.parseFloat(e.target.value) })
+                      }
+                      dir="ltr"
+                      className="bg-background"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -518,6 +736,7 @@ export default function SEOManagementPage() {
                         <code className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded" dir="ltr">
                           {page.page_path}
                         </code>
+                        <span className="text-xs text-muted-foreground">الأولوية: {page.priority || 0.5}</span>
                       </div>
                       <h4 className="font-medium mt-1 truncate">{page.page_title}</h4>
                       {page.meta_description && (
@@ -538,16 +757,129 @@ export default function SEOManagementPage() {
             </div>
           </div>
         )}
+
+        {activeTab === "advanced" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <Code className="h-5 w-5 text-primary" />
+              إعدادات SEO المتقدمة
+            </h2>
+
+            <div className="space-y-2">
+              <Label>Robots.txt (إضافات مخصصة)</Label>
+              <Textarea
+                value={settings.robots_txt}
+                onChange={(e) => setSettings({ ...settings, robots_txt: e.target.value })}
+                rows={8}
+                dir="ltr"
+                className="bg-muted font-mono text-sm resize-none"
+                placeholder={`User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://example.com/sitemap.xml`}
+              />
+              <p className="text-xs text-muted-foreground">تحكم في كيفية فهرسة محركات البحث لموقعك</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>البيانات المنظمة (Structured Data / JSON-LD)</Label>
+              <Textarea
+                value={settings.structured_data}
+                onChange={(e) => setSettings({ ...settings, structured_data: e.target.value })}
+                rows={10}
+                dir="ltr"
+                className="bg-muted font-mono text-sm resize-none"
+                placeholder={`{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "الشيخ السيد مراد",
+  "url": "https://example.com",
+  "logo": "https://example.com/logo.png"
+}`}
+              />
+              <p className="text-xs text-muted-foreground">أضف بيانات منظمة لتحسين ظهورك في نتائج البحث</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                <div>
+                  <h3 className="font-bold">خريطة الموقع التلقائية</h3>
+                  <p className="text-sm text-muted-foreground">إنشاء sitemap.xml تلقائياً</p>
+                </div>
+                <Switch
+                  checked={settings.sitemap_enabled}
+                  onCheckedChange={(checked) => setSettings({ ...settings, sitemap_enabled: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                <div>
+                  <h3 className="font-bold">توليد Meta تلقائي</h3>
+                  <p className="text-sm text-muted-foreground">إنشاء وصف تلقائي للصفحات</p>
+                </div>
+                <Switch
+                  checked={settings.auto_generate_meta}
+                  onCheckedChange={(checked) => setSettings({ ...settings, auto_generate_meta: checked })}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "cache" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <Trash className="h-5 w-5 text-primary" />
+              مسح الكاش وخريطة الموقع
+            </h2>
+
+            <div className="grid gap-6">
+              <div className="bg-muted/50 rounded-xl p-6">
+                <h3 className="font-bold mb-2 flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  مسح كاش جميع الصفحات
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  سيتم إعادة تحميل جميع الصفحات الرئيسية. استخدم هذا إذا لم تظهر التغييرات.
+                </p>
+                <Button
+                  onClick={clearCache}
+                  variant="outline"
+                  className="border-red-300 text-red-600 hover:bg-red-50 bg-transparent"
+                >
+                  <Trash className="h-4 w-4 ml-2" />
+                  مسح الكاش الآن
+                </Button>
+              </div>
+
+              <div className="bg-muted/50 rounded-xl p-6">
+                <h3 className="font-bold mb-2 flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4" />
+                  إنشاء خريطة الموقع
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  إنشاء ملف sitemap.xml جديد يحتوي على جميع صفحات الموقع.
+                </p>
+                <Button onClick={generateSitemap}>
+                  <Plus className="h-4 w-4 ml-2" />
+                  إنشاء خريطة الموقع
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Actions - only show for non-pages tabs */}
+      {/* Actions */}
       {activeTab !== "pages" && (
         <div className="flex justify-end gap-4">
           <Button variant="outline" onClick={loadSettings}>
             <RefreshCw className="h-4 w-4 ml-2" />
             إعادة تحميل
           </Button>
-          <Button onClick={saveSettings} disabled={saving}>
+          <Button onClick={saveSettings} disabled={saving} className="bg-primary hover:bg-primary-hover text-white">
             {saving ? (
               <>
                 <RefreshCw className="h-4 w-4 ml-2 animate-spin" />

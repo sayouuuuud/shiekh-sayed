@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import type { Metadata } from "next"
+import { Calendar, ChevronRight, ChevronLeft, CalendarDays, CalendarRange, Clock, MapPin } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "الجدول الزمني",
@@ -114,8 +115,13 @@ export default async function SchedulePage({
     .select("*")
     .gte("event_date", firstDayOfMonth.toISOString().split("T")[0])
     .lte("event_date", lastDayOfMonth.toISOString().split("T")[0])
-    .eq("is_active", true)
     .order("event_date", { ascending: true })
+
+  const { data: weeklySchedule } = await supabase
+    .from("weekly_schedule")
+    .select("*")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true })
 
   // Generate calendar grid
   const daysInMonth = lastDayOfMonth.getDate()
@@ -182,9 +188,7 @@ export default async function SchedulePage({
       {/* Header */}
       <header className="bg-accent-light dark:bg-card py-12 relative overflow-hidden">
         <div className="absolute -left-10 -top-10 opacity-5 dark:opacity-10 text-primary dark:text-white pointer-events-none select-none">
-          <span className="material-icons-outlined" style={{ fontSize: "300px" }}>
-            calendar_month
-          </span>
+          <Calendar className="h-72 w-72" />
         </div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <span className="inline-block px-3 py-1 bg-white dark:bg-card text-secondary text-xs rounded-full mb-4 border border-secondary/20">
@@ -200,6 +204,26 @@ export default async function SchedulePage({
       </header>
 
       <div className="container mx-auto px-4 py-12">
+        {weeklySchedule && weeklySchedule.length > 0 && (
+          <div className="mb-12 bg-card rounded-2xl p-6 border border-border">
+            <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+              <CalendarRange className="h-5 w-5 text-primary" />
+              الجدول الأسبوعي الثابت
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {weeklySchedule.map((item: any) => (
+                <div key={item.id} className="bg-background rounded-xl p-4 border border-border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">{item.day_name}</span>
+                    <span className="text-xs text-text-muted">{item.time_text}</span>
+                  </div>
+                  <h3 className="font-bold text-foreground">{item.title}</h3>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Month Navigation */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <div className="flex items-center bg-card rounded-xl shadow-sm p-2 border border-border">
@@ -207,7 +231,7 @@ export default async function SchedulePage({
               href={`/schedule?month=${prevMonth}&year=${prevYear}`}
               className="p-2 hover:bg-muted rounded-lg text-text-muted transition"
             >
-              <span className="material-icons-outlined">chevron_right</span>
+              <ChevronRight className="h-5 w-5" />
             </Link>
             <h2 className="px-6 font-bold text-lg text-primary dark:text-white">
               {getArabicMonthName(currentMonth)} {currentYear}
@@ -216,16 +240,16 @@ export default async function SchedulePage({
               href={`/schedule?month=${nextMonth}&year=${nextYear}`}
               className="p-2 hover:bg-muted rounded-lg text-text-muted transition"
             >
-              <span className="material-icons-outlined">chevron_left</span>
+              <ChevronLeft className="h-5 w-5" />
             </Link>
           </div>
           <div className="flex gap-2">
             <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm shadow-sm flex items-center gap-2">
-              <span className="material-icons-outlined text-base">calendar_view_month</span>
+              <CalendarDays className="h-4 w-4" />
               شهر
             </button>
             <button className="px-4 py-2 bg-card text-text-muted border border-border hover:bg-muted rounded-lg text-sm transition flex items-center gap-2">
-              <span className="material-icons-outlined text-base">calendar_view_week</span>
+              <CalendarRange className="h-4 w-4" />
               أسبوع
             </button>
           </div>
@@ -279,11 +303,6 @@ export default async function SchedulePage({
                         key={event.id}
                         className={`p-2 rounded-lg ${styles.bg} border-r-2 ${styles.border} cursor-pointer hover:shadow-md transition relative overflow-hidden`}
                       >
-                        {event.is_live && (
-                          <div className="absolute top-0 left-0 bg-red-500 text-white text-[8px] px-1 py-0.5 rounded-br">
-                            مباشر
-                          </div>
-                        )}
                         <div className={`text-[10px] ${styles.text} font-bold mb-1`}>
                           {getEventTypeLabel(event.event_type)}
                         </div>
@@ -292,13 +311,13 @@ export default async function SchedulePage({
                         </div>
                         {event.event_time && (
                           <div className="flex items-center gap-1 mt-1 text-[10px] text-text-muted">
-                            <span className="material-icons-outlined text-[10px]">schedule</span>
+                            <Clock className="h-2.5 w-2.5" />
                             {event.event_time.substring(0, 5)}
                           </div>
                         )}
                         {event.location && (
                           <div className="flex items-center gap-1 mt-0.5 text-[10px] text-text-muted">
-                            <span className="material-icons-outlined text-[10px]">location_on</span>
+                            <MapPin className="h-2.5 w-2.5" />
                             {event.location}
                           </div>
                         )}

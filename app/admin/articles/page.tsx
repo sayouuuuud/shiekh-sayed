@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/client"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
 import { FileUpload } from "@/components/admin/file-upload"
 import { Pagination } from "@/components/admin/pagination"
+import { FileText, Plus, Eye, Search, Edit, Trash2, Loader2, CheckCircle, FileEdit } from "lucide-react"
 
 interface Article {
   id: string
@@ -19,14 +20,22 @@ interface Article {
   author: string
   featured_image?: string
   publish_status: string
+  category_id?: string
   views_count: number
   created_at: string
+}
+
+interface Category {
+  id: string
+  name: string
+  type: string
 }
 
 const ITEMS_PER_PAGE = 10
 
 export default function ManageArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -38,6 +47,7 @@ export default function ManageArticlesPage() {
     author: "الشيخ السيد مراد",
     featured_image: "",
     publish_status: "draft",
+    category_id: "", // updated default value to be a non-empty string
   })
   const [submitting, setSubmitting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -63,8 +73,14 @@ export default function ManageArticlesPage() {
     setLoading(false)
   }
 
+  const fetchCategories = async () => {
+    const { data } = await supabase.from("categories").select("*").eq("type", "article")
+    if (data) setCategories(data)
+  }
+
   useEffect(() => {
     fetchArticles()
+    fetchCategories()
   }, [currentPage])
 
   const handleAddArticle = async (e: React.FormEvent) => {
@@ -73,6 +89,7 @@ export default function ManageArticlesPage() {
     const { error } = await supabase.from("articles").insert({
       ...formData,
       featured_image: formData.featured_image || null,
+      category_id: formData.category_id || null,
     })
     if (!error) {
       setIsAddModalOpen(false)
@@ -93,6 +110,7 @@ export default function ManageArticlesPage() {
       .update({
         ...formData,
         featured_image: formData.featured_image || null,
+        category_id: formData.category_id || null,
       })
       .eq("id", editingArticle.id)
     if (!error) {
@@ -117,6 +135,7 @@ export default function ManageArticlesPage() {
       author: article.author,
       featured_image: article.featured_image || "",
       publish_status: article.publish_status,
+      category_id: article.category_id || "", // updated default value to be a non-empty string
     })
     setIsEditModalOpen(true)
   }
@@ -128,11 +147,120 @@ export default function ManageArticlesPage() {
       author: "الشيخ السيد مراد",
       featured_image: "",
       publish_status: "draft",
+      category_id: "", // updated default value to be a non-empty string
     })
   }
 
   const filteredArticles = articles.filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()))
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+
+  const getCategoryName = (categoryId: string | undefined) => {
+    if (!categoryId) return null
+    const category = categories.find((c) => c.id === categoryId)
+    return category?.name
+  }
+
+  const ArticleForm = ({ onSubmit, isEdit = false }: { onSubmit: (e: React.FormEvent) => void; isEdit?: boolean }) => (
+    <form onSubmit={onSubmit} className="space-y-6 mt-4">
+      <div className="space-y-2">
+        <Label>عنوان المقال</Label>
+        <Input
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          placeholder="عنوان المقال"
+          className="bg-muted dark:bg-background-alt"
+          required
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-2">
+          <Label>الكاتب</Label>
+          <Input
+            value={formData.author}
+            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+            className="bg-muted dark:bg-background-alt"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>التصنيف</Label>
+          <Select
+            value={formData.category_id}
+            onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+          >
+            <SelectTrigger className="bg-muted dark:bg-background-alt">
+              <SelectValue placeholder="اختر التصنيف" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">بدون تصنيف</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>حالة النشر</Label>
+          <Select
+            value={formData.publish_status}
+            onValueChange={(value) => setFormData({ ...formData, publish_status: value })}
+          >
+            <SelectTrigger className="bg-muted dark:bg-background-alt">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft">مسودة</SelectItem>
+              <SelectItem value="published">منشور</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <FileUpload
+        accept="image/*"
+        folder="articles"
+        label="الصورة المميزة"
+        onUploadComplete={(path) => setFormData({ ...formData, featured_image: path })}
+        currentFile={formData.featured_image}
+      />
+
+      <div className="space-y-2">
+        <Label>محتوى المقال</Label>
+        <RichTextEditor
+          content={formData.content}
+          onChange={(html) => setFormData({ ...formData, content: html })}
+          placeholder="اكتب محتوى المقال هنا..."
+        />
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => {
+            isEdit ? setIsEditModalOpen(false) : setIsAddModalOpen(false)
+            resetForm()
+          }}
+        >
+          إلغاء
+        </Button>
+        <Button type="submit" className="bg-primary hover:bg-primary-hover text-white" disabled={submitting}>
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+              جاري الحفظ...
+            </>
+          ) : isEdit ? (
+            "حفظ التغييرات"
+          ) : (
+            "نشر المقال"
+          )}
+        </Button>
+      </div>
+    </form>
+  )
 
   return (
     <div className="space-y-8">
@@ -140,7 +268,7 @@ export default function ManageArticlesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-primary dark:text-white flex items-center gap-3 font-serif">
-            <span className="material-icons-outlined text-4xl">article</span>
+            <FileText className="h-8 w-8 text-primary" />
             إدارة المقالات والبحوث
           </h1>
           <p className="text-text-muted dark:text-gray-400 mt-2">إضافة وتعديل المقالات العلمية</p>
@@ -148,7 +276,7 @@ export default function ManageArticlesPage() {
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-xl font-bold">
-              <span className="material-icons-outlined ml-2">add</span>
+              <Plus className="h-5 w-5 ml-2" />
               إضافة مقال جديد
             </Button>
           </DialogTrigger>
@@ -156,77 +284,7 @@ export default function ManageArticlesPage() {
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-primary dark:text-white">إضافة مقال جديد</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddArticle} className="space-y-6 mt-4">
-              <div className="space-y-2">
-                <Label>عنوان المقال</Label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="عنوان المقال"
-                  className="bg-muted dark:bg-background-alt"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>الكاتب</Label>
-                  <Input
-                    value={formData.author}
-                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                    className="bg-muted dark:bg-background-alt"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>حالة النشر</Label>
-                  <Select
-                    value={formData.publish_status}
-                    onValueChange={(value) => setFormData({ ...formData, publish_status: value })}
-                  >
-                    <SelectTrigger className="bg-muted dark:bg-background-alt">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">مسودة</SelectItem>
-                      <SelectItem value="published">منشور</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <FileUpload
-                accept="image/*"
-                folder="articles"
-                label="الصورة المميزة"
-                onUploadComplete={(path) => setFormData({ ...formData, featured_image: path })}
-                currentFile={formData.featured_image}
-              />
-
-              <div className="space-y-2">
-                <Label>محتوى المقال</Label>
-                <RichTextEditor
-                  content={formData.content}
-                  onChange={(html) => setFormData({ ...formData, content: html })}
-                  placeholder="اكتب محتوى المقال هنا..."
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => {
-                    setIsAddModalOpen(false)
-                    resetForm()
-                  }}
-                >
-                  إلغاء
-                </Button>
-                <Button type="submit" className="bg-primary hover:bg-primary-hover text-white" disabled={submitting}>
-                  {submitting ? "جاري الحفظ..." : "نشر المقال"}
-                </Button>
-              </div>
-            </form>
+            <ArticleForm onSubmit={handleAddArticle} />
           </DialogContent>
         </Dialog>
       </div>
@@ -239,29 +297,29 @@ export default function ManageArticlesPage() {
             <span className="text-3xl font-bold text-primary dark:text-white">{totalCount}</span>
           </div>
           <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-            <span className="material-icons-outlined">article</span>
+            <FileText className="h-6 w-6" />
           </div>
         </div>
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
           <div>
-            <span className="block text-text-muted text-sm mb-1">المشاهدات</span>
-            <span className="text-3xl font-bold text-secondary">
-              {articles.reduce((acc, a) => acc + (a.views_count || 0), 0).toLocaleString()}
+            <span className="block text-text-muted text-sm mb-1">المنشورة</span>
+            <span className="text-3xl font-bold text-green-600">
+              {articles.filter((a) => a.publish_status === "published").length}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center text-secondary">
-            <span className="material-icons-outlined">visibility</span>
+          <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+            <CheckCircle className="h-6 w-6" />
           </div>
         </div>
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
           <div>
             <span className="block text-text-muted text-sm mb-1">مسودات</span>
-            <span className="text-3xl font-bold text-gray-600 dark:text-gray-300">
+            <span className="text-3xl font-bold text-yellow-600">
               {articles.filter((a) => a.publish_status === "draft").length}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-            <span className="material-icons-outlined">edit_note</span>
+          <div className="w-12 h-12 rounded-full bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
+            <FileEdit className="h-6 w-6" />
           </div>
         </div>
       </div>
@@ -277,12 +335,15 @@ export default function ManageArticlesPage() {
               className="pl-4 pr-10 py-2 rounded-lg w-64 bg-card dark:bg-card"
               placeholder="بحث عن مقال..."
             />
-            <span className="material-icons-outlined absolute right-3 top-2.5 text-text-muted text-lg">search</span>
+            <Search className="absolute right-3 top-2.5 text-text-muted h-5 w-5" />
           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-text-muted">جاري التحميل...</div>
+          <div className="p-12 text-center text-text-muted flex items-center justify-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            جاري التحميل...
+          </div>
         ) : filteredArticles.length === 0 ? (
           <div className="p-12 text-center text-text-muted">{searchQuery ? "لا توجد نتائج" : "لا توجد مقالات بعد"}</div>
         ) : (
@@ -293,6 +354,7 @@ export default function ManageArticlesPage() {
                   <th className="px-6 py-4">#</th>
                   <th className="px-6 py-4">المقال</th>
                   <th className="px-6 py-4">الكاتب</th>
+                  <th className="px-6 py-4">التصنيف</th>
                   <th className="px-6 py-4">المشاهدات</th>
                   <th className="px-6 py-4">الحالة</th>
                   <th className="px-6 py-4 text-center">الإجراءات</th>
@@ -315,7 +377,7 @@ export default function ManageArticlesPage() {
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <span className="material-icons-outlined text-primary">article</span>
+                            <FileText className="h-5 w-5 text-primary" />
                           </div>
                         )}
                         <div>
@@ -327,10 +389,19 @@ export default function ManageArticlesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-text-muted">{article.author}</td>
+                    <td className="px-6 py-4">
+                      {getCategoryName(article.category_id) ? (
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                          {getCategoryName(article.category_id)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-text-muted">-</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 text-sm text-text-muted">{article.views_count || 0}</td>
                     <td className="px-6 py-4">
                       <span
-                        className={`text-xs px-3 py-1 rounded-full font-medium ${article.publish_status === "published" ? "bg-green-50 text-green-600" : "bg-yellow-50 text-yellow-600"}`}
+                        className={`text-xs px-3 py-1 rounded-full font-medium ${article.publish_status === "published" ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"}`}
                       >
                         {article.publish_status === "published" ? "منشور" : "مسودة"}
                       </span>
@@ -339,24 +410,24 @@ export default function ManageArticlesPage() {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => window.open(`/articles/${article.id}`, "_blank")}
-                          className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                           title="عرض"
                         >
-                          <span className="material-icons-outlined text-lg">visibility</span>
+                          <Eye className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => openEditModal(article)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                           title="تعديل"
                         >
-                          <span className="material-icons-outlined text-lg">edit</span>
+                          <Edit className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleDeleteArticle(article.id)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                           title="حذف"
                         >
-                          <span className="material-icons-outlined text-lg">delete_outline</span>
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
@@ -384,69 +455,7 @@ export default function ManageArticlesPage() {
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-primary dark:text-white">تعديل المقال</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleEditArticle} className="space-y-6 mt-4">
-            <div className="space-y-2">
-              <Label>عنوان المقال</Label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="bg-muted dark:bg-background-alt"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label>الكاتب</Label>
-                <Input
-                  value={formData.author}
-                  onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                  className="bg-muted dark:bg-background-alt"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>حالة النشر</Label>
-                <Select
-                  value={formData.publish_status}
-                  onValueChange={(value) => setFormData({ ...formData, publish_status: value })}
-                >
-                  <SelectTrigger className="bg-muted dark:bg-background-alt">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">مسودة</SelectItem>
-                    <SelectItem value="published">منشور</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <FileUpload
-              accept="image/*"
-              folder="articles"
-              label="الصورة المميزة"
-              onUploadComplete={(path) => setFormData({ ...formData, featured_image: path })}
-              currentFile={formData.featured_image}
-            />
-
-            <div className="space-y-2">
-              <Label>محتوى المقال</Label>
-              <RichTextEditor
-                content={formData.content}
-                onChange={(html) => setFormData({ ...formData, content: html })}
-                placeholder="اكتب محتوى المقال هنا..."
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-border">
-              <Button variant="outline" type="button" onClick={() => setIsEditModalOpen(false)}>
-                إلغاء
-              </Button>
-              <Button type="submit" className="bg-primary hover:bg-primary-hover text-white" disabled={submitting}>
-                {submitting ? "جاري الحفظ..." : "حفظ التغييرات"}
-              </Button>
-            </div>
-          </form>
+          <ArticleForm onSubmit={handleEditArticle} isEdit />
         </DialogContent>
       </Dialog>
     </div>

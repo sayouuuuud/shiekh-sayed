@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { BookOpen, Search, ChevronRight, ChevronLeft, FileText, Eye } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "الكتب والمؤلفات",
@@ -24,14 +27,12 @@ export default async function BooksPage({
   const itemsPerPage = 12
   const offset = (currentPage - 1) * itemsPerPage
 
-  // Fetch categories for books
   const { data: categories } = await supabase
     .from("categories")
     .select("*")
     .eq("type", "book")
     .order("name", { ascending: true })
 
-  // Build query
   let query = supabase
     .from("books")
     .select("*", { count: "exact" })
@@ -71,7 +72,7 @@ export default async function BooksPage({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-surface dark:bg-card p-4 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-border dark:border-border">
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <span className="material-icons-outlined text-primary dark:text-secondary">menu_book</span>
+            <BookOpen className="h-5 w-5 text-primary dark:text-secondary" />
             <span className="font-bold text-foreground dark:text-foreground">تصفية الكتب:</span>
           </div>
           <form className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -83,9 +84,7 @@ export default async function BooksPage({
                 placeholder="ابحث عن كتاب..."
                 className="appearance-none bg-background dark:bg-background-alt border border-border dark:border-border text-foreground dark:text-foreground py-2 pr-10 pl-4 rounded-lg focus:outline-none focus:border-primary w-full md:w-64"
               />
-              <span className="material-icons-outlined absolute right-3 top-2.5 text-text-muted pointer-events-none text-sm">
-                search
-              </span>
+              <Search className="absolute right-3 top-2.5 h-4 w-4 text-text-muted pointer-events-none" />
             </div>
             <button
               type="submit"
@@ -125,10 +124,10 @@ export default async function BooksPage({
           </div>
         )}
 
-        {/* Books Grid */}
+        {/* Books Grid - Removed download count from cards */}
         {!books || books.length === 0 ? (
           <div className="text-center py-16 text-text-muted dark:text-text-subtext">
-            <span className="material-icons-outlined text-6xl mb-4">menu_book</span>
+            <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
             <p className="text-lg">لا توجد كتب منشورة حالياً</p>
           </div>
         ) : (
@@ -147,15 +146,13 @@ export default async function BooksPage({
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="material-icons-outlined text-5xl text-primary/30 dark:text-primary/50">
-                        menu_book
-                      </span>
+                      <BookOpen className="h-12 w-12 text-primary/30 dark:text-primary/50" />
                     </div>
                   )}
                   {book.pdf_file_path && (
                     <div className="absolute top-2 right-2">
                       <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1">
-                        <span className="material-icons-outlined text-xs">picture_as_pdf</span>
+                        <FileText className="h-3 w-3" />
                         PDF
                       </span>
                     </div>
@@ -169,25 +166,31 @@ export default async function BooksPage({
                   <div className="mt-auto flex items-center gap-2">
                     <Link
                       href={`/books/${book.id}`}
-                      className="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-1.5 px-2 rounded-lg text-xs font-medium transition"
+                      className="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-1.5 px-2 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1"
                     >
+                      <Eye className="h-3 w-3" />
                       التفاصيل
                     </Link>
                     {book.pdf_file_path && (
-                      <a
-                        href={book.pdf_file_path}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-8 h-8 flex items-center justify-center bg-secondary/10 hover:bg-secondary/20 text-secondary rounded-lg transition"
-                        title="تحميل PDF"
-                      >
-                        <span className="material-icons-outlined text-sm">download</span>
-                      </a>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-8 h-8 p-0 flex items-center justify-center bg-transparent"
+                            title="قراءة"
+                          >
+                            <BookOpen className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl h-[80vh]">
+                          <DialogHeader>
+                            <DialogTitle>{book.title}</DialogTitle>
+                          </DialogHeader>
+                          <iframe src={book.pdf_file_path} className="w-full h-full rounded-lg" title={book.title} />
+                        </DialogContent>
+                      </Dialog>
                     )}
-                  </div>
-                  <div className="flex items-center justify-center gap-1 text-xs text-text-muted mt-2 pt-2 border-t border-border">
-                    <span className="material-icons-outlined text-xs">download</span>
-                    {book.download_count || 0} تحميل
                   </div>
                 </div>
               </article>
@@ -204,7 +207,7 @@ export default async function BooksPage({
                   href={`/books?page=${currentPage - 1}${params.category ? `&category=${params.category}` : ""}${params.search ? `&search=${params.search}` : ""}`}
                   className="w-10 h-10 flex items-center justify-center rounded-lg border border-border dark:border-border text-text-muted dark:text-text-subtext hover:bg-background dark:hover:bg-background-alt"
                 >
-                  <span className="material-icons-outlined text-lg">chevron_right</span>
+                  <ChevronRight className="h-5 w-5" />
                 </Link>
               )}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -237,7 +240,7 @@ export default async function BooksPage({
                   href={`/books?page=${currentPage + 1}${params.category ? `&category=${params.category}` : ""}${params.search ? `&search=${params.search}` : ""}`}
                   className="w-10 h-10 flex items-center justify-center rounded-lg border border-border dark:border-border text-text-muted dark:text-text-subtext hover:bg-background dark:hover:bg-background-alt"
                 >
-                  <span className="material-icons-outlined text-lg">chevron_left</span>
+                  <ChevronLeft className="h-5 w-5" />
                 </Link>
               )}
             </nav>

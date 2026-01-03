@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 import { Pagination } from "@/components/admin/pagination"
+import { Users, CheckCircle, XCircle, Search, Download, Loader2, ToggleLeft, ToggleRight, Trash2 } from "lucide-react"
 
 interface Subscriber {
   id: string
-  email: string
+  email?: string
+  whatsapp_number?: string
+  telegram_username?: string
   subscribed_at: string
   active: boolean
 }
@@ -61,10 +64,9 @@ export default function AdminSubscribersPage() {
   const handleExportCSV = async () => {
     setExporting(true)
     try {
-      // Fetch all subscribers for export
       const { data: allSubscribers, error } = await supabase
         .from("subscribers")
-        .select("email, subscribed_at, active")
+        .select("whatsapp_number, telegram_username, email, subscribed_at, active")
         .order("subscribed_at", { ascending: false })
 
       if (error || !allSubscribers || allSubscribers.length === 0) {
@@ -72,19 +74,17 @@ export default function AdminSubscribersPage() {
         return
       }
 
-      // Generate CSV content
-      const csvHeader = "البريد الإلكتروني,تاريخ الاشتراك,الحالة\n"
+      const csvHeader = "رقم الواتساب,معرف التليجرام,البريد الإلكتروني,تاريخ الاشتراك,الحالة\n"
       const csvRows = allSubscribers
         .map((sub) => {
           const date = new Date(sub.subscribed_at).toLocaleDateString("ar-EG")
           const status = sub.active ? "نشط" : "غير نشط"
-          return `${sub.email},${date},${status}`
+          return `${sub.whatsapp_number || ""},${sub.telegram_username || ""},${sub.email || ""},${date},${status}`
         })
         .join("\n")
 
-      const csvContent = "\uFEFF" + csvHeader + csvRows // Add BOM for Arabic support
+      const csvContent = "\uFEFF" + csvHeader + csvRows
 
-      // Create download link
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
       const url = URL.createObjectURL(blob)
       const link = document.createElement("a")
@@ -102,32 +102,46 @@ export default function AdminSubscribersPage() {
     }
   }
 
-  const filteredSubscribers = subscribers.filter((s) => s.email.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredSubscribers = subscribers.filter(
+    (s) =>
+      s.whatsapp_number?.includes(searchQuery) ||
+      s.telegram_username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
   const activeCount = subscribers.filter((s) => s.active).length
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header - replaced material icons with Lucide */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground dark:text-white flex items-center gap-3">
-            <span className="material-icons-outlined text-3xl text-primary">group</span>
+            <Users className="h-8 w-8 text-primary" />
             إدارة المشتركين
           </h1>
-          <p className="text-sm text-text-muted mt-1">قائمة المشتركين في النشرة البريدية</p>
+          <p className="text-sm text-text-muted mt-1">قائمة المشتركين في مجموعات الواتساب والتليجرام</p>
         </div>
         <Button onClick={handleExportCSV} disabled={exporting} className="bg-primary hover:bg-primary-hover text-white">
-          <span className="material-icons-outlined ml-2">{exporting ? "hourglass_empty" : "download"}</span>
-          {exporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+          {exporting ? (
+            <>
+              <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+              جاري التصدير...
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4 ml-2" />
+              تصدير إلى CSV
+            </>
+          )}
         </Button>
       </div>
 
-      {/* Stats */}
+      {/* Stats - replaced material icons with Lucide */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-card p-5 rounded-xl border border-border flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
-            <span className="material-icons-outlined">group</span>
+            <Users className="h-6 w-6" />
           </div>
           <div>
             <p className="text-sm text-text-muted">إجمالي المشتركين</p>
@@ -136,7 +150,7 @@ export default function AdminSubscribersPage() {
         </div>
         <div className="bg-card p-5 rounded-xl border border-border flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600">
-            <span className="material-icons-outlined">check_circle</span>
+            <CheckCircle className="h-6 w-6" />
           </div>
           <div>
             <p className="text-sm text-text-muted">نشط</p>
@@ -145,7 +159,7 @@ export default function AdminSubscribersPage() {
         </div>
         <div className="bg-card p-5 rounded-xl border border-border flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-            <span className="material-icons-outlined">cancel</span>
+            <XCircle className="h-6 w-6" />
           </div>
           <div>
             <p className="text-sm text-text-muted">غير نشط</p>
@@ -154,25 +168,26 @@ export default function AdminSubscribersPage() {
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search - replaced material icons with Lucide */}
       <div className="bg-card p-4 rounded-xl border border-border">
         <div className="relative w-full md:w-1/3">
-          <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-text-muted">
-            <span className="material-icons-outlined">search</span>
-          </span>
+          <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-text-muted h-5 w-5" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-10 bg-muted dark:bg-background-alt"
-            placeholder="ابحث بالبريد الإلكتروني..."
+            placeholder="ابحث برقم الواتساب أو معرف التليجرام..."
           />
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table - replaced material icons with Lucide */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-text-muted">جاري التحميل...</div>
+          <div className="p-12 text-center text-text-muted flex flex-col items-center gap-2">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            جاري التحميل...
+          </div>
         ) : filteredSubscribers.length === 0 ? (
           <div className="p-12 text-center text-text-muted">
             {searchQuery ? "لا توجد نتائج" : "لا يوجد مشتركون بعد"}
@@ -184,7 +199,10 @@ export default function AdminSubscribersPage() {
                 <tr>
                   <th className="text-right px-6 py-4 text-sm font-bold text-foreground dark:text-white">#</th>
                   <th className="text-right px-6 py-4 text-sm font-bold text-foreground dark:text-white">
-                    البريد الإلكتروني
+                    رقم الواتساب
+                  </th>
+                  <th className="text-right px-6 py-4 text-sm font-bold text-foreground dark:text-white">
+                    معرف التليجرام
                   </th>
                   <th className="text-right px-6 py-4 text-sm font-bold text-foreground dark:text-white">
                     تاريخ الاشتراك
@@ -204,7 +222,12 @@ export default function AdminSubscribersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-medium text-foreground dark:text-white" dir="ltr">
-                        {subscriber.email}
+                        {subscriber.whatsapp_number || "-"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-foreground dark:text-white" dir="ltr">
+                        {subscriber.telegram_username || "-"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-text-muted">
@@ -228,16 +251,14 @@ export default function AdminSubscribersPage() {
                           }`}
                           title={subscriber.active ? "إلغاء التفعيل" : "تفعيل"}
                         >
-                          <span className="material-icons-outlined text-lg">
-                            {subscriber.active ? "toggle_off" : "toggle_on"}
-                          </span>
+                          {subscriber.active ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                         </button>
                         <button
                           onClick={() => handleDeleteSubscriber(subscriber.id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                           title="حذف"
                         >
-                          <span className="material-icons-outlined text-lg">delete</span>
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
                     </td>

@@ -12,6 +12,19 @@ import { createClient } from "@/lib/supabase/client"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
 import { FileUpload } from "@/components/admin/file-upload"
 import { Pagination } from "@/components/admin/pagination"
+import {
+  GraduationCap,
+  PlusCircle,
+  BookOpen,
+  History,
+  CheckCircle,
+  Search,
+  Play,
+  Music,
+  Eye,
+  Edit,
+  Trash2,
+} from "lucide-react"
 
 interface Lesson {
   id: string
@@ -335,7 +348,7 @@ export default function ManageDarsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground dark:text-white font-serif flex items-center gap-3">
-            <span className="material-icons-outlined text-4xl text-primary">school</span>
+            <GraduationCap className="h-8 w-8 text-primary" />
             إدارة الدروس العلمية
           </h1>
           <p className="text-text-muted dark:text-gray-400 mt-2">إضافة وتعديل الدروس والمحاضرات</p>
@@ -343,7 +356,7 @@ export default function ManageDarsPage() {
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-xl font-bold">
-              <span className="material-icons-outlined ml-2">add_circle</span>
+              <PlusCircle className="h-5 w-5 ml-2" />
               إضافة درس جديد
             </Button>
           </DialogTrigger>
@@ -360,7 +373,7 @@ export default function ManageDarsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-secondary flex items-center justify-center">
-            <span className="material-icons-outlined text-3xl">school</span>
+            <GraduationCap className="h-7 w-7" />
           </div>
           <div>
             <p className="text-sm text-text-muted">إجمالي الدروس</p>
@@ -369,7 +382,7 @@ export default function ManageDarsPage() {
         </div>
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
-            <span className="material-icons-outlined text-3xl">menu_book</span>
+            <BookOpen className="h-7 w-7" />
           </div>
           <div>
             <p className="text-sm text-text-muted">دروس فقه</p>
@@ -380,7 +393,7 @@ export default function ManageDarsPage() {
         </div>
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 flex items-center justify-center">
-            <span className="material-icons-outlined text-3xl">history_edu</span>
+            <History className="h-7 w-7" />
           </div>
           <div>
             <p className="text-sm text-text-muted">دروس سيرة</p>
@@ -391,7 +404,7 @@ export default function ManageDarsPage() {
         </div>
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center">
-            <span className="material-icons-outlined text-3xl">check_circle</span>
+            <CheckCircle className="h-7 w-7" />
           </div>
           <div>
             <p className="text-sm text-text-muted">المنشورة</p>
@@ -407,9 +420,7 @@ export default function ManageDarsPage() {
         <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h3 className="text-xl font-bold text-foreground dark:text-white">قائمة الدروس</h3>
           <div className="relative">
-            <span className="material-icons-outlined absolute top-1/2 right-3 transform -translate-y-1/2 text-text-muted">
-              search
-            </span>
+            <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 h-5 w-5 text-text-muted" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -449,9 +460,11 @@ export default function ManageDarsPage() {
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <span className="material-icons-outlined text-primary">
-                              {lesson.type === "video" ? "play_circle" : "audiotrack"}
-                            </span>
+                            {lesson.type === "video" ? (
+                              <Play className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Music className="h-5 w-5 text-primary" />
+                            )}
                           </div>
                         )}
                         <div>
@@ -494,21 +507,21 @@ export default function ManageDarsPage() {
                           className="p-2 rounded-lg hover:bg-muted text-text-muted hover:text-gray-600 transition-colors"
                           title="عرض"
                         >
-                          <span className="material-icons-outlined">visibility</span>
+                          <Eye className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => openEditModal(lesson)}
-                          className="p-2 rounded-lg hover:bg-muted text-text-muted hover:text-primary transition-colors"
+                          className="p-2 rounded-lg hover:bg-muted text-text-muted hover:text-blue-600 transition-colors"
                           title="تعديل"
                         >
-                          <span className="material-icons-outlined">edit</span>
+                          <Edit className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleDeleteLesson(lesson.id)}
-                          className="p-2 rounded-lg hover:bg-red-50 text-text-muted hover:text-red-600 transition-colors"
+                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors"
                           title="حذف"
                         >
-                          <span className="material-icons-outlined">delete</span>
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
@@ -518,17 +531,9 @@ export default function ManageDarsPage() {
             </table>
           </div>
         )}
-
-        <div className="p-4 border-t border-border">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            totalItems={totalCount}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
-        </div>
       </div>
+
+      {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

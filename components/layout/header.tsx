@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { createClient } from "@/lib/supabase/client"
 
 const defaultNavLinks = [
   { href: "/", label: "الرئيسية" },
@@ -32,7 +33,8 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [scrolled, setScrolled] = useState(false)
-  const [navLinks] = useState<{ href: string; label: string }[]>(defaultNavLinks)
+  const [navLinks, setNavLinks] = useState<{ href: string; label: string }[]>(defaultNavLinks)
+  const [logoPath, setLogoPath] = useState<string | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,6 +54,31 @@ export function Header() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [searchOpen])
 
+  useEffect(() => {
+    async function loadNavbarAndSettings() {
+      const supabase = createClient()
+
+      const { data: navData } = await supabase
+        .from("navbar_items")
+        .select("*")
+        .eq("is_active", true)
+        .order("order_index", { ascending: true })
+
+      if (navData && navData.length > 0) {
+        setNavLinks(navData.map((item: NavItem) => ({ href: item.href, label: item.label })))
+      }
+
+      // Load logo from appearance settings
+      const { data: appearanceData } = await supabase.from("appearance_settings").select("site_logo_path").single()
+
+      if (appearanceData?.site_logo_path) {
+        setLogoPath(appearanceData.site_logo_path)
+      }
+    }
+
+    loadNavbarAndSettings()
+  }, [])
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
@@ -69,22 +96,17 @@ export function Header() {
           scrolled ? "shadow-md border-b border-border" : "shadow-sm",
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-1">
           <div className="flex justify-between h-16 items-center">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="text-primary group-hover:scale-105 transition-transform">
-                <span className="material-icons-outlined text-4xl">mosque</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg text-primary dark:text-white font-serif leading-tight">
-                  الشيخ السيد مراد
-                </span>
-                <span className="text-xs text-text-muted dark:text-text-subtext">عالم أزهري</span>
-              </div>
+            <Link href="/" className="flex items-center group">
+              {logoPath ? (
+                <img src={logoPath || "/placeholder.svg"} alt="شعار الموقع" className="h-12 object-contain" />
+              ) : (
+                <img src="/islamic-mosque-logo-arabic.jpg" alt="شعار الموقع" className="h-12 object-contain w-max" />
+              )}
             </Link>
 
-            {/* Navigation - Desktop */}
+            {/* Navigation - Desktop (Center) */}
             <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
               {navLinks.map((link) => (
                 <Link
@@ -102,7 +124,7 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Actions */}
+            {/* Actions (Left) */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSearchOpen(true)}

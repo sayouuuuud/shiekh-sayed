@@ -10,13 +10,28 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { createClient } from "@/lib/supabase/client"
+import {
+  Calendar,
+  Plus,
+  Repeat,
+  CalendarCheck,
+  Radio,
+  Edit,
+  Trash2,
+  Clock,
+  MapPin,
+  CalendarDays,
+  Loader2,
+} from "lucide-react"
 
 interface ScheduleEvent {
   id: string
   title: string
   description: string | null
   event_type: string
-  event_date: string
+  type: "weekly" | "one_time"
+  day_of_week: string | null
+  event_date: string | null
   event_time: string | null
   location: string | null
   is_live: boolean
@@ -32,17 +47,30 @@ const eventTypes = [
   { value: "general", label: "عام", color: "bg-gray-500" },
 ]
 
+const daysOfWeek = [
+  { value: "sunday", label: "الأحد" },
+  { value: "monday", label: "الاثنين" },
+  { value: "tuesday", label: "الثلاثاء" },
+  { value: "wednesday", label: "الأربعاء" },
+  { value: "thursday", label: "الخميس" },
+  { value: "friday", label: "الجمعة" },
+  { value: "saturday", label: "السبت" },
+]
+
 export default function AdminSchedulePage() {
   const [events, setEvents] = useState<ScheduleEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [filterType, setFilterType] = useState<"all" | "weekly" | "one_time">("all")
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     event_type: "fiqh",
+    type: "weekly" as "weekly" | "one_time",
+    day_of_week: "friday",
     event_date: "",
     event_time: "",
     location: "",
@@ -54,7 +82,7 @@ export default function AdminSchedulePage() {
 
   const fetchEvents = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from("schedule_events").select("*").order("event_date", { ascending: false })
+    const { data, error } = await supabase.from("events").select("*").order("created_at", { ascending: false })
 
     if (!error && data) {
       setEvents(data)
@@ -71,18 +99,31 @@ export default function AdminSchedulePage() {
     setSubmitting(true)
 
     try {
+      const eventData = {
+        title: formData.title,
+        description: formData.description || null,
+        event_type: formData.event_type,
+        type: formData.type,
+        day_of_week: formData.type === "weekly" ? formData.day_of_week : null,
+        event_date: formData.type === "one_time" ? formData.event_date : null,
+        event_time: formData.event_time || null,
+        location: formData.location || null,
+        is_live: formData.is_live,
+        is_active: formData.is_active,
+      }
+
       if (editingEvent) {
         const { error } = await supabase
-          .from("schedule_events")
+          .from("events")
           .update({
-            ...formData,
+            ...eventData,
             updated_at: new Date().toISOString(),
           })
           .eq("id", editingEvent.id)
 
         if (error) throw error
       } else {
-        const { error } = await supabase.from("schedule_events").insert(formData)
+        const { error } = await supabase.from("events").insert(eventData)
         if (error) throw error
       }
 
@@ -100,14 +141,14 @@ export default function AdminSchedulePage() {
   const handleDelete = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا الحدث؟")) return
 
-    const { error } = await supabase.from("schedule_events").delete().eq("id", id)
+    const { error } = await supabase.from("events").delete().eq("id", id)
     if (!error) {
       fetchEvents()
     }
   }
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
-    await supabase.from("schedule_events").update({ is_active: !currentStatus }).eq("id", id)
+    await supabase.from("events").update({ is_active: !currentStatus }).eq("id", id)
     fetchEvents()
   }
 
@@ -117,7 +158,9 @@ export default function AdminSchedulePage() {
       title: event.title,
       description: event.description || "",
       event_type: event.event_type,
-      event_date: event.event_date,
+      type: event.type || "weekly",
+      day_of_week: event.day_of_week || "friday",
+      event_date: event.event_date || "",
       event_time: event.event_time || "",
       location: event.location || "",
       is_live: event.is_live,
@@ -131,6 +174,8 @@ export default function AdminSchedulePage() {
       title: "",
       description: "",
       event_type: "fiqh",
+      type: "weekly",
+      day_of_week: "friday",
       event_date: "",
       event_time: "",
       location: "",
@@ -144,16 +189,25 @@ export default function AdminSchedulePage() {
     return eventTypes.find((t) => t.value === type) || eventTypes[4]
   }
 
+  const getDayLabel = (day: string | null) => {
+    return daysOfWeek.find((d) => d.value === day)?.label || day
+  }
+
+  const filteredEvents = events.filter((event) => {
+    if (filterType === "all") return true
+    return event.type === filterType
+  })
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground dark:text-white font-serif flex items-center gap-3">
-            <span className="material-icons-outlined text-4xl text-primary">calendar_month</span>
+            <Calendar className="h-8 w-8 text-primary" />
             إدارة الجدول الزمني
           </h1>
-          <p className="text-text-muted mt-2">إضافة وتعديل الأحداث والدروس في التقويم</p>
+          <p className="text-text-muted mt-2">إدارة الأحداث الأسبوعية والمناسبات الخاصة</p>
         </div>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
@@ -164,11 +218,14 @@ export default function AdminSchedulePage() {
                 setIsModalOpen(true)
               }}
             >
-              <span className="material-icons-outlined ml-2">add_circle</span>
+              <Plus className="h-4 w-4 ml-2" />
               إضافة حدث جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogContent
+            className="sm:max-w-2xl bg-card max-h-[90vh] overflow-y-auto"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-primary">
                 {editingEvent ? "تعديل الحدث" : "إضافة حدث جديد"}
@@ -207,6 +264,44 @@ export default function AdminSchedulePage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>تصنيف الحدث *</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: "weekly" | "one_time") => setFormData({ ...formData, type: value })}
+                >
+                  <SelectTrigger className="bg-muted">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">أسبوعي متكرر</SelectItem>
+                    <SelectItem value="one_time">مناسبة خاصة (مرة واحدة)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {formData.type === "weekly" ? (
+                <div className="space-y-2">
+                  <Label>يوم الأسبوع *</Label>
+                  <Select
+                    value={formData.day_of_week}
+                    onValueChange={(value) => setFormData({ ...formData, day_of_week: value })}
+                  >
+                    <SelectTrigger className="bg-muted">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {daysOfWeek.map((day) => (
+                        <SelectItem key={day.value} value={day.value}>
+                          {day.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
                 <div className="space-y-2">
                   <Label>التاريخ *</Label>
                   <Input
@@ -214,9 +309,12 @@ export default function AdminSchedulePage() {
                     value={formData.event_date}
                     onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
                     className="bg-muted"
-                    required
+                    required={formData.type === "one_time"}
                   />
                 </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>الوقت</Label>
                   <Input
@@ -226,7 +324,7 @@ export default function AdminSchedulePage() {
                     className="bg-muted"
                   />
                 </div>
-                <div className="space-y-2 md:col-span-2">
+                <div className="space-y-2">
                   <Label>المكان</Label>
                   <Input
                     value={formData.location}
@@ -235,24 +333,26 @@ export default function AdminSchedulePage() {
                     className="bg-muted"
                   />
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>الوصف</Label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="وصف مختصر للحدث..."
-                    className="bg-muted resize-none"
-                    rows={3}
+              </div>
+
+              <div className="space-y-2">
+                <Label>الوصف</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="وصف مختصر للحدث..."
+                  className="bg-muted resize-none"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_live}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_live: checked })}
                   />
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={formData.is_live}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_live: checked })}
-                    />
-                    <Label>بث مباشر</Label>
-                  </div>
+                  <Label>بث مباشر</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
@@ -275,7 +375,16 @@ export default function AdminSchedulePage() {
                   إلغاء
                 </Button>
                 <Button type="submit" className="bg-primary hover:bg-primary-hover text-white" disabled={submitting}>
-                  {submitting ? "جاري الحفظ..." : editingEvent ? "تحديث" : "إضافة"}
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                      جاري الحفظ...
+                    </>
+                  ) : editingEvent ? (
+                    "تحديث"
+                  ) : (
+                    "إضافة"
+                  )}
                 </Button>
               </div>
             </form>
@@ -287,7 +396,7 @@ export default function AdminSchedulePage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card p-6 rounded-xl border border-border flex items-center gap-4">
           <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <span className="material-icons-outlined">event</span>
+            <CalendarDays className="h-6 w-6" />
           </div>
           <div>
             <p className="text-sm text-text-muted">إجمالي الأحداث</p>
@@ -295,47 +404,72 @@ export default function AdminSchedulePage() {
           </div>
         </div>
         <div className="bg-card p-6 rounded-xl border border-border flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600">
-            <span className="material-icons-outlined">check_circle</span>
+          <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600">
+            <Repeat className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-sm text-text-muted">مفعّلة</p>
-            <p className="text-2xl font-bold text-green-600">{events.filter((e) => e.is_active).length}</p>
+            <p className="text-sm text-text-muted">أسبوعية</p>
+            <p className="text-2xl font-bold text-blue-600">{events.filter((e) => e.type === "weekly").length}</p>
+          </div>
+        </div>
+        <div className="bg-card p-6 rounded-xl border border-border flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600">
+            <CalendarCheck className="h-6 w-6" />
+          </div>
+          <div>
+            <p className="text-sm text-text-muted">مناسبات خاصة</p>
+            <p className="text-2xl font-bold text-orange-600">{events.filter((e) => e.type === "one_time").length}</p>
           </div>
         </div>
         <div className="bg-card p-6 rounded-xl border border-border flex items-center gap-4">
           <div className="w-12 h-12 rounded-lg bg-red-500/10 flex items-center justify-center text-red-600">
-            <span className="material-icons-outlined">live_tv</span>
+            <Radio className="h-6 w-6" />
           </div>
           <div>
             <p className="text-sm text-text-muted">بث مباشر</p>
             <p className="text-2xl font-bold text-red-600">{events.filter((e) => e.is_live).length}</p>
           </div>
         </div>
-        <div className="bg-card p-6 rounded-xl border border-border flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600">
-            <span className="material-icons-outlined">upcoming</span>
-          </div>
-          <div>
-            <p className="text-sm text-text-muted">قادمة</p>
-            <p className="text-2xl font-bold text-blue-600">
-              {events.filter((e) => new Date(e.event_date) >= new Date()).length}
-            </p>
-          </div>
-        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <Button
+          variant={filterType === "all" ? "default" : "outline"}
+          onClick={() => setFilterType("all")}
+          className={filterType === "all" ? "bg-primary text-white" : ""}
+        >
+          الكل
+        </Button>
+        <Button
+          variant={filterType === "weekly" ? "default" : "outline"}
+          onClick={() => setFilterType("weekly")}
+          className={filterType === "weekly" ? "bg-primary text-white" : ""}
+        >
+          أسبوعية
+        </Button>
+        <Button
+          variant={filterType === "one_time" ? "default" : "outline"}
+          onClick={() => setFilterType("one_time")}
+          className={filterType === "one_time" ? "bg-primary text-white" : ""}
+        >
+          مناسبات خاصة
+        </Button>
       </div>
 
       {/* Events List */}
       {loading ? (
-        <div className="text-center py-12 text-text-muted">جاري التحميل...</div>
-      ) : events.length === 0 ? (
+        <div className="text-center py-12 text-text-muted flex items-center justify-center gap-2">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          جاري التحميل...
+        </div>
+      ) : filteredEvents.length === 0 ? (
         <div className="text-center py-16 bg-card rounded-2xl border border-border">
-          <span className="material-icons-outlined text-6xl text-text-muted mb-4">event_busy</span>
+          <Calendar className="h-16 w-16 mx-auto text-text-muted mb-4" />
           <p className="text-text-muted">لا توجد أحداث في الجدول</p>
         </div>
       ) : (
         <div className="grid gap-4">
-          {events.map((event) => {
+          {filteredEvents.map((event) => {
             const typeInfo = getEventTypeInfo(event.event_type)
             return (
               <div
@@ -343,11 +477,16 @@ export default function AdminSchedulePage() {
                 className={`bg-card rounded-xl p-4 border border-border flex flex-col md:flex-row md:items-center gap-4 ${!event.is_active ? "opacity-50" : ""}`}
               >
                 <div className={`w-12 h-12 rounded-lg ${typeInfo.color} flex items-center justify-center text-white`}>
-                  <span className="material-icons-outlined">event</span>
+                  <CalendarDays className="h-6 w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className="text-xs bg-muted px-2 py-0.5 rounded text-text-muted">{typeInfo.label}</span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded ${event.type === "weekly" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"}`}
+                    >
+                      {event.type === "weekly" ? "أسبوعي" : "مناسبة خاصة"}
+                    </span>
                     {event.is_live && (
                       <span className="text-xs bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
@@ -360,19 +499,27 @@ export default function AdminSchedulePage() {
                   </div>
                   <h3 className="font-bold text-foreground truncate">{event.title}</h3>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-text-muted mt-1">
-                    <span className="flex items-center gap-1">
-                      <span className="material-icons-outlined text-sm">calendar_today</span>
-                      {new Date(event.event_date).toLocaleDateString("ar-EG")}
-                    </span>
+                    {event.type === "weekly" && event.day_of_week && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        كل {getDayLabel(event.day_of_week)}
+                      </span>
+                    )}
+                    {event.type === "one_time" && event.event_date && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(event.event_date).toLocaleDateString("ar-EG")}
+                      </span>
+                    )}
                     {event.event_time && (
                       <span className="flex items-center gap-1">
-                        <span className="material-icons-outlined text-sm">schedule</span>
+                        <Clock className="h-4 w-4" />
                         {event.event_time.substring(0, 5)}
                       </span>
                     )}
                     {event.location && (
                       <span className="flex items-center gap-1">
-                        <span className="material-icons-outlined text-sm">location_on</span>
+                        <MapPin className="h-4 w-4" />
                         {event.location}
                       </span>
                     )}
@@ -382,17 +529,15 @@ export default function AdminSchedulePage() {
                   <Switch checked={event.is_active} onCheckedChange={() => toggleActive(event.id, event.is_active)} />
                   <button
                     onClick={() => openEditModal(event)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition"
-                    title="تعديل"
+                    className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-white transition"
                   >
-                    <span className="material-icons-outlined">edit</span>
+                    <Edit className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(event.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
-                    title="حذف"
+                    className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-500 hover:text-white transition"
                   >
-                    <span className="material-icons-outlined">delete</span>
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>

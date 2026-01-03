@@ -10,17 +10,15 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Loader2, Plus, ChevronDown, ChevronRight, Trash2, Edit, FolderTree } from "lucide-react"
+import { Loader2, Plus, Trash2, Edit, FolderTree, ChevronLeft } from "lucide-react"
 
 interface Category {
   id: string
   name: string
-  slug: string
-  content_type: string
+  type: string
   description?: string
   parent_category_id?: string | null
   created_at: string
-  children?: Category[]
 }
 
 const CONTENT_TYPES = [
@@ -33,15 +31,14 @@ const CONTENT_TYPES = [
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
-  const [flatCategories, setFlatCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState({ type: "", text: "" })
   const [formData, setFormData] = useState({
     name: "",
-    slug: "",
-    content_type: "sermon",
+    type: "sermon",
     description: "",
     parent_category_id: null,
   })
@@ -54,53 +51,29 @@ export default function CategoriesPage() {
 
   async function fetchCategories() {
     setLoading(true)
-    const { data } = await supabase.from("categories").select("*").order("created_at", { ascending: false })
+    try {
+      const { data, error } = await supabase.from("categories").select("*").order("created_at", { ascending: false })
 
-    if (data) {
-      setFlatCategories(data)
-      // Build tree structure
-      const tree = buildTree(data)
-      setCategories(tree)
+      if (error) {
+        console.error("[v0] Error fetching categories:", error)
+        setMessage({ type: "error", text: "حدث خطأ أثناء جلب التصنيفات: " + error.message })
+        setCategories([])
+      } else {
+        setCategories(data || [])
+      }
+    } catch (err: any) {
+      console.error("[v0] Fetch error:", err)
+      setMessage({ type: "error", text: "حدث خطأ غير متوقع" })
+      setCategories([])
     }
     setLoading(false)
-  }
-
-  function buildTree(items: Category[]): Category[] {
-    const map = new Map<string, Category>()
-    const roots: Category[] = []
-
-    items.forEach((item) => {
-      map.set(item.id, { ...item, children: [] })
-    })
-
-    items.forEach((item) => {
-      const node = map.get(item.id)!
-      if (item.parent_category_id && map.has(item.parent_category_id)) {
-        map.get(item.parent_category_id)!.children!.push(node)
-      } else {
-        roots.push(node)
-      }
-    })
-
-    return roots
-  }
-
-  function toggleExpand(id: string) {
-    const newExpanded = new Set(expandedIds)
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id)
-    } else {
-      newExpanded.add(id)
-    }
-    setExpandedIds(newExpanded)
   }
 
   function handleEdit(category: Category) {
     setEditingCategory(category)
     setFormData({
       name: category.name,
-      slug: category.slug,
-      content_type: category.content_type,
+      type: category.type,
       description: category.description || "",
       parent_category_id: category.parent_category_id || null,
     })
@@ -111,8 +84,7 @@ export default function CategoriesPage() {
     setEditingCategory(null)
     setFormData({
       name: "",
-      slug: "",
-      content_type: "sermon",
+      type: "sermon",
       description: "",
       parent_category_id: null,
     })
@@ -121,81 +93,73 @@ export default function CategoriesPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setSaving(true)
+    setMessage({ type: "", text: "" })
 
-    const payload = {
-      name: formData.name,
-      slug: formData.slug,
-      content_type: formData.content_type,
-      description: formData.description || null,
-      parent_category_id: formData.parent_category_id,
+    try {
+      const payload = {
+        name: formData.name,
+        type: formData.type,
+        description: formData.description || null,
+        parent_category_id: formData.parent_category_id || null,
+      }
+
+      let error
+      if (editingCategory) {
+        const result = await supabase.from("categories").update(payload).eq("id", editingCategory.id)
+        error = result.error
+      } else {
+        const result = await supabase.from("categories").insert([payload])
+        error = result.error
+      }
+
+      if (error) {
+        throw error
+      }
+
+      setMessage({ type: "success", text: editingCategory ? "تم تحديث التصنيف بنجاح" : "تم إضافة التصنيف بنجاح" })
+      setDialogOpen(false)
+      fetchCategories()
+    } catch (error: any) {
+      console.error("[v0] Error saving category:", error)
+      setMessage({ type: "error", text: "حدث خطأ أثناء الحفظ: " + error.message })
+    } finally {
+      setSaving(false)
     }
-
-    if (editingCategory) {
-      await supabase.from("categories").update(payload).eq("id", editingCategory.id)
-    } else {
-      await supabase.from("categories").insert([payload])
-    }
-
-    setDialogOpen(false)
-    fetchCategories()
   }
 
   async function handleDelete(id: string) {
     if (!confirm("هل أنت متأكد من حذف هذا التصنيف؟")) return
-    await supabase.from("categories").delete().eq("id", id)
-    fetchCategories()
+
+    const { error } = await supabase.from("categories").delete().eq("id", id)
+    if (error) {
+      setMessage({ type: "error", text: "حدث خطأ أثناء الحذف: " + error.message })
+    } else {
+      setMessage({ type: "success", text: "تم حذف التصنيف بنجاح" })
+      fetchCategories()
+    }
   }
 
-  // Render category tree item
-  function renderCategory(category: Category, depth = 0) {
-    const hasChildren = category.children && category.children.length > 0
-    const isExpanded = expandedIds.has(category.id)
+  function getParentCategories(type: string) {
+    return categories.filter((c) => c.type === type && !c.parent_category_id)
+  }
 
-    return (
-      <div key={category.id}>
-        <div
-          className={`flex items-center gap-3 p-3 hover:bg-muted/50 rounded-lg transition-colors ${depth > 0 ? "mr-8" : ""}`}
-          style={{ marginRight: depth * 24 }}
-        >
-          {hasChildren ? (
-            <button onClick={() => toggleExpand(category.id)} className="p-1 hover:bg-muted rounded">
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-text-muted" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-text-muted" />
-              )}
-            </button>
-          ) : (
-            <div className="w-6" />
-          )}
+  function getChildCategories(parentId: string) {
+    return categories.filter((c) => c.parent_category_id === parentId)
+  }
 
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground dark:text-white">{category.name}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                {CONTENT_TYPES.find((t) => t.value === category.content_type)?.label}
-              </span>
-            </div>
-            {category.description && <p className="text-xs text-text-muted mt-1">{category.description}</p>}
-          </div>
+  function getParentName(parentId: string | null | undefined) {
+    if (!parentId) return null
+    const parent = categories.find((c) => c.id === parentId)
+    return parent?.name
+  }
 
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" onClick={() => handleEdit(category)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => handleDelete(category.id)}>
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
-          </div>
-        </div>
-
-        {hasChildren && isExpanded && (
-          <div className="border-r-2 border-border mr-4">
-            {category.children!.map((child) => renderCategory(child, depth + 1))}
-          </div>
-        )}
-      </div>
-    )
+  function groupCategoriesByType() {
+    const grouped: Record<string, Category[]> = {}
+    CONTENT_TYPES.forEach((type) => {
+      grouped[type.value] = categories.filter((c) => c.type === type.value)
+    })
+    return grouped
   }
 
   if (loading) {
@@ -206,6 +170,8 @@ export default function CategoriesPage() {
     )
   }
 
+  const groupedCategories = groupCategoriesByType()
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -214,7 +180,7 @@ export default function CategoriesPage() {
             <FolderTree className="h-8 w-8 text-primary" />
             التصنيفات
           </h1>
-          <p className="text-text-muted mt-2">إدارة تصنيفات المحتوى بنظام هرمي</p>
+          <p className="text-text-muted mt-2">إدارة تصنيفات المحتوى مع دعم التصنيفات الفرعية</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -223,7 +189,7 @@ export default function CategoriesPage() {
               إضافة تصنيف
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle>{editingCategory ? "تعديل التصنيف" : "إضافة تصنيف جديد"}</DialogTitle>
             </DialogHeader>
@@ -234,15 +200,7 @@ export default function CategoriesPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                />
-              </div>
-              <div>
-                <Label>الاسم المختصر (Slug)</Label>
-                <Input
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  required
-                  dir="ltr"
+                  placeholder="مثال: فقه العبادات"
                 />
               </div>
               <div>
@@ -251,13 +209,14 @@ export default function CategoriesPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={2}
+                  placeholder="وصف مختصر للتصنيف"
                 />
               </div>
               <div>
                 <Label>نوع المحتوى</Label>
                 <Select
-                  value={formData.content_type}
-                  onValueChange={(value) => setFormData({ ...formData, content_type: value })}
+                  value={formData.type}
+                  onValueChange={(value) => setFormData({ ...formData, type: value, parent_category_id: null })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -275,16 +234,14 @@ export default function CategoriesPage() {
                 <Label>التصنيف الأب (اختياري)</Label>
                 <Select
                   value={formData.parent_category_id}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, parent_category_id: value === "" ? null : value })
-                  }
+                  onValueChange={(value) => setFormData({ ...formData, parent_category_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="بدون تصنيف أب" />
+                    <SelectValue placeholder="بدون تصنيف أب (تصنيف رئيسي)" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={null}>بدون تصنيف أب</SelectItem>
-                    {flatCategories
+                    {getParentCategories(formData.type)
                       .filter((c) => c.id !== editingCategory?.id)
                       .map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>
@@ -293,10 +250,18 @@ export default function CategoriesPage() {
                       ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-text-muted mt-1">اختر تصنيف أب لجعل هذا تصنيفاً فرعياً</p>
               </div>
               <div className="flex gap-2">
-                <Button type="submit" className="flex-1 bg-primary hover:bg-primary-hover text-white">
-                  حفظ
+                <Button type="submit" className="flex-1 bg-primary hover:bg-primary-hover text-white" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                      جاري الحفظ...
+                    </>
+                  ) : (
+                    "حفظ"
+                  )}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
                   إلغاء
@@ -307,15 +272,134 @@ export default function CategoriesPage() {
         </Dialog>
       </div>
 
-      <div className="bg-card rounded-xl border border-border p-6">
-        {categories.length === 0 ? (
-          <div className="text-center py-12">
+      {message.text && (
+        <div
+          className={`p-4 rounded-xl text-center ${
+            message.type === "error"
+              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+              : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
+
+      <div className="space-y-6">
+        {CONTENT_TYPES.map((type) => {
+          const typeCategories = groupedCategories[type.value] || []
+          const parentCats = typeCategories.filter((c) => !c.parent_category_id)
+
+          if (typeCategories.length === 0) return null
+
+          return (
+            <div key={type.value} className="bg-card rounded-xl border border-border p-6">
+              <h3 className="text-lg font-bold text-foreground dark:text-white mb-4 flex items-center gap-2">
+                <span className="px-2 py-1 rounded-lg bg-primary/10 text-primary text-sm">{type.label}</span>
+                <span className="text-sm text-text-muted font-normal">({typeCategories.length} تصنيف)</span>
+              </h3>
+
+              <div className="space-y-2">
+                {parentCats.map((category) => {
+                  const children = getChildCategories(category.id)
+
+                  return (
+                    <div key={category.id}>
+                      {/* Parent Category */}
+                      <div className="flex items-center gap-3 p-4 hover:bg-muted/50 rounded-lg transition-colors border border-border">
+                        <FolderTree className="h-5 w-5 text-primary" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-foreground dark:text-white">{category.name}</span>
+                            {children.length > 0 && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-text-muted">
+                                {children.length} فرعي
+                              </span>
+                            )}
+                          </div>
+                          {category.description && (
+                            <p className="text-xs text-text-muted mt-1">{category.description}</p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="ghost" onClick={() => handleEdit(category)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleDelete(category.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Child Categories */}
+                      {children.length > 0 && (
+                        <div className="mr-8 mt-1 space-y-1">
+                          {children.map((child) => (
+                            <div
+                              key={child.id}
+                              className="flex items-center gap-3 p-3 hover:bg-muted/50 rounded-lg transition-colors border border-border/50 bg-muted/20"
+                            >
+                              <ChevronLeft className="h-4 w-4 text-text-muted" />
+                              <div className="flex-1">
+                                <span className="font-medium text-foreground dark:text-white text-sm">
+                                  {child.name}
+                                </span>
+                                {child.description && (
+                                  <p className="text-xs text-text-muted mt-0.5">{child.description}</p>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Button size="sm" variant="ghost" onClick={() => handleEdit(child)}>
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={() => handleDelete(child.id)}>
+                                  <Trash2 className="h-3 w-3 text-destructive" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+
+                {/* Orphan categories (those with parent_category_id but parent doesn't exist) */}
+                {typeCategories
+                  .filter((c) => c.parent_category_id && !categories.find((p) => p.id === c.parent_category_id))
+                  .map((category) => (
+                    <div
+                      key={category.id}
+                      className="flex items-center gap-3 p-4 hover:bg-muted/50 rounded-lg transition-colors border border-border"
+                    >
+                      <FolderTree className="h-5 w-5 text-text-muted" />
+                      <div className="flex-1">
+                        <span className="font-medium text-foreground dark:text-white">{category.name}</span>
+                        {category.description && <p className="text-xs text-text-muted mt-1">{category.description}</p>}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(category)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDelete(category.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )
+        })}
+
+        {categories.length === 0 && (
+          <div className="bg-card rounded-xl border border-border p-6 text-center py-12">
             <FolderTree className="h-12 w-12 mx-auto mb-4 text-text-muted opacity-50" />
             <h3 className="text-lg font-bold text-foreground mb-2">لا توجد تصنيفات</h3>
             <p className="text-text-muted">ابدأ بإضافة تصنيف جديد</p>
           </div>
-        ) : (
-          <div className="space-y-1">{categories.map((category) => renderCategory(category))}</div>
         )}
       </div>
     </div>

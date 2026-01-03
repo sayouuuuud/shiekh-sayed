@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
-import { Calendar, Eye, Clock, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -56,12 +56,6 @@ export default async function ArticlesPage({
     })
   }
 
-  function calculateReadTime(content: string): number {
-    const wordsPerMinute = 200
-    const words = content?.split(/\s+/).length || 0
-    return Math.ceil(words / wordsPerMinute) || 3
-  }
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -113,7 +107,7 @@ export default async function ArticlesPage({
         </div>
       </section>
 
-      {/* Articles Grid */}
+      {/* Articles Grid - Only show thumbnail, title and author */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           {!articles || articles.length === 0 ? (
@@ -129,40 +123,29 @@ export default async function ArticlesPage({
               {articles.map((article) => (
                 <Link key={article.id} href={`/articles/${article.id}`} className="group">
                   <article className="bg-card rounded-2xl overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                    {article.thumbnail && (
-                      <div className="aspect-video overflow-hidden">
+                    {/* Thumbnail */}
+                    <div className="aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+                      {article.thumbnail_path ? (
                         <img
-                          src={article.thumbnail || "/placeholder.svg"}
+                          src={article.thumbnail_path || "/placeholder.svg"}
                           alt={article.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="material-icons-outlined text-5xl text-primary/30">article</span>
+                        </div>
+                      )}
+                    </div>
                     <div className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                          {article.category}
-                        </span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {calculateReadTime(article.content)} دقائق
-                        </span>
-                      </div>
+                      {/* Title */}
                       <h2 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
                         {article.title}
                       </h2>
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
-                        {article.content?.replace(/<[^>]*>/g, "").slice(0, 150)}...
-                      </p>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {formatDate(article.created_at)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          {article.views || 0} مشاهدة
-                        </span>
+                      {/* Author */}
+                      <div className="flex items-center gap-2 text-sm text-secondary font-medium mt-auto">
+                        <span className="material-icons-outlined text-sm">person</span>
+                        <span>{article.author}</span>
                       </div>
                     </div>
                   </article>

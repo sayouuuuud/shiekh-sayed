@@ -1,10 +1,54 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import {
+  GraduationCap,
+  MapPin,
+  Mic,
+  Trophy,
+  BookOpen,
+  Youtube,
+  Send,
+  Facebook,
+  MessageCircle,
+  ChevronLeft,
+  Mail,
+  Twitter,
+  Instagram,
+} from "lucide-react"
+
+export const revalidate = 60
 
 export default async function AboutPage() {
   const supabase = await createClient()
 
   const { data: aboutData } = await supabase.from("about_page").select("*").single()
+
+  let socialLinks: Record<string, string> = {}
+
+  // First try to get from about_page social_links field
+  if (aboutData?.social_links && Array.isArray(aboutData.social_links)) {
+    aboutData.social_links.forEach((link: { platform: string; url: string }) => {
+      if (link.platform && link.url) {
+        socialLinks[link.platform.toLowerCase()] = link.url
+      }
+    })
+  }
+
+  // If no links found, fallback to social_links table
+  if (Object.keys(socialLinks).length === 0) {
+    try {
+      const { data: linksData } = await supabase.from("social_links").select("*").eq("is_active", true)
+
+      if (linksData) {
+        linksData.forEach((link: any) => {
+          socialLinks[link.platform?.toLowerCase()] = link.url
+        })
+      }
+    } catch {
+      // Fallback to about_page social_media if social_links table doesn't exist
+      socialLinks = (aboutData?.social_media as Record<string, string>) || {}
+    }
+  }
 
   // Default data if none in DB
   const about = aboutData || {
@@ -15,12 +59,69 @@ export default async function AboutPage() {
     achievements: "",
     education: "",
     current_positions: "",
-    social_media: {},
+    quote_text: "إنما العلم خشية، وليس العلم بكثرة الرواية، وإنما العالم من يخشى الله تعالى في سره وعلانيته.",
+    quote_author: "- من أقوال الشيخ",
     stats: { students: "5000+", books: "20+", lectures: "1000+", years: "25+" },
   }
 
   const stats = about.stats as Record<string, string>
-  const socialMedia = about.social_media as Record<string, string>
+
+  const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case "youtube":
+        return <Youtube className="h-5 w-5" />
+      case "telegram":
+        return <Send className="h-5 w-5" />
+      case "facebook":
+        return <Facebook className="h-5 w-5" />
+      case "twitter":
+        return <Twitter className="h-5 w-5" />
+      case "instagram":
+        return <Instagram className="h-5 w-5" />
+      case "whatsapp":
+        return <MessageCircle className="h-5 w-5" />
+      default:
+        return <Mail className="h-5 w-5" />
+    }
+  }
+
+  const getSocialColor = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case "youtube":
+        return "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+      case "telegram":
+        return "bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
+      case "facebook":
+        return "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+      case "twitter":
+        return "bg-sky-100 dark:bg-sky-900/30 text-sky-500 dark:text-sky-400"
+      case "instagram":
+        return "bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400"
+      case "whatsapp":
+        return "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+      default:
+        return "bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400"
+    }
+  }
+
+  const getSocialLabel = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case "youtube":
+        return { name: "يوتيوب", desc: "شاهد الدروس والمرئيات" }
+      case "telegram":
+        return { name: "تيليجرام", desc: "اشترك في القناة" }
+      case "facebook":
+        return { name: "فيسبوك", desc: "تابع الصفحة الرسمية" }
+      case "twitter":
+        return { name: "تويتر", desc: "تابعنا على تويتر" }
+      case "instagram":
+        return { name: "إنستجرام", desc: "تابعنا على إنستجرام" }
+      case "whatsapp":
+        return { name: "واتساب", desc: "تواصل مباشر" }
+      default:
+        return { name: platform, desc: "تابعنا" }
+    }
+  }
 
   return (
     <main className="min-h-screen py-12 relative overflow-hidden">
@@ -32,7 +133,7 @@ export default async function AboutPage() {
           <Link href="/" className="hover:text-primary dark:hover:text-secondary">
             الرئيسية
           </Link>
-          <span className="material-icons-outlined text-xs rtl-flip">chevron_left</span>
+          <ChevronLeft className="h-4 w-4 rtl-flip" />
           <span className="text-primary dark:text-secondary font-medium">من هو الشيخ</span>
         </div>
 
@@ -64,16 +165,16 @@ export default async function AboutPage() {
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
               {about.education && (
                 <div className="flex items-center gap-2 bg-background dark:bg-background-alt px-4 py-2 rounded-lg border border-border dark:border-border">
-                  <span className="material-icons-outlined text-secondary">school</span>
+                  <GraduationCap className="h-5 w-5 text-secondary" />
                   <span className="text-sm font-medium">دكتوراه في الفقه المقارن</span>
                 </div>
               )}
               <div className="flex items-center gap-2 bg-background dark:bg-background-alt px-4 py-2 rounded-lg border border-border dark:border-border">
-                <span className="material-icons-outlined text-secondary">location_on</span>
+                <MapPin className="h-5 w-5 text-secondary" />
                 <span className="text-sm font-medium">القاهرة، مصر</span>
               </div>
               <div className="flex items-center gap-2 bg-background dark:bg-background-alt px-4 py-2 rounded-lg border border-border dark:border-border">
-                <span className="material-icons-outlined text-secondary">mic</span>
+                <Mic className="h-5 w-5 text-secondary" />
                 <span className="text-sm font-medium">خطيب وإمام</span>
               </div>
             </div>
@@ -88,7 +189,7 @@ export default async function AboutPage() {
               <div className="bg-surface dark:bg-card rounded-xl shadow-sm border border-border dark:border-border p-8 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
-                    <span className="material-icons-outlined text-3xl">history_edu</span>
+                    <BookOpen className="h-8 w-8" />
                   </div>
                   <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">المسيرة العلمية</h2>
                 </div>
@@ -103,7 +204,7 @@ export default async function AboutPage() {
               <div className="bg-surface dark:bg-card rounded-xl shadow-sm border border-border dark:border-border p-8 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg text-primary dark:text-green-400">
-                    <span className="material-icons-outlined text-3xl">emoji_events</span>
+                    <Trophy className="h-8 w-8" />
                   </div>
                   <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">الإنجازات</h2>
                 </div>
@@ -148,54 +249,29 @@ export default async function AboutPage() {
                 تواصل مع الشيخ
               </h3>
               <div className="space-y-4">
-                {socialMedia?.youtube && (
-                  <a
-                    href={socialMedia.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-background dark:hover:bg-background-alt transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
-                      <span className="material-icons-outlined text-sm">smart_display</span>
-                    </div>
-                    <div>
-                      <span className="block text-sm font-bold text-foreground dark:text-white">يوتيوب</span>
-                      <span className="text-xs text-text-muted dark:text-text-subtext">شاهد الدروس والمرئيات</span>
-                    </div>
-                  </a>
-                )}
-                {socialMedia?.telegram && (
-                  <a
-                    href={socialMedia.telegram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-background dark:hover:bg-background-alt transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600 dark:text-sky-400">
-                      <span className="material-icons-outlined text-sm">send</span>
-                    </div>
-                    <div>
-                      <span className="block text-sm font-bold text-foreground dark:text-white">تيليجرام</span>
-                      <span className="text-xs text-text-muted dark:text-text-subtext">اشترك في القناة</span>
-                    </div>
-                  </a>
-                )}
-                {socialMedia?.facebook && (
-                  <a
-                    href={socialMedia.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-background dark:hover:bg-background-alt transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                      <span className="material-icons-outlined text-sm">facebook</span>
-                    </div>
-                    <div>
-                      <span className="block text-sm font-bold text-foreground dark:text-white">فيسبوك</span>
-                      <span className="text-xs text-text-muted dark:text-text-subtext">تابع الصفحة الرسمية</span>
-                    </div>
-                  </a>
-                )}
+                {Object.entries(socialLinks).map(([platform, url]) => {
+                  if (!url) return null
+                  const label = getSocialLabel(platform)
+                  return (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 p-3 rounded-lg hover:bg-background dark:hover:bg-background-alt transition-colors group"
+                    >
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${getSocialColor(platform)}`}
+                      >
+                        {getSocialIcon(platform)}
+                      </div>
+                      <div>
+                        <span className="block text-sm font-bold text-foreground dark:text-white">{label.name}</span>
+                        <span className="text-xs text-text-muted dark:text-text-subtext">{label.desc}</span>
+                      </div>
+                    </a>
+                  )
+                })}
               </div>
 
               <div className="mt-8 pt-6 border-t border-border dark:border-border">
@@ -203,7 +279,7 @@ export default async function AboutPage() {
                   href="/contact"
                   className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                 >
-                  <span className="material-icons-outlined text-sm">mail</span>
+                  <Mail className="h-4 w-4" />
                   راسلنا
                 </Link>
               </div>
@@ -211,14 +287,17 @@ export default async function AboutPage() {
           </div>
         </div>
 
-        {/* Quote Section */}
+        {/* Quote Section - Now editable from Admin */}
         <div className="mt-16 text-center max-w-4xl mx-auto">
-          <span className="material-icons-outlined text-5xl text-secondary opacity-50 mb-4">format_quote</span>
+          <span className="text-5xl text-secondary opacity-50 mb-4 block">"</span>
           <blockquote className="text-2xl md:text-3xl font-bold text-primary dark:text-white leading-relaxed font-serif">
-            &quot;إنما العلم خشية، وليس العلم بكثرة الرواية، وإنما العالم من يخشى الله تعالى في سره وعلانيته.&quot;
+            &quot;
+            {about.quote_text ||
+              "إنما العلم خشية، وليس العلم بكثرة الرواية، وإنما العالم من يخشى الله تعالى في سره وعلانيته."}
+            &quot;
           </blockquote>
           <cite className="block mt-4 text-text-muted dark:text-text-subtext not-italic font-medium">
-            - من أقوال الشيخ
+            {about.quote_author || "- من أقوال الشيخ"}
           </cite>
         </div>
       </div>

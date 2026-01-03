@@ -13,15 +13,26 @@ import { createClient } from "@/lib/supabase/client"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
 import { FileUpload } from "@/components/admin/file-upload"
 import { Pagination } from "@/components/admin/pagination"
-import { Loader2, Mic, CheckCircle, FileEdit, Eye, Trash2, ExternalLink, Edit } from "lucide-react"
+import {
+  Loader2,
+  Mic,
+  CheckCircle,
+  FileEdit,
+  Eye,
+  Trash2,
+  ExternalLink,
+  Edit,
+  PlusCircle,
+  Search,
+  Music,
+  Video,
+  Calendar,
+} from "lucide-react"
 
 interface Sermon {
   id: string
   title: string
   content: string
-  introduction?: string
-  main_topic?: string
-  conclusion?: string
   audio_file_path?: string
   youtube_url?: string
   media_source?: "youtube" | "local"
@@ -44,9 +55,7 @@ export default function ManageKhutbaPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: "",
-    introduction: "",
-    main_topic: "",
-    conclusion: "",
+    content: "",
     audio_file_path: "",
     youtube_url: "",
     media_source: "local" as "youtube" | "local",
@@ -86,15 +95,9 @@ export default function ManageKhutbaPage() {
     e.preventDefault()
     setSubmitting(true)
 
-    const content = JSON.stringify({
-      introduction: formData.introduction,
-      main_topic: formData.main_topic,
-      conclusion: formData.conclusion,
-    })
-
     const { error } = await supabase.from("sermons").insert({
       title: formData.title,
-      content: content,
+      content: formData.content,
       audio_file_path: formData.media_source === "local" ? formData.audio_file_path : null,
       youtube_url: formData.media_source === "youtube" ? formData.youtube_url : null,
       media_source: formData.media_source,
@@ -118,17 +121,11 @@ export default function ManageKhutbaPage() {
     if (!editingSermon) return
     setSubmitting(true)
 
-    const content = JSON.stringify({
-      introduction: formData.introduction,
-      main_topic: formData.main_topic,
-      conclusion: formData.conclusion,
-    })
-
     const { error } = await supabase
       .from("sermons")
       .update({
         title: formData.title,
-        content: content,
+        content: formData.content,
         audio_file_path: formData.media_source === "local" ? formData.audio_file_path : null,
         youtube_url: formData.media_source === "youtube" ? formData.youtube_url : null,
         media_source: formData.media_source,
@@ -171,25 +168,9 @@ export default function ManageKhutbaPage() {
 
   const openEditModal = (sermon: Sermon) => {
     setEditingSermon(sermon)
-
-    let introduction = ""
-    let main_topic = ""
-    let conclusion = ""
-
-    try {
-      const parsed = JSON.parse(sermon.content || "{}")
-      introduction = parsed.introduction || ""
-      main_topic = parsed.main_topic || ""
-      conclusion = parsed.conclusion || ""
-    } catch {
-      main_topic = sermon.content || ""
-    }
-
     setFormData({
       title: sermon.title,
-      introduction,
-      main_topic,
-      conclusion,
+      content: sermon.content || "",
       audio_file_path: sermon.audio_file_path || "",
       youtube_url: sermon.youtube_url || "",
       media_source: sermon.media_source || "local",
@@ -203,9 +184,7 @@ export default function ManageKhutbaPage() {
   const resetForm = () => {
     setFormData({
       title: "",
-      introduction: "",
-      main_topic: "",
-      conclusion: "",
+      content: "",
       audio_file_path: "",
       youtube_url: "",
       media_source: "local",
@@ -263,29 +242,11 @@ export default function ManageKhutbaPage() {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-lg font-semibold text-primary">المقدمة</Label>
+        <Label className="text-lg font-semibold text-primary">محتوى الخطبة</Label>
         <RichTextEditor
-          content={formData.introduction}
-          onChange={(html) => setFormData({ ...formData, introduction: html })}
-          placeholder="اكتب مقدمة الخطبة..."
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-lg font-semibold text-primary">الموضوع الرئيسي</Label>
-        <RichTextEditor
-          content={formData.main_topic}
-          onChange={(html) => setFormData({ ...formData, main_topic: html })}
-          placeholder="اكتب موضوع الخطبة..."
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-lg font-semibold text-primary">الخاتمة</Label>
-        <RichTextEditor
-          content={formData.conclusion}
-          onChange={(html) => setFormData({ ...formData, conclusion: html })}
-          placeholder="اكتب خاتمة الخطبة..."
+          content={formData.content}
+          onChange={(html) => setFormData({ ...formData, content: html })}
+          placeholder="اكتب نص الخطبة الكامل هنا..."
         />
       </div>
 
@@ -379,7 +340,7 @@ export default function ManageKhutbaPage() {
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-bold">
-              <span className="material-icons-outlined ml-2">add_circle</span>
+              <PlusCircle className="h-5 w-5 ml-2" />
               إضافة خطبة جديدة
             </Button>
           </DialogTrigger>
@@ -433,9 +394,7 @@ export default function ManageKhutbaPage() {
 
       <div className="bg-card p-4 rounded-xl border border-border flex flex-col md:flex-row items-center gap-4">
         <div className="relative w-full md:w-1/3">
-          <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-text-muted">
-            <span className="material-icons-outlined">search</span>
-          </span>
+          <Search className="absolute inset-y-0 right-0 flex items-center pr-3 h-full w-5 text-text-muted" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -494,22 +453,22 @@ export default function ManageKhutbaPage() {
                 <h3 className="text-lg font-bold text-foreground dark:text-white">{sermon.title}</h3>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-text-muted mt-2">
                   <span className="flex items-center gap-1">
-                    <span className="material-icons-outlined text-base">calendar_today</span>
+                    <Calendar className="h-4 w-4" />
                     {new Date(sermon.created_at).toLocaleDateString("ar-EG")}
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="material-icons-outlined text-base">visibility</span>
+                    <Eye className="h-4 w-4" />
                     {sermon.views_count || 0}
                   </span>
                   {sermon.audio_file_path && (
                     <span className="flex items-center gap-1 text-primary">
-                      <span className="material-icons-outlined text-base">audiotrack</span>
+                      <Music className="h-4 w-4" />
                       صوتي
                     </span>
                   )}
                   {sermon.youtube_url && (
                     <span className="flex items-center gap-1 text-red-500">
-                      <span className="material-icons-outlined text-base">smart_display</span>
+                      <Video className="h-4 w-4" />
                       يوتيوب
                     </span>
                   )}
@@ -526,29 +485,35 @@ export default function ManageKhutbaPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => window.open(`/khutba/${sermon.id}`, "_blank")}>
-                  <ExternalLink className="h-4 w-4 text-text-muted" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => openEditModal(sermon)}>
-                  <Edit className="h-4 w-4 text-blue-600" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDeleteSermon(sermon.id)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                <a
+                  href={`/khutba/${sermon.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-lg hover:bg-muted transition-colors text-text-muted hover:text-primary"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                </a>
+                <button
+                  onClick={() => openEditModal(sermon)}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors text-text-muted hover:text-primary"
+                >
+                  <Edit className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => handleDeleteSermon(sermon.id)}
+                  className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-text-muted hover:text-red-500"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        totalItems={totalCount}
-        itemsPerPage={ITEMS_PER_PAGE}
-      />
+      {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 
+      {/* Edit Dialog */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-4xl bg-card max-h-[90vh] overflow-y-auto">
           <DialogHeader>

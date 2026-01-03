@@ -3,7 +3,8 @@ import Link from "next/link"
 interface ScheduleItem {
   id: string
   day_name: string
-  time_text: string
+  time_text?: string
+  time?: string
   title: string
   description: string | null
   is_active: boolean
@@ -43,7 +44,7 @@ export function WeeklySchedule({ schedule }: WeeklyScheduleProps) {
               <div className="flex items-start gap-4 group">
                 <div className="bg-card border border-border rounded-xl p-3 text-center min-w-[80px] shadow-sm group-hover:border-primary/30 transition-colors">
                   <span className="block text-xs text-text-muted font-medium">{item.day_name}</span>
-                  <span className="block text-xl font-bold text-primary mt-1">{item.time_text}</span>
+                  <span className="block text-xl font-bold text-primary mt-1">{item.time_text || item.time || ""}</span>
                 </div>
                 <div className="flex-1">
                   <h4 className="font-bold text-lg text-foreground dark:text-white group-hover:text-primary dark:group-hover:text-secondary transition-colors">

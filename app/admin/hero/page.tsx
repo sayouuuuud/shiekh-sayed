@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2, Save } from "lucide-react"
 
 interface Book {
   id: string
@@ -28,6 +30,10 @@ export default function AdminHeroPage() {
     book_button_text: "",
     book_button_link: "",
     featured_book_id: "",
+    important_notice: "",
+    important_notice_link: "",
+    show_important_notice: false,
+    underline_text: "",
   })
   const [books, setBooks] = useState<Book[]>([])
 
@@ -55,6 +61,10 @@ export default function AdminHeroPage() {
         book_button_text: hero.book_button_text || "تصفح الكتب",
         book_button_link: hero.book_button_link || "/books",
         featured_book_id: hero.featured_book_id || "",
+        important_notice: hero.important_notice || "",
+        important_notice_link: hero.important_notice_link || "",
+        show_important_notice: hero.show_important_notice ?? false,
+        underline_text: hero.underline_text || "",
       })
     }
 
@@ -86,6 +96,10 @@ export default function AdminHeroPage() {
       book_button_text: heroData.book_button_text,
       book_button_link: heroData.book_button_link,
       featured_book_id: heroData.featured_book_id || null,
+      important_notice: heroData.important_notice,
+      important_notice_link: heroData.important_notice_link,
+      show_important_notice: heroData.show_important_notice,
+      underline_text: heroData.underline_text || null,
       updated_at: new Date().toISOString(),
     }
 
@@ -133,12 +147,12 @@ export default function AdminHeroPage() {
         <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary-hover text-white px-8">
           {saving ? (
             <>
-              <span className="material-icons-outlined animate-spin ml-2 text-sm">refresh</span>
+              <Loader2 className="h-4 w-4 ml-2 animate-spin" />
               جاري الحفظ...
             </>
           ) : (
             <>
-              <span className="material-icons-outlined ml-2 text-sm">save</span>
+              <Save className="h-4 w-4 ml-2" />
               حفظ التغييرات
             </>
           )}
@@ -153,6 +167,38 @@ export default function AdminHeroPage() {
           {message}
         </div>
       )}
+
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-800 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
+              <span className="material-icons-outlined">campaign</span>
+            </span>
+            <div>
+              <h2 className="text-xl font-bold text-foreground dark:text-white">التنويه الهام</h2>
+              <p className="text-sm text-text-muted">إظهار رسالة تنويه في أعلى الصفحة الرئيسية</p>
+            </div>
+          </div>
+          <Switch
+            checked={heroData.show_important_notice}
+            onCheckedChange={(checked) => setHeroData({ ...heroData, show_important_notice: checked })}
+          />
+        </div>
+
+        {heroData.show_important_notice && (
+          <div className="pt-4 border-t border-yellow-200 dark:border-yellow-800">
+            <div className="space-y-2">
+              <Label>نص التنويه</Label>
+              <Input
+                value={heroData.important_notice}
+                onChange={(e) => setHeroData({ ...heroData, important_notice: e.target.value })}
+                placeholder="مثال: درس جديد اليوم في مسجد الرحمن الساعة 7 مساءً"
+                className="bg-white dark:bg-background-alt"
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Hadith Section */}
@@ -174,6 +220,17 @@ export default function AdminHeroPage() {
                 className="bg-muted dark:bg-background-alt resize-none"
                 placeholder="أدخل نص الحديث بالعربية"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>الكلمة/الجملة المراد تسطيرها</Label>
+              <Input
+                value={heroData.underline_text}
+                onChange={(e) => setHeroData({ ...heroData, underline_text: e.target.value })}
+                className="bg-muted dark:bg-background-alt"
+                placeholder="مثال: خيراً - اكتب الكلمة التي تريد وضع خط تحتها"
+              />
+              <p className="text-xs text-text-muted">اكتب الكلمة أو الجملة التي تريد وضع خط تحتها من نص الحديث</p>
             </div>
 
             <div className="space-y-2">
@@ -249,6 +306,7 @@ export default function AdminHeroPage() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-text-muted">صورة الكتاب المختار ستظهر في الصفحة الرئيسية</p>
             </div>
 
             <div className="space-y-2">

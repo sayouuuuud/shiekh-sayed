@@ -1,22 +1,51 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createSubscriber } from "@/lib/appwrite/subscribers"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email } = body
+    const { phone, telegram, name } = body
 
-    // Validate email
-    if (!email) {
-      return NextResponse.json({ error: "البريد الإلكتروني مطلوب" }, { status: 400 })
+    // Validate - at least one contact method required
+    if (!phone && !telegram) {
+      return NextResponse.json({ error: "يرجى إدخال رقم واتساب أو معرف تيليجرام" }, { status: 400 })
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: "البريد الإلكتروني غير صحيح" }, { status: 400 })
+    // Validate phone number format if provided
+    if (phone) {
+      const phoneRegex = /^[0-9+]{8,15}$/
+      if (!phoneRegex.test(phone.replace(/\s/g, ""))) {
+        return NextResponse.json({ error: "رقم الواتساب غير صحيح" }, { status: 400 })
+      }
     }
 
-    const subscriber = await createSubscriber(email)
+    // Validate telegram username if provided
+    if (telegram) {
+      const telegramRegex = /^@?[a-zA-Z][a-zA-Z0-9_]{4,31}$/
+      if (!telegramRegex.test(telegram)) {
+        return NextResponse.json({ error: "معرف التيليجرام غير صحيح" }, { status: 400 })
+      }
+    }
+
+    const supabase = await createClient()
+
+    const { data: subscriber, error } = await supabase
+      .from("subscribers")
+      .insert({
+        phone: phone || null,
+        telegram: telegram || null,
+        email: null,
+        is_active: true,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "هذا الرقم/المعرف مسجل بالفعل" }, { status: 400 })
+      }
+      throw error
+    }
 
     return NextResponse.json({
       success: true,

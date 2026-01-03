@@ -52,32 +52,6 @@ export default function ManageVideosPage() {
 
   const supabase = createClient()
 
-  // Auto-focus effect for add modal
-  useEffect(() => {
-    if (isAddModalOpen) {
-      const firstInput = document.querySelector('.modal-input') as HTMLInputElement
-      if (firstInput) {
-        setTimeout(() => {
-          firstInput.focus()
-          firstInput.select()
-        }, 100)
-      }
-    }
-  }, [isAddModalOpen])
-
-  // Auto-focus effect for edit modal
-  useEffect(() => {
-    if (isEditModalOpen) {
-      const firstInput = document.querySelector('.modal-input') as HTMLInputElement
-      if (firstInput) {
-        setTimeout(() => {
-          firstInput.focus()
-          firstInput.select()
-        }, 100)
-      }
-    }
-  }, [isEditModalOpen])
-
   const fetchItems = async () => {
     setLoading(true)
     const start = (currentPage - 1) * ITEMS_PER_PAGE
@@ -188,7 +162,7 @@ export default function ManageVideosPage() {
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           placeholder="عنوان الفيديو"
-          className="bg-muted dark:bg-background-alt modal-input"
+          className="bg-muted dark:bg-background-alt"
           required
         />
       </div>
@@ -209,7 +183,7 @@ export default function ManageVideosPage() {
             value={formData.media_type}
             onValueChange={(value) => setFormData({ ...formData, media_type: value })}
           >
-            <SelectTrigger className="bg-muted dark:bg-background-alt modal-input">
+            <SelectTrigger className="bg-muted dark:bg-background-alt">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -224,7 +198,7 @@ export default function ManageVideosPage() {
             value={formData.media_source}
             onValueChange={(value) => setFormData({ ...formData, media_source: value })}
           >
-            <SelectTrigger className="bg-muted dark:bg-background-alt modal-input">
+            <SelectTrigger className="bg-muted dark:bg-background-alt">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -250,7 +224,7 @@ export default function ManageVideosPage() {
             value={formData.media_path_or_url}
             onChange={(e) => setFormData({ ...formData, media_path_or_url: e.target.value })}
             placeholder="https://youtube.com/watch?v=..."
-            className="bg-muted dark:bg-background-alt modal-input"
+            className="bg-muted dark:bg-background-alt"
             dir="ltr"
             required
           />
@@ -272,7 +246,7 @@ export default function ManageVideosPage() {
             value={formData.publish_status}
             onValueChange={(value) => setFormData({ ...formData, publish_status: value })}
           >
-            <SelectTrigger className="bg-muted dark:bg-background-alt modal-input">
+            <SelectTrigger className="bg-muted dark:bg-background-alt">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -380,12 +354,12 @@ export default function ManageVideosPage() {
           </div>
         </div>
         <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
             <Eye className="h-7 w-7" />
           </div>
           <div>
             <p className="text-sm text-text-muted">المنشورة</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">
+            <p className="text-2xl font-bold text-green-600 mt-1">
               {items.filter((i) => i.publish_status === "published").length}
             </p>
           </div>
@@ -468,7 +442,7 @@ export default function ManageVideosPage() {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold ${
                           item.publish_status === "published"
-                            ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                            ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                             : "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
                         }`}
                       >

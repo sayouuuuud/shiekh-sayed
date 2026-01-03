@@ -6,24 +6,34 @@ import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 export function NewsletterSection() {
-  const [email, setEmail] = useState("")
+  const [whatsapp, setWhatsapp] = useState("")
+  const [telegram, setTelegram] = useState("")
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [message, setMessage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email) return
+    if (!whatsapp && !telegram) {
+      setMessage("يرجى إدخال رقم الواتساب أو معرف التليجرام")
+      setStatus("error")
+      return
+    }
 
     setStatus("loading")
 
     try {
       const supabase = createClient()
-      const { error } = await supabase.from("subscribers").insert({ email })
+      const { error } = await supabase.from("subscribers").insert({
+        whatsapp_number: whatsapp || null,
+        telegram_username: telegram || null,
+        subscribed_at: new Date().toISOString(),
+        active: true,
+      })
 
       if (error) {
         if (error.code === "23505") {
-          setMessage("هذا البريد مسجل بالفعل")
+          setMessage("هذا الرقم مسجل بالفعل")
         } else {
           setMessage("حدث خطأ، يرجى المحاولة مرة أخرى")
         }
@@ -31,9 +41,10 @@ export function NewsletterSection() {
         return
       }
 
-      setMessage("تم الاشتراك بنجاح!")
+      setMessage("تم الاشتراك بنجاح! سيتم إضافتك للجروب قريباً")
       setStatus("success")
-      setEmail("")
+      setWhatsapp("")
+      setTelegram("")
     } catch {
       setMessage("حدث خطأ، يرجى المحاولة مرة أخرى")
       setStatus("error")
@@ -54,28 +65,50 @@ export function NewsletterSection() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         <div className="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-medium mb-4 backdrop-blur-sm text-white">
-          <span className="material-icons-outlined text-sm">mail</span>
-          <span>القائمة البريدية</span>
+          <span className="material-icons-outlined text-sm">group</span>
+          <span>انضم للمجموعة</span>
         </div>
 
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white font-serif">ابق على اطلاع بكل جديد</h2>
         <p className="text-green-100 mb-8 max-w-xl mx-auto">
-          اشترك في القائمة البريدية لتصلك الدروس والمقالات الجديدة مباشرة إلى بريدك الإلكتروني.
+          سجل بياناتك لتتم إضافتك لمجموعة الواتساب أو التليجرام وتصلك الدروس والمقالات الجديدة.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="البريد الإلكتروني"
-            disabled={status === "loading"}
-            className="flex-1 bg-white/10 border border-white/20 text-white placeholder-white/60 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary backdrop-blur-sm disabled:opacity-50"
-          />
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
+          <div className="flex flex-col gap-3">
+            <div className="relative">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60">
+                <span className="material-icons-outlined text-lg">phone</span>
+              </span>
+              <input
+                type="tel"
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                placeholder="رقم الواتساب (مثال: 01012345678)"
+                disabled={status === "loading"}
+                className="w-full bg-white/10 border border-white/20 text-white placeholder-white/60 px-4 py-3 pr-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary backdrop-blur-sm disabled:opacity-50"
+                dir="ltr"
+              />
+            </div>
+            <div className="relative">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60">
+                <span className="material-icons-outlined text-lg">send</span>
+              </span>
+              <input
+                type="text"
+                value={telegram}
+                onChange={(e) => setTelegram(e.target.value)}
+                placeholder="معرف التليجرام (مثال: @username)"
+                disabled={status === "loading"}
+                className="w-full bg-white/10 border border-white/20 text-white placeholder-white/60 px-4 py-3 pr-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary backdrop-blur-sm disabled:opacity-50"
+                dir="ltr"
+              />
+            </div>
+          </div>
           <button
             type="submit"
             disabled={status === "loading"}
-            className="bg-secondary hover:bg-secondary-hover text-primary font-bold px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
+            className="w-full bg-secondary hover:bg-secondary-hover text-primary font-bold px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
           >
             {status === "loading" ? "جاري الاشتراك..." : "اشترك الآن"}
           </button>
@@ -85,7 +118,7 @@ export function NewsletterSection() {
           <p className={`text-sm mt-4 ${status === "success" ? "text-green-200" : "text-red-200"}`}>{message}</p>
         )}
 
-        <p className="text-xs text-green-200 mt-4 opacity-80">نحترم خصوصيتك. لن نشارك بريدك مع أي طرف ثالث.</p>
+        <p className="text-xs text-green-200 mt-4 opacity-80">نحترم خصوصيتك. لن نشارك بياناتك مع أي طرف ثالث.</p>
       </div>
     </section>
   )

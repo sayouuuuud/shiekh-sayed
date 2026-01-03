@@ -1,12 +1,27 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { ViewsChart } from "@/components/admin/views-chart"
+import {
+  PlusCircle,
+  Mic,
+  GraduationCap,
+  FileText,
+  BookOpen,
+  Users,
+  Video,
+  Settings,
+  User,
+  Palette,
+  ChevronLeft,
+  Eye,
+  TrendingUp,
+} from "lucide-react"
 
 const quickActions = [
-  { label: "إضافة خطبة", href: "/admin/khutba", icon: "add_circle", color: "text-blue-500" },
-  { label: "إضافة درس", href: "/admin/dars", icon: "add_circle", color: "text-green-500" },
-  { label: "إضافة مقال", href: "/admin/articles", icon: "add_circle", color: "text-amber-500" },
-  { label: "إضافة كتاب", href: "/admin/books", icon: "add_circle", color: "text-purple-500" },
+  { label: "إضافة خطبة", href: "/admin/khutba", icon: PlusCircle, color: "text-blue-500" },
+  { label: "إضافة درس", href: "/admin/dars", icon: PlusCircle, color: "text-green-500" },
+  { label: "إضافة مقال", href: "/admin/articles", icon: PlusCircle, color: "text-amber-500" },
+  { label: "إضافة كتاب", href: "/admin/books", icon: PlusCircle, color: "text-purple-500" },
 ]
 
 export default async function AdminDashboard() {
@@ -19,6 +34,7 @@ export default async function AdminDashboard() {
     { count: articlesCount },
     { count: booksCount },
     { count: subscribersCount },
+    { count: videosCount },
     { data: recentSermons },
     { data: recentLessons },
     { data: recentArticles },
@@ -29,19 +45,20 @@ export default async function AdminDashboard() {
     supabase.from("articles").select("*", { count: "exact", head: true }),
     supabase.from("books").select("*", { count: "exact", head: true }),
     supabase.from("subscribers").select("*", { count: "exact", head: true }),
+    supabase.from("media").select("*", { count: "exact", head: true }),
     supabase
       .from("sermons")
-      .select("id, title, publish_status, created_at")
+      .select("id, title, publish_status, created_at, views_count")
       .order("created_at", { ascending: false })
       .limit(2),
     supabase
       .from("lessons")
-      .select("id, title, publish_status, created_at")
+      .select("id, title, publish_status, created_at, views_count")
       .order("created_at", { ascending: false })
       .limit(2),
     supabase
       .from("articles")
-      .select("id, title, publish_status, created_at")
+      .select("id, title, publish_status, created_at, views")
       .order("created_at", { ascending: false })
       .limit(2),
     supabase
@@ -51,39 +68,49 @@ export default async function AdminDashboard() {
       .order("date", { ascending: true }),
   ])
 
+  // Calculate total views
+  const totalViews = (analyticsData || []).reduce((sum, day) => sum + (day.views_count || 0), 0)
+
   const stats = [
     {
       label: "الخطب",
       value: sermonsCount?.toString() || "0",
-      icon: "mic",
+      icon: Mic,
       color: "bg-blue-500",
       href: "/admin/khutba",
     },
     {
       label: "الدروس",
       value: lessonsCount?.toString() || "0",
-      icon: "school",
+      icon: GraduationCap,
       color: "bg-green-500",
       href: "/admin/dars",
     },
     {
       label: "المقالات",
       value: articlesCount?.toString() || "0",
-      icon: "article",
+      icon: FileText,
       color: "bg-amber-500",
       href: "/admin/articles",
     },
     {
       label: "الكتب",
       value: booksCount?.toString() || "0",
-      icon: "menu_book",
+      icon: BookOpen,
       color: "bg-purple-500",
       href: "/admin/books",
     },
     {
+      label: "المرئيات",
+      value: videosCount?.toString() || "0",
+      icon: Video,
+      color: "bg-red-500",
+      href: "/admin/videos",
+    },
+    {
       label: "المشتركين",
       value: subscribersCount?.toString() || "0",
-      icon: "group",
+      icon: Users,
       color: "bg-teal-500",
       href: "/admin/subscribers",
     },
@@ -91,12 +118,20 @@ export default async function AdminDashboard() {
 
   // Combine recent items
   const recentItems = [
-    ...(recentSermons || []).map((s) => ({ ...s, type: "خطبة", icon: "mic" })),
-    ...(recentLessons || []).map((l) => ({ ...l, type: "درس", icon: "school" })),
-    ...(recentArticles || []).map((a) => ({ ...a, type: "مقال", icon: "article" })),
+    ...(recentSermons || []).map((s) => ({ ...s, type: "خطبة", icon: Mic, views: s.views_count || 0 })),
+    ...(recentLessons || []).map((l) => ({ ...l, type: "درس", icon: GraduationCap, views: l.views_count || 0 })),
+    ...(recentArticles || []).map((a) => ({ ...a, type: "مقال", icon: FileText, views: a.views || 0 })),
   ]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 5)
+
+  const quickLinks = [
+    { label: "إدارة الكتب", href: "/admin/books", icon: BookOpen },
+    { label: "إدارة المرئيات", href: "/admin/videos", icon: Video },
+    { label: "إعدادات الموقع", href: "/admin/settings", icon: Settings },
+    { label: "الملف الشخصي", href: "/admin/profile", icon: User },
+    { label: "المظهر والألوان", href: "/admin/appearance", icon: Palette },
+  ]
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
@@ -107,37 +142,85 @@ export default async function AdminDashboard() {
           <h2 className="text-2xl font-bold mb-2">مرحباً بك في لوحة التحكم</h2>
           <p className="text-green-100 text-sm mb-4">إدارة محتوى موقع الشيخ السيد مراد بكل سهولة</p>
           <div className="flex flex-wrap gap-3">
-            {quickActions.map((action) => (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm transition-colors"
-              >
-                <span className="material-icons-outlined text-lg">{action.icon}</span>
-                {action.label}
-              </Link>
-            ))}
+            {quickActions.map((action) => {
+              const Icon = action.icon
+              return (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm transition-colors"
+                >
+                  <Icon className="h-5 w-5" />
+                  {action.label}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Stats Summary */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-card rounded-xl p-4 border border-border flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <Eye className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-foreground">{totalViews.toLocaleString("ar-EG")}</p>
+            <p className="text-sm text-text-muted">زيارة (30 يوم)</p>
+          </div>
+        </div>
+        <div className="bg-card rounded-xl p-4 border border-border flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-foreground">
+              {((sermonsCount || 0) + (lessonsCount || 0) + (articlesCount || 0)).toLocaleString("ar-EG")}
+            </p>
+            <p className="text-sm text-text-muted">محتوى منشور</p>
+          </div>
+        </div>
+        <div className="bg-card rounded-xl p-4 border border-border flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-foreground">{(booksCount || 0).toLocaleString("ar-EG")}</p>
+            <p className="text-sm text-text-muted">كتاب منشور</p>
+          </div>
+        </div>
+        <div className="bg-card rounded-xl p-4 border border-border flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+            <Users className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-foreground">{(subscribersCount || 0).toLocaleString("ar-EG")}</p>
+            <p className="text-sm text-text-muted">مشترك</p>
           </div>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat) => (
-          <Link
-            key={stat.label}
-            href={stat.href}
-            className="bg-surface dark:bg-card rounded-xl p-5 border border-border dark:border-border hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center text-white`}>
-                <span className="material-icons-outlined text-xl">{stat.icon}</span>
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon
+          return (
+            <Link
+              key={stat.label}
+              href={stat.href}
+              className="bg-surface dark:bg-card rounded-xl p-5 border border-border dark:border-border hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center text-white`}>
+                  <Icon className="h-5 w-5" />
+                </div>
               </div>
-            </div>
-            <h3 className="text-3xl font-bold text-foreground dark:text-white mb-1">{stat.value}</h3>
-            <p className="text-sm text-text-muted dark:text-text-subtext">{stat.label}</p>
-          </Link>
-        ))}
+              <h3 className="text-3xl font-bold text-foreground dark:text-white mb-1">{stat.value}</h3>
+              <p className="text-sm text-text-muted dark:text-text-subtext">{stat.label}</p>
+            </Link>
+          )
+        })}
       </div>
 
       {/* Views Chart */}
@@ -153,35 +236,44 @@ export default async function AdminDashboard() {
             {recentItems.length === 0 ? (
               <div className="px-6 py-8 text-center text-text-muted dark:text-text-subtext">لا توجد محتويات بعد</div>
             ) : (
-              recentItems.map((item) => (
-                <div
-                  key={`${item.type}-${item.id}`}
-                  className="px-6 py-4 flex items-center justify-between hover:bg-background dark:hover:bg-background-alt transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-background dark:bg-background-alt flex items-center justify-center">
-                      <span className="material-icons-outlined text-text-muted dark:text-text-subtext">
-                        {item.icon}
+              recentItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <div
+                    key={`${item.type}-${item.id}`}
+                    className="px-6 py-4 flex items-center justify-between hover:bg-background dark:hover:bg-background-alt transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-background dark:bg-background-alt flex items-center justify-center">
+                        <Icon className="h-5 w-5 text-text-muted dark:text-text-subtext" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground dark:text-white text-sm line-clamp-1">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-text-muted dark:text-text-subtext">
+                          {item.type} • {new Date(item.created_at).toLocaleDateString("ar-EG")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-text-muted flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {item.views}
+                      </span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          item.publish_status === "published"
+                            ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
+                            : "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
+                        }`}
+                      >
+                        {item.publish_status === "published" ? "منشور" : "مسودة"}
                       </span>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-foreground dark:text-white text-sm line-clamp-1">{item.title}</h4>
-                      <p className="text-xs text-text-muted dark:text-text-subtext">
-                        {item.type} • {new Date(item.created_at).toLocaleDateString("ar-EG")}
-                      </p>
-                    </div>
                   </div>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      item.publish_status === "published"
-                        ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
-                        : "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
-                    }`}
-                  >
-                    {item.publish_status === "published" ? "منشور" : "مسودة"}
-                  </span>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </div>
@@ -191,23 +283,20 @@ export default async function AdminDashboard() {
           <div className="bg-surface dark:bg-card rounded-xl border border-border dark:border-border p-6">
             <h3 className="font-bold text-foreground dark:text-white mb-4">روابط سريعة</h3>
             <div className="space-y-2">
-              {[
-                { label: "إدارة الكتب", href: "/admin/books", icon: "menu_book" },
-                { label: "إدارة الفيديوهات", href: "/admin/media", icon: "videocam" },
-                { label: "إعدادات الموقع", href: "/admin/settings", icon: "settings" },
-                { label: "الملف الشخصي", href: "/admin/profile", icon: "person" },
-                { label: "المظهر والألوان", href: "/admin/appearance", icon: "palette" },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center gap-3 p-2 rounded-lg text-text-muted dark:text-text-subtext hover:text-foreground dark:hover:text-white hover:bg-background dark:hover:bg-background-alt transition-colors"
-                >
-                  <span className="material-icons-outlined text-lg">{link.icon}</span>
-                  <span className="text-sm">{link.label}</span>
-                  <span className="material-icons-outlined text-sm mr-auto rtl-flip">chevron_left</span>
-                </Link>
-              ))}
+              {quickLinks.map((link) => {
+                const Icon = link.icon
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-center gap-3 p-2 rounded-lg text-text-muted dark:text-text-subtext hover:text-foreground dark:hover:text-white hover:bg-background dark:hover:bg-background-alt transition-colors"
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="text-sm">{link.label}</span>
+                    <ChevronLeft className="h-4 w-4 mr-auto" />
+                  </Link>
+                )
+              })}
             </div>
           </div>
         </div>

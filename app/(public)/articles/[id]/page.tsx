@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ShareButtons } from "@/components/share-buttons"
+import { SafeHtml } from "@/components/ui/safe-html"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -95,8 +96,10 @@ export default async function ArticleDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Article Content */}
-          <div className="prose prose-lg max-w-none mb-12" dangerouslySetInnerHTML={{ __html: article.content }} />
+          <SafeHtml
+            html={article.content}
+            className="prose prose-lg max-w-none mb-12 prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground dark:prose-headings:text-white dark:prose-p:text-gray-300 dark:prose-strong:text-white dark:prose-li:text-gray-300"
+          />
 
           {/* Tags */}
           {article.tags && article.tags.length > 0 && (

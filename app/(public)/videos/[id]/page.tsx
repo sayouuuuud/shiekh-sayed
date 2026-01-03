@@ -9,7 +9,7 @@ async function getVideo(id: string) {
   // Fetch video
   const { data: video } = await supabase
     .from("media")
-    .select("*, category:categories(name)")
+    .select("*")
     .eq("id", id)
     .eq("publish_status", "published")
     .single()
@@ -100,11 +100,7 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
             <div className="bg-surface dark:bg-card rounded-xl p-6 border border-border dark:border-border">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
-                  {video.category && (
-                    <span className="inline-block px-3 py-1 bg-primary/10 text-primary dark:text-secondary text-xs font-medium rounded-full mb-3">
-                      {video.category.name}
-                    </span>
-                  )}
+                  {/* Remove category display */}
                   <h1 className="text-2xl font-bold text-foreground dark:text-white font-serif">{video.title}</h1>
                 </div>
               </div>

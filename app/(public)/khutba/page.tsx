@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { Filter, Clock, History, TrendingUp, Mic, Eye, Music, ChevronRight, ChevronLeft, Tag } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "الخطب المنبرية",
@@ -74,7 +75,7 @@ export default async function KhutbaPage({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-surface dark:bg-card p-4 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-border dark:border-border">
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <span className="material-icons-outlined text-primary dark:text-secondary">filter_list</span>
+            <Filter className="h-5 w-5 text-primary dark:text-secondary" />
             <span className="font-bold text-foreground dark:text-foreground">تصفية الخطب:</span>
           </div>
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -86,7 +87,7 @@ export default async function KhutbaPage({
                   : "bg-background dark:bg-background-alt border border-border text-foreground hover:border-primary"
               }`}
             >
-              <span className="material-icons-outlined text-sm">schedule</span>
+              <Clock className="h-4 w-4" />
               أحدث الخطب
             </Link>
             <Link
@@ -97,7 +98,7 @@ export default async function KhutbaPage({
                   : "bg-background dark:bg-background-alt border border-border text-foreground hover:border-primary"
               }`}
             >
-              <span className="material-icons-outlined text-sm">history</span>
+              <History className="h-4 w-4" />
               الأقدم
             </Link>
             <Link
@@ -108,7 +109,7 @@ export default async function KhutbaPage({
                   : "bg-background dark:bg-background-alt border border-border text-foreground hover:border-primary"
               }`}
             >
-              <span className="material-icons-outlined text-sm">trending_up</span>
+              <TrendingUp className="h-4 w-4" />
               الأكثر مشاهدة
             </Link>
           </div>
@@ -146,7 +147,7 @@ export default async function KhutbaPage({
         {/* Sermons Grid */}
         {!sermons || sermons.length === 0 ? (
           <div className="text-center py-16 text-text-muted dark:text-text-subtext">
-            <span className="material-icons-outlined text-6xl mb-4">mic_off</span>
+            <Mic className="h-16 w-16 mx-auto mb-4 opacity-50" />
             <p className="text-lg">لا توجد خطب منشورة حالياً</p>
           </div>
         ) : (
@@ -164,9 +165,7 @@ export default async function KhutbaPage({
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <span className="material-icons-outlined text-6xl text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500">
-                      mic
-                    </span>
+                    <Mic className="h-16 w-16 text-primary/30 dark:text-primary/50 group-hover:scale-110 transition-transform duration-500" />
                   )}
                   <div className="absolute top-4 left-4 bg-surface dark:bg-card text-xs font-bold px-2 py-1 rounded shadow-sm text-text-muted dark:text-text-subtext">
                     {new Date(sermon.created_at).toLocaleDateString("ar-EG")}
@@ -174,7 +173,7 @@ export default async function KhutbaPage({
                   {sermon.audio_file_path && (
                     <div className="absolute bottom-4 right-4">
                       <span className="bg-primary/90 text-white text-xs font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1">
-                        <span className="material-icons-outlined text-xs">audiotrack</span>
+                        <Music className="h-3 w-3" />
                         صوتي
                       </span>
                     </div>
@@ -183,26 +182,23 @@ export default async function KhutbaPage({
                 <div className="p-6 flex flex-col flex-grow">
                   {sermon.category && (
                     <div className="flex items-center gap-2 text-xs text-secondary font-medium mb-3">
-                      <span className="material-icons-outlined text-sm">label</span>
+                      <Tag className="h-4 w-4" />
                       <span>{sermon.category}</span>
                     </div>
                   )}
                   <h3 className="text-xl font-bold text-primary dark:text-white mb-3 line-clamp-2 hover:text-secondary transition-colors cursor-pointer">
                     {sermon.title}
                   </h3>
-                  <p className="text-text-muted dark:text-text-subtext text-sm leading-relaxed mb-6 line-clamp-3">
-                    {sermon.content?.replace(/<[^>]*>/g, "").substring(0, 150)}...
-                  </p>
                   <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-border dark:border-border">
                     <Link
                       href={`/khutba/${sermon.id}`}
                       className="flex-1 text-center bg-primary hover:bg-primary-hover text-white py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
                     >
-                      <span className="material-icons-outlined text-sm">visibility</span>
+                      <Eye className="h-4 w-4" />
                       اقرأ الخطبة
                     </Link>
                     <div className="flex items-center gap-1 text-xs text-text-muted">
-                      <span className="material-icons-outlined text-sm">visibility</span>
+                      <Eye className="h-4 w-4" />
                       {sermon.views_count || 0}
                     </div>
                   </div>
@@ -220,7 +216,7 @@ export default async function KhutbaPage({
                   href={`/khutba?page=${currentPage - 1}${params.sort ? `&sort=${params.sort}` : ""}${params.category ? `&category=${params.category}` : ""}`}
                   className="w-10 h-10 flex items-center justify-center rounded-lg border border-border dark:border-border text-text-muted dark:text-text-subtext hover:bg-background dark:hover:bg-background-alt"
                 >
-                  <span className="material-icons-outlined text-lg">chevron_right</span>
+                  <ChevronRight className="h-5 w-5" />
                 </Link>
               )}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -253,7 +249,7 @@ export default async function KhutbaPage({
                   href={`/khutba?page=${currentPage + 1}${params.sort ? `&sort=${params.sort}` : ""}${params.category ? `&category=${params.category}` : ""}`}
                   className="w-10 h-10 flex items-center justify-center rounded-lg border border-border dark:border-border text-text-muted dark:text-text-subtext hover:bg-background dark:hover:bg-background-alt"
                 >
-                  <span className="material-icons-outlined text-lg">chevron_left</span>
+                  <ChevronLeft className="h-5 w-5" />
                 </Link>
               )}
             </nav>

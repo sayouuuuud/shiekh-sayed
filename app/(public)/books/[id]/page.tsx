@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ShareButtons } from "@/components/share-buttons"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, Download, BookOpen } from "lucide-react"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -39,27 +42,19 @@ export default async function BookDetailPage({ params }: PageProps) {
   ]
   const colors = bookColors[0]
 
-  const handleDownload = async () => {
-    await supabase
-      .from("books")
-      .update({ download_count: (book.download_count || 0) + 1 })
-      .eq("id", id)
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Breadcrumb */}
         <nav className="flex items-center text-sm text-text-muted dark:text-text-subtext mb-8 overflow-x-auto whitespace-nowrap">
-          <Link href="/" className="hover:text-primary">
+          <Link href="/" className="hover:text-primary dark:hover:text-secondary">
             الرئيسية
           </Link>
-          <span className="material-icons-outlined text-xs mx-2">chevron_left</span>
-          <Link href="/books" className="hover:text-primary">
+          <ChevronLeft className="h-4 w-4 mx-2" />
+          <Link href="/books" className="hover:text-primary dark:hover:text-secondary">
             الكتب
           </Link>
-          <span className="material-icons-outlined text-xs mx-2">chevron_left</span>
-          <span className="text-primary font-medium">{book.title}</span>
+          <ChevronLeft className="h-4 w-4 mx-2" />
+          <span className="text-primary dark:text-secondary font-medium">{book.title}</span>
         </nav>
 
         {/* Book Details */}
@@ -83,44 +78,64 @@ export default async function BookDetailPage({ params }: PageProps) {
                 </div>
               )}
             </div>
-
-            {/* Download Stats */}
-            <div className="mt-6 bg-card rounded-xl p-4 border border-border text-center">
-              <p className="text-sm text-text-muted mb-1">تم التحميل</p>
-              <p className="text-3xl font-bold text-primary">{book.download_count || 0}</p>
-              <p className="text-xs text-text-muted">مرة</p>
-            </div>
           </div>
 
           {/* Book Info */}
           <div className="md:col-span-2">
-            <h1 className="text-4xl font-bold text-foreground mb-4 font-serif">{book.title}</h1>
-            <p className="text-xl text-text-muted mb-6">بقلم: {book.author}</p>
+            <h1 className="text-4xl font-bold text-foreground dark:text-white mb-4 font-serif">{book.title}</h1>
+            <p className="text-xl text-text-muted dark:text-text-subtext mb-6">بقلم: {book.author}</p>
 
             <div className="prose prose-lg max-w-none mb-8">
-              <h3 className="text-xl font-bold text-foreground mb-3">نبذة عن الكتاب</h3>
-              <p className="text-text-muted leading-relaxed whitespace-pre-line">{book.description}</p>
+              <h3 className="text-xl font-bold text-foreground dark:text-white mb-3">نبذة عن الكتاب</h3>
+              {book.description && (
+                <div
+                  className="text-text-muted dark:text-text-subtext leading-relaxed prose-headings:text-foreground dark:prose-headings:text-white"
+                  dangerouslySetInnerHTML={{ __html: book.description }}
+                />
+              )}
             </div>
 
-            {/* Download Button */}
-            {book.pdf_file_path ? (
-              <a
-                href={book.pdf_file_path}
-                download
-                className="inline-flex items-center gap-3 bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors"
-              >
-                <span className="material-icons-outlined">download</span>
-                تحميل الكتاب (PDF)
-              </a>
-            ) : (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-800">
-                <p className="font-medium">الكتاب غير متوفر للتحميل حالياً</p>
-                <p className="text-sm mt-1">يرجى التواصل معنا للحصول على نسخة من الكتاب</p>
-              </div>
-            )}
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 mb-8">
+              {book.pdf_file_path ? (
+                <>
+                  <a
+                    href={book.pdf_file_path}
+                    download
+                    className="inline-flex items-center gap-3 bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors"
+                  >
+                    <Download className="h-6 w-6" />
+                    تحميل الكتاب (PDF)
+                  </a>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="inline-flex items-center gap-3 px-8 py-4 text-lg font-bold bg-transparent"
+                      >
+                        <BookOpen className="h-6 w-6" />
+                        قراءة الكتاب
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-5xl h-[90vh]">
+                      <DialogHeader>
+                        <DialogTitle>{book.title}</DialogTitle>
+                      </DialogHeader>
+                      <iframe src={book.pdf_file_path} className="w-full h-full rounded-lg" title={book.title} />
+                    </DialogContent>
+                  </Dialog>
+                </>
+              ) : (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 text-amber-800 dark:text-amber-300">
+                  <p className="font-medium">الكتاب غير متوفر للتحميل حالياً</p>
+                  <p className="text-sm mt-1">يرجى التواصل معنا للحصول على نسخة من الكتاب</p>
+                </div>
+              )}
+            </div>
 
-            <div className="mt-8 pt-8 border-t border-border">
-              <h4 className="font-bold text-foreground mb-3">مشاركة الكتاب</h4>
+            <div className="pt-8 border-t border-border dark:border-border">
+              <h4 className="font-bold text-foreground dark:text-white mb-3">مشاركة الكتاب</h4>
               <ShareButtons title={`${book.title} - ${book.author}`} />
             </div>
           </div>
@@ -129,7 +144,7 @@ export default async function BookDetailPage({ params }: PageProps) {
         {/* Related Books */}
         {relatedBooks && relatedBooks.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-6">كتب ذات صلة</h2>
+            <h2 className="text-2xl font-bold text-foreground dark:text-white mb-6">كتب ذات صلة</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {relatedBooks.map((relatedBook, index) => {
                 const colors = bookColors[index % bookColors.length]
@@ -154,7 +169,7 @@ export default async function BookDetailPage({ params }: PageProps) {
                         </div>
                       )}
                     </div>
-                    <h4 className="font-bold text-foreground text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                    <h4 className="font-bold text-foreground dark:text-white text-sm line-clamp-2 group-hover:text-primary dark:group-hover:text-secondary transition-colors">
                       {relatedBook.title}
                     </h4>
                   </Link>

@@ -18,11 +18,16 @@ export function Footer() {
   useEffect(() => {
     async function loadSettings() {
       const supabase = createClient()
-      const { data } = await supabase.from("site_settings").select("key, value")
+      const { data } = await supabase.from("site_settings").select("*")
       if (data) {
         const settingsObj: Record<string, string> = {}
-        data.forEach((item) => {
-          settingsObj[item.key] = item.value || ""
+        data.forEach((item: Record<string, unknown>) => {
+          // Handle both possible column names: 'key' or 'setting_key'
+          const key = (item.key || item.setting_key || "") as string
+          const value = (item.value || item.setting_value || "") as string
+          if (key) {
+            settingsObj[key] = value
+          }
         })
         setSettings({
           youtube_channel: settingsObj.youtube_channel || "",

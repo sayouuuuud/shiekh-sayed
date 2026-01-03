@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { BookOpen, History, School, Play, Download, Share2, Calendar, Eye, Music, Video, ArrowLeft } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "الدروس العلمية",
@@ -17,7 +18,6 @@ export default async function DarsPage() {
     .select("*")
     .eq("lesson_type", "fiqh")
     .eq("publish_status", "published")
-    .eq("is_active", true)
     .eq("is_archived", false)
     .order("created_at", { ascending: false })
     .limit(3)
@@ -28,7 +28,6 @@ export default async function DarsPage() {
     .select("*")
     .eq("lesson_type", "seerah")
     .eq("publish_status", "published")
-    .eq("is_active", true)
     .eq("is_archived", false)
     .order("created_at", { ascending: false })
     .limit(4)
@@ -39,7 +38,6 @@ export default async function DarsPage() {
     .select("*")
     .eq("lesson_type", "general")
     .eq("publish_status", "published")
-    .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(6)
 
@@ -84,90 +82,73 @@ export default async function DarsPage() {
           <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <span className="material-icons-outlined text-2xl">menu_book</span>
+                <BookOpen className="h-6 w-6" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">دروس الفقه</h2>
                 <p className="text-sm text-text-muted">{'شرح كتاب "منهاج الطالبين" للإمام النووي'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-lg">
-              <span className="material-icons-outlined text-lg">calendar_today</span>
+            <div className="flex items-center gap-2 text-sm font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg">
+              <Calendar className="h-4 w-4" />
               كل يوم اثنين
             </div>
           </div>
 
           {!fiqhLessons || fiqhLessons.length === 0 ? (
             <div className="text-center py-12 bg-card rounded-xl border border-border">
-              <span className="material-icons-outlined text-5xl text-text-muted mb-4">school</span>
+              <School className="h-12 w-12 mx-auto text-text-muted mb-4" />
               <p className="text-text-muted">لا توجد دروس فقه حالياً</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {fiqhLessons.map((lesson, index) => (
-                <div
+                <Link
                   key={lesson.id}
+                  href={`/dars/${lesson.id}`}
                   className={`group bg-card rounded-xl shadow-sm hover:shadow-lg border transition-all duration-300 relative overflow-hidden ${
                     index === 0
                       ? "border-primary/20 dark:border-primary/20"
                       : "border-border dark:border-border hover:shadow-md"
                   }`}
                 >
-                  {index === 0 && (
-                    <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg z-10">
-                      الدرس القادم
+                  {lesson.thumbnail_path && (
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={lesson.thumbnail_path || "/placeholder.svg"}
+                        alt={lesson.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
                   )}
                   <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-5xl font-black text-gray-100 dark:text-gray-800 absolute -left-2 -top-2 opacity-50 select-none">
-                        {fiqhLessons.length - index}
-                      </span>
-                      <div
-                        className={`w-10 h-10 rounded-full ${index === 0 ? "bg-green-50 dark:bg-green-900/30 text-primary dark:text-primary" : "bg-gray-50 dark:bg-gray-800 text-gray-400"} flex items-center justify-center mb-4 z-10 relative`}
-                      >
-                        <span className="material-icons-outlined">{index === 0 ? "play_arrow" : "done"}</span>
-                      </div>
-                    </div>
                     <h3 className="text-xl font-bold text-foreground dark:text-white mb-2 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                       {lesson.title}
                     </h3>
-                    <p className="text-sm text-text-muted mb-6 line-clamp-2">
-                      {lesson.description?.replace(/<[^>]*>/g, "").substring(0, 100)}...
-                    </p>
                     <div className="flex items-center justify-between pt-4 border-t border-border">
-                      <div className="flex items-center gap-2 text-xs text-text-muted">
-                        <span className="material-icons-outlined text-sm">{index === 0 ? "schedule" : "event"}</span>
-                        {index === 0
-                          ? "7:30 مساءً"
-                          : new Date(lesson.created_at).toLocaleDateString("ar-EG", {
-                              day: "numeric",
-                              month: "long",
-                            })}
+                      <div className="flex items-center gap-4 text-xs text-text-muted">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(lesson.created_at).toLocaleDateString("ar-EG", {
+                            day: "numeric",
+                            month: "long",
+                          })}
+                        </span>
+                        {lesson.duration && (
+                          <span className="flex items-center gap-1">
+                            <History className="h-3 w-3" />
+                            {lesson.duration} دقيقة
+                          </span>
+                        )}
                       </div>
-                      {index === 0 ? (
-                        <Link
-                          href={`/dars/${lesson.id}`}
-                          className="text-sm font-semibold text-primary hover:underline"
-                        >
-                          التفاصيل
-                        </Link>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white dark:hover:bg-primary transition">
-                            <span className="material-icons-outlined text-sm">download</span>
-                          </button>
-                          <Link
-                            href={`/dars/${lesson.id}`}
-                            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white dark:hover:bg-primary transition"
-                          >
-                            <span className="material-icons-outlined text-sm">play_arrow</span>
-                          </Link>
-                        </div>
-                      )}
+                      <div className="flex gap-2">
+                        <span className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:text-white dark:group-hover:bg-primary transition">
+                          <Play className="h-4 w-4" />
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -178,7 +159,7 @@ export default async function DarsPage() {
               className="text-sm font-semibold text-text-muted hover:text-primary flex items-center justify-center gap-2 mx-auto transition"
             >
               عرض أرشيف الفقه
-              <span className="material-icons-outlined text-sm transform rotate-180">arrow_right_alt</span>
+              <ArrowLeft className="h-4 w-4" />
             </Link>
           </div>
         </section>
@@ -188,7 +169,7 @@ export default async function DarsPage() {
           <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
-                <span className="material-icons-outlined text-2xl">history_edu</span>
+                <History className="h-6 w-6" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">دروس السيرة النبوية</h2>
@@ -196,14 +177,14 @@ export default async function DarsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm font-bold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 px-4 py-2 rounded-lg">
-              <span className="material-icons-outlined text-lg">live_tv</span>
-              بث مباشر (الأربعاء)
+              <Calendar className="h-4 w-4" />
+              كل يوم أربعاء
             </div>
           </div>
 
           {!seerahLessons || seerahLessons.length === 0 ? (
             <div className="text-center py-12 bg-card rounded-xl border border-border">
-              <span className="material-icons-outlined text-5xl text-text-muted mb-4">history_edu</span>
+              <History className="h-12 w-12 mx-auto text-text-muted mb-4" />
               <p className="text-text-muted">لا توجد دروس سيرة حالياً</p>
             </div>
           ) : (
@@ -211,37 +192,29 @@ export default async function DarsPage() {
               {/* Featured Lesson */}
               {featuredSeerah && (
                 <div className="md:w-1/3 bg-primary/5 dark:bg-primary/10 p-8 flex flex-col justify-center border-l border-border relative overflow-hidden">
-                  <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 animate-pulse">
-                    <span className="w-2 h-2 bg-white rounded-full"></span>
-                    مباشر
-                  </div>
-                  <div className="mb-6 mt-8">
+                  {featuredSeerah.thumbnail_path && (
+                    <div className="mb-4 rounded-xl overflow-hidden">
+                      <img
+                        src={featuredSeerah.thumbnail_path || "/placeholder.svg"}
+                        alt={featuredSeerah.title}
+                        className="w-full h-40 object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="mb-6">
                     <span className="text-xs font-bold text-primary dark:text-primary uppercase tracking-wider mb-2 block">
                       درس الأسبوع
                     </span>
                     <h3 className="text-3xl font-extrabold text-primary dark:text-white mb-3 leading-tight font-serif">
                       {featuredSeerah.title}
                     </h3>
-                    <p className="text-sm text-text-muted leading-relaxed">
-                      {featuredSeerah.description?.replace(/<[^>]*>/g, "").substring(0, 150)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-3 mt-auto">
-                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                      <span className="material-icons-outlined text-primary">schedule</span>
-                      الساعة 8:00 مساءً بتوقيت مكة
-                    </div>
-                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                      <span className="material-icons-outlined text-primary">place</span>
-                      مسجد الرحمن - مدينة نصر
-                    </div>
                   </div>
                   <Link
                     href={`/dars/${featuredSeerah.id}`}
                     className="mt-8 w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-hover transition flex items-center justify-center gap-2 shadow-lg shadow-primary/30"
                   >
-                    <span className="material-icons-outlined">play_circle</span>
-                    شاهد البث المباشر
+                    <Play className="h-5 w-5" />
+                    شاهد الدرس
                   </Link>
                 </div>
               )}
@@ -257,9 +230,19 @@ export default async function DarsPage() {
                       className="flex items-center justify-between group p-4 rounded-xl hover:bg-muted transition border border-transparent hover:border-border cursor-pointer"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-700 dark:text-yellow-400 group-hover:scale-110 transition-transform">
-                          <span className="material-icons-outlined">play_arrow</span>
-                        </div>
+                        {lesson.thumbnail_path ? (
+                          <div className="w-10 h-10 rounded-full overflow-hidden">
+                            <img
+                              src={lesson.thumbnail_path || "/placeholder.svg"}
+                              alt={lesson.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-700 dark:text-yellow-400 group-hover:scale-110 transition-transform">
+                            <Play className="h-5 w-5" />
+                          </div>
+                        )}
                         <div>
                           <h5 className="font-bold text-foreground group-hover:text-primary transition">
                             {lesson.title}
@@ -271,10 +254,10 @@ export default async function DarsPage() {
                       </div>
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button className="text-text-muted hover:text-primary">
-                          <span className="material-icons-outlined">download</span>
+                          <Download className="h-5 w-5" />
                         </button>
                         <button className="text-text-muted hover:text-primary">
-                          <span className="material-icons-outlined">share</span>
+                          <Share2 className="h-5 w-5" />
                         </button>
                       </div>
                     </Link>
@@ -290,7 +273,7 @@ export default async function DarsPage() {
               className="text-sm font-semibold text-text-muted hover:text-primary flex items-center justify-center gap-2 mx-auto transition"
             >
               عرض أرشيف السيرة
-              <span className="material-icons-outlined text-sm transform rotate-180">arrow_right_alt</span>
+              <ArrowLeft className="h-4 w-4" />
             </Link>
           </div>
         </section>
@@ -301,7 +284,7 @@ export default async function DarsPage() {
             <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
-                  <span className="material-icons-outlined text-2xl">school</span>
+                  <School className="h-6 w-6" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">دروس متنوعة</h2>
@@ -317,14 +300,21 @@ export default async function DarsPage() {
                   href={`/dars/${lesson.id}`}
                   className="group bg-card rounded-xl shadow-sm hover:shadow-md border border-border transition-all duration-300"
                 >
+                  {lesson.thumbnail_path && (
+                    <div className="aspect-video overflow-hidden rounded-t-xl">
+                      <img
+                        src={lesson.thumbnail_path || "/placeholder.svg"}
+                        alt={lesson.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-4">
                       <span
                         className={`w-10 h-10 rounded-full flex items-center justify-center ${lesson.type === "video" ? "bg-purple-50 dark:bg-purple-900/20 text-purple-600" : "bg-blue-50 dark:bg-blue-900/20 text-blue-600"}`}
                       >
-                        <span className="material-icons-outlined">
-                          {lesson.type === "video" ? "play_circle" : "audiotrack"}
-                        </span>
+                        {lesson.type === "video" ? <Video className="h-5 w-5" /> : <Music className="h-5 w-5" />}
                       </span>
                       <span className="text-xs bg-muted px-2 py-1 rounded text-text-muted">
                         {lesson.type === "video" ? "مرئي" : "صوتي"}
@@ -333,12 +323,9 @@ export default async function DarsPage() {
                     <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition mb-2">
                       {lesson.title}
                     </h3>
-                    <p className="text-sm text-text-muted line-clamp-2 mb-4">
-                      {lesson.description?.replace(/<[^>]*>/g, "").substring(0, 80)}...
-                    </p>
                     <div className="flex items-center justify-between text-xs text-text-muted">
                       <span className="flex items-center gap-1">
-                        <span className="material-icons-outlined text-sm">visibility</span>
+                        <Eye className="h-4 w-4" />
                         {lesson.views_count || 0}
                       </span>
                       <span>{new Date(lesson.created_at).toLocaleDateString("ar-EG")}</span>
@@ -350,29 +337,22 @@ export default async function DarsPage() {
           </section>
         )}
 
-        {/* Newsletter CTA */}
+        {/* Newsletter CTA - Updated to WhatsApp/Telegram */}
         <section className="bg-primary dark:bg-primary/40 rounded-2xl p-8 md:p-12 relative overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="md:w-1/2">
-              <h2 className="text-2xl font-bold text-white mb-2 font-serif">اشترك في القائمة البريدية</h2>
+              <h2 className="text-2xl font-bold text-white mb-2 font-serif">اشترك في التنبيهات</h2>
               <p className="text-white/80 text-sm">
-                احصل على تنبيهات بالدروس الجديدة والملفات العلمية مباشرة إلى بريدك الإلكتروني.
+                احصل على تنبيهات بالدروس الجديدة والملفات العلمية مباشرة عبر واتساب أو تيليجرام.
               </p>
             </div>
             <div className="md:w-1/2 w-full">
-              <form className="flex flex-col sm:flex-row gap-3">
-                <input
-                  className="flex-1 rounded-lg border-none focus:ring-2 focus:ring-secondary px-4 py-3 text-foreground bg-white/95 dark:bg-black/40 backdrop-blur-sm"
-                  placeholder="أدخل بريدك الإلكتروني"
-                  type="email"
-                />
-                <button
-                  type="submit"
-                  className="bg-secondary hover:bg-secondary-hover text-white font-bold px-6 py-3 rounded-lg transition shadow-lg whitespace-nowrap"
-                >
-                  اشتراك الآن
-                </button>
-              </form>
+              <Link
+                href="/subscribe"
+                className="block w-full bg-secondary hover:bg-secondary-hover text-primary font-bold px-6 py-3 rounded-lg transition shadow-lg text-center"
+              >
+                اشترك الآن
+              </Link>
             </div>
           </div>
         </section>
