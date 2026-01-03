@@ -15,26 +15,28 @@ export function NewsletterSection() {
     e.preventDefault()
 
     if (!whatsapp && !telegram) {
-      setMessage("يرجى إدخال رقم الواتساب أو معرف التليجرام")
+      setMessage("يرجى إدخال رقم الواتساب أو معرف التليجرام (أحدهما على الأقل)")
       setStatus("error")
       return
     }
 
     setStatus("loading")
+    setMessage("")
 
     try {
       const supabase = createClient()
       const { error } = await supabase.from("subscribers").insert({
-        whatsapp_number: whatsapp || null,
-        telegram_username: telegram || null,
+        whatsapp_number: whatsapp.trim() || null,
+        telegram_username: telegram.trim() || null,
         subscribed_at: new Date().toISOString(),
         active: true,
       })
 
       if (error) {
         if (error.code === "23505") {
-          setMessage("هذا الرقم مسجل بالفعل")
+          setMessage("هذا الرقم أو المعرف مسجل بالفعل")
         } else {
+          console.error("[v0] Subscription error:", error)
           setMessage("حدث خطأ، يرجى المحاولة مرة أخرى")
         }
         setStatus("error")
@@ -45,7 +47,8 @@ export function NewsletterSection() {
       setStatus("success")
       setWhatsapp("")
       setTelegram("")
-    } catch {
+    } catch (err) {
+      console.error("[v0] Subscription catch error:", err)
       setMessage("حدث خطأ، يرجى المحاولة مرة أخرى")
       setStatus("error")
     }
@@ -76,6 +79,7 @@ export function NewsletterSection() {
 
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
           <div className="flex flex-col gap-3">
+            <p className="text-white/80 text-sm mb-2">أدخل رقم الواتساب أو معرف التليجرام (أحدهما فقط كافٍ)</p>
             <div className="relative">
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60">
                 <span className="material-icons-outlined text-lg">phone</span>
@@ -89,6 +93,11 @@ export function NewsletterSection() {
                 className="w-full bg-white/10 border border-white/20 text-white placeholder-white/60 px-4 py-3 pr-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary backdrop-blur-sm disabled:opacity-50"
                 dir="ltr"
               />
+            </div>
+            <div className="flex items-center gap-2 text-white/60 text-sm">
+              <span className="flex-1 h-px bg-white/20"></span>
+              <span>أو</span>
+              <span className="flex-1 h-px bg-white/20"></span>
             </div>
             <div className="relative">
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60">

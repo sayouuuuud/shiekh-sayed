@@ -41,13 +41,14 @@ export default function ManageArticlesPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingArticle, setEditingArticle] = useState<Article | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  // FIX: Initialize category_id with "none" instead of empty string
   const [formData, setFormData] = useState({
     title: "",
     content: "",
     author: "الشيخ السيد مراد",
     featured_image: "",
     publish_status: "draft",
-    category_id: "", // updated default value to be a non-empty string
+    category_id: "none",
   })
   const [submitting, setSubmitting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -86,10 +87,14 @@ export default function ManageArticlesPage() {
   const handleAddArticle = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+
+    // FIX: Convert "none" back to null before sending to Supabase
+    const categoryIdToSend = formData.category_id === "none" ? null : formData.category_id
+
     const { error } = await supabase.from("articles").insert({
       ...formData,
       featured_image: formData.featured_image || null,
-      category_id: formData.category_id || null,
+      category_id: categoryIdToSend,
     })
     if (!error) {
       setIsAddModalOpen(false)
@@ -105,12 +110,16 @@ export default function ManageArticlesPage() {
     e.preventDefault()
     if (!editingArticle) return
     setSubmitting(true)
+
+    // FIX: Convert "none" back to null before sending to Supabase
+    const categoryIdToSend = formData.category_id === "none" ? null : formData.category_id
+
     const { error } = await supabase
       .from("articles")
       .update({
         ...formData,
         featured_image: formData.featured_image || null,
-        category_id: formData.category_id || null,
+        category_id: categoryIdToSend,
       })
       .eq("id", editingArticle.id)
     if (!error) {
@@ -135,7 +144,8 @@ export default function ManageArticlesPage() {
       author: article.author,
       featured_image: article.featured_image || "",
       publish_status: article.publish_status,
-      category_id: article.category_id || "", // updated default value to be a non-empty string
+      // FIX: Handle null category_id by defaulting to "none"
+      category_id: article.category_id || "none",
     })
     setIsEditModalOpen(true)
   }
@@ -147,7 +157,7 @@ export default function ManageArticlesPage() {
       author: "الشيخ السيد مراد",
       featured_image: "",
       publish_status: "draft",
-      category_id: "", // updated default value to be a non-empty string
+      category_id: "none", // FIX: Reset to "none"
     })
   }
 
@@ -185,14 +195,16 @@ export default function ManageArticlesPage() {
         <div className="space-y-2">
           <Label>التصنيف</Label>
           <Select
-            value={formData.category_id}
+            // FIX: Ensure value is never null/undefined
+            value={formData.category_id || "none"}
             onValueChange={(value) => setFormData({ ...formData, category_id: value })}
           >
             <SelectTrigger className="bg-muted dark:bg-background-alt">
               <SelectValue placeholder="اختر التصنيف" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">بدون تصنيف</SelectItem>
+              {/* FIX: Use "none" instead of empty string "" */}
+              <SelectItem value="none">بدون تصنيف</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
@@ -280,7 +292,10 @@ export default function ManageArticlesPage() {
               إضافة مقال جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogContent
+            className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-primary dark:text-white">إضافة مقال جديد</DialogTitle>
             </DialogHeader>
@@ -451,7 +466,10 @@ export default function ManageArticlesPage() {
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-primary dark:text-white">تعديل المقال</DialogTitle>
           </DialogHeader>

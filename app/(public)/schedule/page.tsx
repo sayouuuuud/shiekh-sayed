@@ -120,7 +120,6 @@ export default async function SchedulePage({
   const { data: weeklySchedule } = await supabase
     .from("weekly_schedule")
     .select("*")
-    .eq("is_active", true)
     .order("sort_order", { ascending: true })
 
   // Generate calendar grid

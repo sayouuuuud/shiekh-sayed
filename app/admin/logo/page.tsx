@@ -30,30 +30,42 @@ export default function LogoManagementPage() {
 
   async function loadLogos() {
     setLoading(true)
-    const { data, error } = await supabase.from("site_settings").select("setting_value").eq("setting_key", "site_logos")
+    try {
+      const { data: appearanceData } = await supabase.from("appearance_settings").select("id, site_logo_path").limit(1)
 
-    // Mock data for now since we don't have a logos table
-    setLogos([
-      {
-        id: "1",
-        filename: "logo-main.png",
-        path: "/logo.png",
-        is_active: true,
-        uploaded_at: new Date().toISOString(),
-        size: 45000,
-      },
-      {
-        id: "2",
-        filename: "logo-light.png",
-        path: "/logo-light.png",
-        is_active: false,
-        uploaded_at: new Date().toISOString(),
-        size: 42000,
-      },
-    ])
+      const currentLogoPath = appearanceData?.[0]?.site_logo_path
 
-    const activeLogo = "1"
-    setActiveLogo(activeLogo)
+      // Create a list of available logos
+      const defaultLogos: Logo[] = [
+        {
+          id: "default",
+          filename: "الشعار الافتراضي",
+          path: "/islamic-mosque-logo-arabic.jpg",
+          is_active: currentLogoPath === "/islamic-mosque-logo-arabic.jpg" || !currentLogoPath,
+          uploaded_at: new Date().toISOString(),
+          size: 45000,
+        },
+      ]
+
+      // If there's a custom logo path, add it
+      if (currentLogoPath && currentLogoPath !== "/islamic-mosque-logo-arabic.jpg") {
+        defaultLogos.push({
+          id: "custom",
+          filename: "الشعار المخصص",
+          path: currentLogoPath,
+          is_active: true,
+          uploaded_at: new Date().toISOString(),
+          size: 0,
+        })
+        // Update default logo active status
+        defaultLogos[0].is_active = false
+      }
+
+      setLogos(defaultLogos)
+      setActiveLogo(defaultLogos.find((l) => l.is_active)?.id || "default")
+    } catch (error) {
+      console.error("[v0] Error loading logos:", error)
+    }
     setLoading(false)
   }
 
@@ -77,47 +89,117 @@ export default function LogoManagementPage() {
     setMessage("")
 
     try {
+      const fileExt = file.name.split(".").pop()
+      const fileName = `logo-${Date.now()}.${fileExt}`
+      const filePath = `logos/${fileName}`
+
+      const { error: uploadError } = await supabase.storage.from("uploads").upload(filePath, file)
+
+      if (uploadError) {
+        // If bucket doesn't exist, show helpful message
+        if (uploadError.message.includes("Bucket not found")) {
+          setMessage("يرجى إنشاء bucket باسم 'uploads' في Supabase Storage أولاً")
+          setUploading(false)
+          return
+        }
+        throw uploadError
+      }
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("uploads").getPublicUrl(filePath)
+
+      const { data: existingSettings } = await supabase.from("appearance_settings").select("id").limit(1)
+
+      if (existingSettings && existingSettings.length > 0) {
+        await supabase
+          .from("appearance_settings")
+          .update({ site_logo_path: publicUrl })
+          .eq("id", existingSettings[0].id)
+      } else {
+        await supabase.from("appearance_settings").insert({ site_logo_path: publicUrl })
+      }
+
       const newLogo: Logo = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: `custom-${Date.now()}`,
         filename: file.name,
-        path: URL.createObjectURL(file),
-        is_active: false,
+        path: publicUrl,
+        is_active: true,
         uploaded_at: new Date().toISOString(),
         size: file.size,
       }
 
-      setLogos([...logos, newLogo])
-      setMessage("تم رفع الشعار بنجاح")
+      // Update logos list
+      setLogos((prev) => [...prev.map((l) => ({ ...l, is_active: false })), newLogo])
+      setActiveLogo(newLogo.id)
+      setMessage("تم رفع الشعار وتعيينه بنجاح")
       e.target.value = ""
-    } catch (error) {
-      console.error("Error uploading logo:", error)
-      setMessage("حدث خطأ أثناء رفع الشعار")
+    } catch (error: any) {
+      console.error("[v0] Error uploading logo:", error)
+      setMessage("حدث خطأ أثناء رفع الشعار: " + error.message)
     }
 
     setUploading(false)
   }
 
   async function handleSetActive(logoId: string) {
-    setActiveLogo(logoId)
-    setMessage("تم تعيين الشعار كشعار رئيسي")
+    const selectedLogo = logos.find((l) => l.id === logoId)
+    if (!selectedLogo) return
 
-    // Update all logos
-    setLogos(
-      logos.map((logo) => ({
-        ...logo,
-        is_active: logo.id === logoId,
-      })),
-    )
+    try {
+      const { data: existingSettings } = await supabase.from("appearance_settings").select("id").limit(1)
+
+      if (existingSettings && existingSettings.length > 0) {
+        await supabase
+          .from("appearance_settings")
+          .update({ site_logo_path: selectedLogo.path })
+          .eq("id", existingSettings[0].id)
+      } else {
+        await supabase.from("appearance_settings").insert({ site_logo_path: selectedLogo.path })
+      }
+
+      setActiveLogo(logoId)
+      setLogos(logos.map((logo) => ({ ...logo, is_active: logo.id === logoId })))
+      setMessage("تم تعيين الشعار كشعار رئيسي")
+    } catch (error: any) {
+      console.error("[v0] Error setting active logo:", error)
+      setMessage("حدث خطأ: " + error.message)
+    }
   }
 
   async function handleDelete(logoId: string) {
+    if (logoId === "default") {
+      setMessage("لا يمكن حذف الشعار الافتراضي")
+      return
+    }
+
     if (!confirm("هل أنت متأكد من حذف هذا الشعار؟")) return
 
-    setLogos(logos.filter((logo) => logo.id !== logoId))
-    setMessage("تم حذف الشعار بنجاح")
+    const logoToDelete = logos.find((l) => l.id === logoId)
 
-    if (activeLogo === logoId) {
-      setActiveLogo(logos[0]?.id || null)
+    try {
+      // If this was the active logo, set default as active
+      if (logoToDelete?.is_active) {
+        const { data: existingSettings } = await supabase.from("appearance_settings").select("id").limit(1)
+        if (existingSettings && existingSettings.length > 0) {
+          await supabase
+            .from("appearance_settings")
+            .update({ site_logo_path: "/islamic-mosque-logo-arabic.jpg" })
+            .eq("id", existingSettings[0].id)
+        }
+      }
+
+      setLogos(logos.filter((logo) => logo.id !== logoId))
+      setMessage("تم حذف الشعار بنجاح")
+
+      if (activeLogo === logoId) {
+        setActiveLogo("default")
+        setLogos((prev) => prev.map((l) => (l.id === "default" ? { ...l, is_active: true } : l)))
+      }
+    } catch (error: any) {
+      console.error("[v0] Error deleting logo:", error)
+      setMessage("حدث خطأ: " + error.message)
     }
   }
 
@@ -152,7 +234,7 @@ export default function LogoManagementPage() {
       {message && (
         <div
           className={`p-4 rounded-xl text-center font-medium ${
-            message.includes("خطأ")
+            message.includes("خطأ") || message.includes("لا يمكن")
               ? "bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400"
               : "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400"
           }`}
@@ -219,10 +301,12 @@ export default function LogoManagementPage() {
                   <div className="md:col-span-3">
                     <h3 className="font-bold text-foreground dark:text-white mb-1">{logo.filename}</h3>
                     <div className="flex flex-wrap gap-4 text-sm text-text-muted dark:text-gray-400">
-                      <div className="flex items-center gap-1">
-                        <span className="material-icons-outlined text-sm">storage</span>
-                        <span>{(logo.size / 1024).toFixed(1)} KB</span>
-                      </div>
+                      {logo.size > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="material-icons-outlined text-sm">storage</span>
+                          <span>{(logo.size / 1024).toFixed(1)} KB</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-1">
                         <span className="material-icons-outlined text-sm">calendar_today</span>
                         <span>{new Date(logo.uploaded_at).toLocaleDateString("ar-EG")}</span>
@@ -247,14 +331,16 @@ export default function LogoManagementPage() {
                         تعيين كرئيسي
                       </Button>
                     )}
-                    <Button
-                      onClick={() => handleDelete(logo.id)}
-                      variant="ghost"
-                      className="w-full text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 text-sm"
-                    >
-                      <span className="material-icons-outlined text-sm ml-1">delete</span>
-                      حذف
-                    </Button>
+                    {logo.id !== "default" && (
+                      <Button
+                        onClick={() => handleDelete(logo.id)}
+                        variant="ghost"
+                        className="w-full text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 text-sm"
+                      >
+                        <span className="material-icons-outlined text-sm ml-1">delete</span>
+                        حذف
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

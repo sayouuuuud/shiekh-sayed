@@ -8,60 +8,53 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { createClient } from "@/lib/supabase/client"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
 import { FileUpload } from "@/components/admin/file-upload"
 import { Pagination } from "@/components/admin/pagination"
-import {
-  Loader2,
-  Mic,
-  CheckCircle,
-  FileEdit,
-  Eye,
-  Trash2,
-  ExternalLink,
-  Edit,
-  PlusCircle,
-  Search,
-  Music,
-  Video,
-  Calendar,
-} from "lucide-react"
+import { Mic, Plus, Eye, Search, Edit, Trash2, Loader2, CheckCircle, FileEdit } from "lucide-react"
 
 interface Sermon {
   id: string
   title: string
-  content: string
-  audio_file_path?: string
-  youtube_url?: string
-  media_source?: "youtube" | "local"
-  thumbnail_path?: string
+  description: string
+  transcript: string
+  date: string
+  video_url?: string
+  audio_url?: string
   publish_status: string
   is_active: boolean
   views_count: number
   created_at: string
+  category_id?: string
+}
+
+interface Category {
+  id: string
+  name: string
+  type: string
 }
 
 const ITEMS_PER_PAGE = 10
 
 export default function ManageKhutbaPage() {
   const [sermons, setSermons] = useState<Sermon[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingSermon, setEditingSermon] = useState<Sermon | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: "",
-    content: "",
-    audio_file_path: "",
-    youtube_url: "",
-    media_source: "local" as "youtube" | "local",
-    thumbnail_path: "",
+    description: "",
+    transcript: "",
+    date: new Date().toISOString().split("T")[0],
+    video_url: "",
+    audio_url: "",
     publish_status: "draft",
     is_active: true,
+    category_id: "none", // Added category_id
   })
   const [submitting, setSubmitting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -87,25 +80,28 @@ export default function ManageKhutbaPage() {
     setLoading(false)
   }
 
+  const fetchCategories = async () => {
+    const { data } = await supabase.from("categories").select("*").eq("type", "sermon")
+    if (data) setCategories(data)
+  }
+
   useEffect(() => {
     fetchSermons()
+    fetchCategories() // Fetch categories on mount
   }, [currentPage])
 
   const handleAddSermon = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
 
-    const { error } = await supabase.from("sermons").insert({
-      title: formData.title,
-      content: formData.content,
-      audio_file_path: formData.media_source === "local" ? formData.audio_file_path : null,
-      youtube_url: formData.media_source === "youtube" ? formData.youtube_url : null,
-      media_source: formData.media_source,
-      thumbnail_path: formData.thumbnail_path || null,
-      publish_status: formData.publish_status,
-      is_active: formData.is_active,
-    })
+    const categoryIdToSend = formData.category_id === "none" ? null : formData.category_id
 
+    const { error } = await supabase.from("sermons").insert({
+      ...formData,
+      video_url: formData.video_url || null,
+      audio_url: formData.audio_url || null,
+      category_id: categoryIdToSend,
+    })
     if (!error) {
       setIsAddModalOpen(false)
       resetForm()
@@ -121,20 +117,17 @@ export default function ManageKhutbaPage() {
     if (!editingSermon) return
     setSubmitting(true)
 
+    const categoryIdToSend = formData.category_id === "none" ? null : formData.category_id
+
     const { error } = await supabase
       .from("sermons")
       .update({
-        title: formData.title,
-        content: formData.content,
-        audio_file_path: formData.media_source === "local" ? formData.audio_file_path : null,
-        youtube_url: formData.media_source === "youtube" ? formData.youtube_url : null,
-        media_source: formData.media_source,
-        thumbnail_path: formData.thumbnail_path || null,
-        publish_status: formData.publish_status,
-        is_active: formData.is_active,
+        ...formData,
+        video_url: formData.video_url || null,
+        audio_url: formData.audio_url || null,
+        category_id: categoryIdToSend,
       })
       .eq("id", editingSermon.id)
-
     if (!error) {
       setIsEditModalOpen(false)
       setEditingSermon(null)
@@ -149,34 +142,23 @@ export default function ManageKhutbaPage() {
     if (!error) fetchSermons()
   }
 
-  const handleBulkDelete = async () => {
-    if (!confirm(`هل أنت متأكد من حذف ${selectedItems.length} خطبة؟`)) return
-    for (const id of selectedItems) {
-      await supabase.from("sermons").delete().eq("id", id)
-    }
-    setSelectedItems([])
+  const toggleActive = async (id: string, currentStatus: boolean) => {
+    await supabase.from("sermons").update({ is_active: !currentStatus }).eq("id", id)
     fetchSermons()
-  }
-
-  const toggleSelectItem = (id: string) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter((i) => i !== id))
-    } else {
-      setSelectedItems([...selectedItems, id])
-    }
   }
 
   const openEditModal = (sermon: Sermon) => {
     setEditingSermon(sermon)
     setFormData({
       title: sermon.title,
-      content: sermon.content || "",
-      audio_file_path: sermon.audio_file_path || "",
-      youtube_url: sermon.youtube_url || "",
-      media_source: sermon.media_source || "local",
-      thumbnail_path: sermon.thumbnail_path || "",
+      description: sermon.description,
+      transcript: sermon.transcript || "",
+      date: sermon.date,
+      video_url: sermon.video_url || "",
+      audio_url: sermon.audio_url || "",
       publish_status: sermon.publish_status,
       is_active: sermon.is_active ?? true,
+      category_id: sermon.category_id || "none", // Handle category_id
     })
     setIsEditModalOpen(true)
   }
@@ -184,34 +166,67 @@ export default function ManageKhutbaPage() {
   const resetForm = () => {
     setFormData({
       title: "",
-      content: "",
-      audio_file_path: "",
-      youtube_url: "",
-      media_source: "local",
-      thumbnail_path: "",
+      description: "",
+      transcript: "",
+      date: new Date().toISOString().split("T")[0],
+      video_url: "",
+      audio_url: "",
       publish_status: "draft",
       is_active: true,
+      category_id: "none", // Reset category_id
     })
   }
 
   const filteredSermons = sermons.filter((s) => s.title.toLowerCase().includes(searchQuery.toLowerCase()))
-  const publishedCount = sermons.filter((s) => s.publish_status === "published").length
-  const draftCount = sermons.filter((s) => s.publish_status === "draft").length
-  const totalViews = sermons.reduce((acc, s) => acc + (s.views_count || 0), 0)
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+
+  const getCategoryName = (categoryId: string | undefined) => {
+    if (!categoryId) return null
+    const category = categories.find((c) => c.id === categoryId)
+    return category?.name
+  }
 
   const SermonForm = ({ onSubmit, isEdit = false }: { onSubmit: (e: React.FormEvent) => void; isEdit?: boolean }) => (
     <form onSubmit={onSubmit} className="space-y-6 mt-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-2">
+        <Label>عنوان الخطبة *</Label>
+        <Input
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          placeholder="عنوان الخطبة"
+          className="bg-muted dark:bg-background-alt"
+          required
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label>عنوان الخطبة</Label>
+          <Label>التاريخ *</Label>
           <Input
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="مثال: فضل الذكر وأثره على القلب"
+            type="date"
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             className="bg-muted dark:bg-background-alt"
             required
           />
+        </div>
+        <div className="space-y-2">
+          <Label>التصنيف</Label>
+          <Select
+            value={formData.category_id || "none"}
+            onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+          >
+            <SelectTrigger className="bg-muted dark:bg-background-alt">
+              <SelectValue placeholder="اختر التصنيف" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">بدون تصنيف</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label>حالة النشر</Label>
@@ -230,77 +245,51 @@ export default function ManageKhutbaPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
-        <div>
-          <Label className="text-base">نشط في الموقع</Label>
-          <p className="text-sm text-text-muted">إظهار الخطبة في الموقع العام</p>
+      <div className="space-y-2">
+        <Label>الوصف</Label>
+        <RichTextEditor
+          content={formData.description}
+          onChange={(html) => setFormData({ ...formData, description: html })}
+          placeholder="وصف مختصر للخطبة..."
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>رابط الفيديو (يوتيوب)</Label>
+          <Input
+            value={formData.video_url}
+            onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+            placeholder="https://youtube.com/watch?v=..."
+            className="bg-muted dark:bg-background-alt"
+            dir="ltr"
+          />
         </div>
-        <Switch
-          checked={formData.is_active}
-          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+        <FileUpload
+          accept="audio/*"
+          folder="sermons/audio"
+          label="الملف الصوتي"
+          onUploadComplete={(path) => setFormData({ ...formData, audio_url: path })}
+          currentFile={formData.audio_url}
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-lg font-semibold text-primary">محتوى الخطبة</Label>
+        <Label>نص الخطبة (تفريغ)</Label>
         <RichTextEditor
-          content={formData.content}
-          onChange={(html) => setFormData({ ...formData, content: html })}
-          placeholder="اكتب نص الخطبة الكامل هنا..."
+          content={formData.transcript}
+          onChange={(html) => setFormData({ ...formData, transcript: html })}
+          placeholder="النص الكامل للخطبة..."
         />
       </div>
 
-      <div className="space-y-4 p-4 bg-muted/50 rounded-xl">
-        <Label className="text-lg font-semibold">مصدر الصوت</Label>
-        <RadioGroup
-          value={formData.media_source}
-          onValueChange={(value: "youtube" | "local") => setFormData({ ...formData, media_source: value })}
-          className="flex gap-6"
-        >
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="local" id="local" />
-            <Label htmlFor="local" className="cursor-pointer">
-              ملف محلي
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="youtube" id="youtube" />
-            <Label htmlFor="youtube" className="cursor-pointer">
-              رابط يوتيوب
-            </Label>
-          </div>
-        </RadioGroup>
-
-        {formData.media_source === "local" && (
-          <FileUpload
-            accept="audio/*"
-            folder="sermons"
-            label="ملف الخطبة الصوتي"
-            onUploadComplete={(path) => setFormData({ ...formData, audio_file_path: path })}
-            currentFile={formData.audio_file_path}
-          />
-        )}
-
-        {formData.media_source === "youtube" && (
-          <div className="space-y-2">
-            <Label>رابط يوتيوب</Label>
-            <Input
-              value={formData.youtube_url}
-              onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-              placeholder="https://youtube.com/watch?v=..."
-              dir="ltr"
-            />
-          </div>
-        )}
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={formData.is_active}
+          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+        />
+        <Label>نشط</Label>
       </div>
-
-      <FileUpload
-        accept="image/*"
-        folder="thumbnails"
-        label="الصورة المصغرة"
-        onUploadComplete={(path) => setFormData({ ...formData, thumbnail_path: path })}
-        currentFile={formData.thumbnail_path}
-      />
 
       <div className="flex justify-end gap-3 pt-4 border-t border-border">
         <Button
@@ -319,8 +308,10 @@ export default function ManageKhutbaPage() {
               <Loader2 className="h-4 w-4 ml-2 animate-spin" />
               جاري الحفظ...
             </>
+          ) : isEdit ? (
+            "حفظ التغييرات"
           ) : (
-            "حفظ الخطبة"
+            "إضافة الخطبة"
           )}
         </Button>
       </div>
@@ -329,22 +320,26 @@ export default function ManageKhutbaPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-primary dark:text-white flex items-center gap-3 font-serif">
             <Mic className="h-8 w-8 text-primary" />
-            إدارة الخطب المنبرية
+            إدارة الخطب
           </h1>
-          <p className="text-text-muted dark:text-gray-400 mt-2">إضافة وتعديل الخطب والمواعظ</p>
+          <p className="text-text-muted dark:text-gray-400 mt-2">إضافة وتعديل خطب الجمعة والمناسبات</p>
         </div>
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-bold">
-              <PlusCircle className="h-5 w-5 ml-2" />
+            <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-xl font-bold">
+              <Plus className="h-5 w-5 ml-2" />
               إضافة خطبة جديدة
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-4xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogContent
+            className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-primary dark:text-white">إضافة خطبة جديدة</DialogTitle>
             </DialogHeader>
@@ -353,169 +348,170 @@ export default function ManageKhutbaPage() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-card p-6 rounded-xl border border-border flex items-center justify-between">
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
           <div>
-            <p className="text-sm text-text-muted mb-1">إجمالي الخطب</p>
-            <h3 className="text-3xl font-bold text-foreground dark:text-white">{totalCount}</h3>
+            <span className="block text-text-muted text-sm mb-1">إجمالي الخطب</span>
+            <span className="text-3xl font-bold text-primary dark:text-white">{totalCount}</span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
-            <Mic className="h-6 w-6 text-primary" />
+          <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+            <Mic className="h-6 w-6" />
           </div>
         </div>
-        <div className="bg-card p-6 rounded-xl border border-border flex items-center justify-between">
+        <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
           <div>
-            <p className="text-sm text-text-muted mb-1">المنشورة</p>
-            <h3 className="text-3xl font-bold text-green-600">{publishedCount}</h3>
+            <span className="block text-text-muted text-sm mb-1">المنشورة</span>
+            <span className="text-3xl font-bold text-green-600">
+              {sermons.filter((s) => s.publish_status === "published").length}
+            </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
-            <CheckCircle className="h-6 w-6 text-green-600" />
+          <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+            <CheckCircle className="h-6 w-6" />
           </div>
         </div>
-        <div className="bg-card p-6 rounded-xl border border-border flex items-center justify-between">
+        <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
           <div>
-            <p className="text-sm text-text-muted mb-1">المسودات</p>
-            <h3 className="text-3xl font-bold text-yellow-600">{draftCount}</h3>
+            <span className="block text-text-muted text-sm mb-1">مسودات</span>
+            <span className="text-3xl font-bold text-yellow-600">
+              {sermons.filter((s) => s.publish_status === "draft").length}
+            </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
-            <FileEdit className="h-6 w-6 text-yellow-600" />
-          </div>
-        </div>
-        <div className="bg-card p-6 rounded-xl border border-border flex items-center justify-between">
-          <div>
-            <p className="text-sm text-text-muted mb-1">المشاهدات</p>
-            <h3 className="text-3xl font-bold text-blue-600">{totalViews.toLocaleString()}</h3>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-            <Eye className="h-6 w-6 text-blue-600" />
+          <div className="w-12 h-12 rounded-full bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
+            <FileEdit className="h-6 w-6" />
           </div>
         </div>
       </div>
 
-      <div className="bg-card p-4 rounded-xl border border-border flex flex-col md:flex-row items-center gap-4">
-        <div className="relative w-full md:w-1/3">
-          <Search className="absolute inset-y-0 right-0 flex items-center pr-3 h-full w-5 text-text-muted" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10 bg-muted dark:bg-background-alt"
-            placeholder="ابحث عن خطبة..."
+      {/* Table */}
+      <div className="bg-card rounded-3xl border border-border overflow-hidden">
+        <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/50 dark:bg-background-alt/50">
+          <h2 className="font-bold text-xl text-primary dark:text-white">قائمة الخطب ({totalCount})</h2>
+          <div className="relative">
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-4 pr-10 py-2 rounded-lg w-64 bg-card dark:bg-card"
+              placeholder="بحث عن خطبة..."
+            />
+            <Search className="absolute right-3 top-2.5 text-text-muted h-5 w-5" />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center text-text-muted flex items-center justify-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            جاري التحميل...
+          </div>
+        ) : filteredSermons.length === 0 ? (
+          <div className="p-12 text-center text-text-muted">{searchQuery ? "لا توجد نتائج" : "لا توجد خطب بعد"}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-right">
+              <thead className="bg-muted/50 dark:bg-background-alt text-xs font-bold text-text-muted uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">#</th>
+                  <th className="px-6 py-4">الخطبة</th>
+                  <th className="px-6 py-4">التاريخ</th>
+                  <th className="px-6 py-4">التصنيف</th>
+                  <th className="px-6 py-4">المشاهدات</th>
+                  <th className="px-6 py-4">الحالة</th>
+                  <th className="px-6 py-4">نشط</th>
+                  <th className="px-6 py-4 text-center">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredSermons.map((sermon, index) => (
+                  <tr
+                    key={sermon.id}
+                    className="group hover:bg-muted/50 dark:hover:bg-background-alt/50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-text-muted text-sm">{String(index + 1).padStart(2, "0")}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
+                          <Mic className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-foreground dark:text-gray-200 text-sm">{sermon.title}</h3>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-muted">
+                      {new Date(sermon.date).toLocaleDateString("ar-EG")}
+                    </td>
+                    <td className="px-6 py-4">
+                      {getCategoryName(sermon.category_id) ? (
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                          {getCategoryName(sermon.category_id)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-text-muted">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-muted">{sermon.views_count || 0}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`text-xs px-3 py-1 rounded-full font-medium ${sermon.publish_status === "published" ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"}`}
+                      >
+                        {sermon.publish_status === "published" ? "منشور" : "مسودة"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Switch
+                        checked={sermon.is_active ?? true}
+                        onCheckedChange={() => toggleActive(sermon.id, sermon.is_active ?? true)}
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => window.open(`/khutba/${sermon.id}`, "_blank")}
+                          className="p-2 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                          title="عرض"
+                        >
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => openEditModal(sermon)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                          title="تعديل"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSermon(sermon.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                          title="حذف"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="p-4 border-t border-border">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={totalCount}
+            itemsPerPage={ITEMS_PER_PAGE}
           />
         </div>
-        {selectedItems.length > 0 && (
-          <Button variant="destructive" onClick={handleBulkDelete}>
-            <Trash2 className="h-4 w-4 ml-2" />
-            حذف المحدد ({selectedItems.length})
-          </Button>
-        )}
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : filteredSermons.length === 0 ? (
-        <div className="text-center py-12 bg-card rounded-xl border border-border">
-          <Mic className="h-12 w-12 mx-auto mb-4 text-text-muted opacity-50" />
-          <h3 className="text-lg font-bold text-foreground mb-2">
-            {searchQuery ? "لا توجد نتائج للبحث" : "لا توجد خطب بعد"}
-          </h3>
-          <p className="text-text-muted">ابدأ بإضافة خطبة جديدة</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {filteredSermons.map((sermon) => (
-            <div
-              key={sermon.id}
-              className="bg-card p-4 rounded-xl border border-border flex flex-col md:flex-row items-center gap-6 relative overflow-hidden"
-            >
-              <div
-                className={`absolute right-0 top-0 bottom-0 w-1 ${sermon.publish_status === "published" ? "bg-green-500" : "bg-yellow-500"}`}
-              ></div>
-              <input
-                type="checkbox"
-                checked={selectedItems.includes(sermon.id)}
-                onChange={() => toggleSelectItem(sermon.id)}
-                className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
-              />
-              {sermon.thumbnail_path ? (
-                <img
-                  src={sermon.thumbnail_path || "/placeholder.svg"}
-                  alt={sermon.title}
-                  className="w-16 h-16 rounded-lg object-cover"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Mic className="h-6 w-6 text-primary" />
-                </div>
-              )}
-              <div className="flex-grow text-center md:text-right">
-                <h3 className="text-lg font-bold text-foreground dark:text-white">{sermon.title}</h3>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-text-muted mt-2">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {new Date(sermon.created_at).toLocaleDateString("ar-EG")}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    {sermon.views_count || 0}
-                  </span>
-                  {sermon.audio_file_path && (
-                    <span className="flex items-center gap-1 text-primary">
-                      <Music className="h-4 w-4" />
-                      صوتي
-                    </span>
-                  )}
-                  {sermon.youtube_url && (
-                    <span className="flex items-center gap-1 text-red-500">
-                      <Video className="h-4 w-4" />
-                      يوتيوب
-                    </span>
-                  )}
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs ${sermon.publish_status === "published" ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"}`}
-                  >
-                    {sermon.publish_status === "published" ? "منشور" : "مسودة"}
-                  </span>
-                  {!sermon.is_active && (
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                      غير نشط
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <a
-                  href={`/khutba/${sermon.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-lg hover:bg-muted transition-colors text-text-muted hover:text-primary"
-                >
-                  <ExternalLink className="h-5 w-5" />
-                </a>
-                <button
-                  onClick={() => openEditModal(sermon)}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors text-text-muted hover:text-primary"
-                >
-                  <Edit className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => handleDeleteSermon(sermon.id)}
-                  className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-text-muted hover:text-red-500"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
-
-      {/* Edit Dialog */}
+      {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-4xl bg-card max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-primary dark:text-white">تعديل الخطبة</DialogTitle>
           </DialogHeader>

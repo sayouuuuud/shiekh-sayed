@@ -8,7 +8,9 @@ import Link from "@tiptap/extension-link"
 import { TextStyle } from "@tiptap/extension-text-style"
 import { Color } from "@tiptap/extension-color"
 import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useEffect } from "react"
+import { Palette } from "lucide-react"
 
 interface RichTextEditorProps {
   content: string
@@ -16,8 +18,24 @@ interface RichTextEditorProps {
   placeholder?: string
 }
 
+const TEXT_COLORS = [
+  { name: "أسود", value: "#000000" },
+  { name: "أبيض", value: "#FFFFFF" },
+  { name: "رمادي", value: "#6B7280" },
+  { name: "أحمر", value: "#DC2626" },
+  { name: "برتقالي", value: "#EA580C" },
+  { name: "أصفر", value: "#CA8A04" },
+  { name: "أخضر", value: "#16A34A" },
+  { name: "أزرق", value: "#2563EB" },
+  { name: "بنفسجي", value: "#9333EA" },
+  { name: "وردي", value: "#DB2777" },
+  { name: "سماوي", value: "#0891B2" },
+  { name: "ذهبي", value: "#B45309" },
+]
+
 export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
@@ -87,6 +105,45 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         >
           U
         </Button>
+
+        <div className="w-px h-8 bg-border mx-1" />
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button type="button" size="sm" variant="ghost" className="relative">
+              <Palette className="h-4 w-4" />
+              <span
+                className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full"
+                style={{
+                  backgroundColor: editor.getAttributes("textStyle").color || "#000000",
+                }}
+              />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-2" align="start">
+            <div className="grid grid-cols-4 gap-1">
+              {TEXT_COLORS.map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  title={color.name}
+                  className="w-8 h-8 rounded-md border border-border hover:scale-110 transition-transform"
+                  style={{ backgroundColor: color.value }}
+                  onClick={() => editor.chain().focus().setColor(color.value).run()}
+                />
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="w-full mt-2 text-xs"
+              onClick={() => editor.chain().focus().unsetColor().run()}
+            >
+              إزالة اللون
+            </Button>
+          </PopoverContent>
+        </Popover>
 
         <div className="w-px h-8 bg-border mx-1" />
 

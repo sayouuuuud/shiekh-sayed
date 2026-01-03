@@ -60,8 +60,15 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg',
-          className,
+          // التنسيق الأساسي: ثابت في المنتصف، خلفية بيضاء، حواف دائرية
+          "bg-background fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border p-6 shadow-lg duration-200 sm:rounded-lg",
+          // تحديد العرض الأقصى ليكون مناسباً (ليس كامل الشاشة)
+          "max-w-lg",
+          // منع السكرول الأفقي المزعج
+          "overflow-x-hidden max-h-[90vh] overflow-y-auto",
+          // أنيميشن الفتح والإغلاق
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+          className
         )}
         {...props}
       >
@@ -79,7 +86,6 @@ function DialogContent({
     </DialogPortal>
   )
 }
-
 function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div

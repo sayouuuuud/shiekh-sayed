@@ -93,7 +93,7 @@ export function AdminHeader({ user }: { user: any }) {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a href="/admin/profile" className="flex items-center gap-2 cursor-pointer">
+              <a href="/admin/security" className="flex items-center gap-2 cursor-pointer">
                 <span className="material-icons-outlined text-lg">person</span>
                 <span>الملف الشخصي</span>
               </a>

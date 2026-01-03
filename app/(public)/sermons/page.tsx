@@ -13,7 +13,6 @@ export default async function SermonsPage() {
     .from("sermons")
     .select("*")
     .eq("publish_status", "published")
-    .eq("is_active", true)
     .order("created_at", { ascending: false })
 
   return (

@@ -21,7 +21,7 @@ export const revalidate = 60
 export default async function AboutPage() {
   const supabase = await createClient()
 
-  const { data: aboutData } = await supabase.from("about_page").select("*").single()
+  const { data: aboutData, error: aboutError } = await supabase.from("about_page").select("*").limit(1).maybeSingle()
 
   let socialLinks: Record<string, string> = {}
 
@@ -34,15 +34,17 @@ export default async function AboutPage() {
     })
   }
 
-  // If no links found, fallback to social_links table
   if (Object.keys(socialLinks).length === 0) {
     try {
-      const { data: linksData } = await supabase.from("social_links").select("*").eq("is_active", true)
+      const { data: linksData } = await supabase.from("social_links").select("*")
 
       if (linksData) {
-        linksData.forEach((link: any) => {
-          socialLinks[link.platform?.toLowerCase()] = link.url
-        })
+        // Filter active items in JavaScript if is_active exists
+        linksData
+          .filter((link: any) => link.is_active !== false)
+          .forEach((link: any) => {
+            socialLinks[link.platform?.toLowerCase()] = link.url
+          })
       }
     } catch {
       // Fallback to about_page social_media if social_links table doesn't exist
@@ -50,21 +52,33 @@ export default async function AboutPage() {
     }
   }
 
-  // Default data if none in DB
-  const about = aboutData || {
-    sheikh_name: "الشيخ السيد مراد",
-    sheikh_photo: "/islamic-scholar-portrait.jpg",
+  const about = {
+    sheikh_name: aboutData?.sheikh_name || "الشيخ السيد مراد",
+    sheikh_photo: aboutData?.image_path || aboutData?.sheikh_photo || "/islamic-scholar-portrait.jpg",
     biography:
+      aboutData?.content ||
+      aboutData?.biography ||
       "عالم أزهري ومفكر تربوي، كرس حياته لخدمة العلم والدعوة. يتميز بأسلوبه الهادئ والرزين في طرح القضايا المعاصرة.",
-    achievements: "",
-    education: "",
-    current_positions: "",
-    quote_text: "إنما العلم خشية، وليس العلم بكثرة الرواية، وإنما العالم من يخشى الله تعالى في سره وعلانيته.",
-    quote_author: "- من أقوال الشيخ",
-    stats: { students: "5000+", books: "20+", lectures: "1000+", years: "25+" },
+    achievements: aboutData?.achievements || "",
+    education: aboutData?.education || "",
+    current_positions: aboutData?.positions || aboutData?.current_positions || "",
+    location: aboutData?.location || "القاهرة، مصر",
+    title: aboutData?.title || "عالم أزهري ومصلح اجتماعي",
+    position: aboutData?.position || "خطيب وإمام",
+    quote_text:
+      aboutData?.quote ||
+      aboutData?.quote_text ||
+      "إنما العلم خشية، وليس العلم بكثرة الرواية، وإنما العالم من يخشى الله تعالى في سره وعلانيته.",
+    quote_author: aboutData?.quote_author || "- من أقوال الشيخ",
+    stats: (aboutData?.stats as Record<string, string>) || {
+      students: "5000+",
+      books: "20+",
+      lectures: "1000+",
+      years: "25+",
+    },
   }
 
-  const stats = about.stats as Record<string, string>
+  const stats = about.stats
 
   const getSocialIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -137,7 +151,7 @@ export default async function AboutPage() {
           <span className="text-primary dark:text-secondary font-medium">من هو الشيخ</span>
         </div>
 
-        {/* Hero Card */}
+        {/* Hero Card - Now properly displays data from database */}
         <div className="bg-surface dark:bg-card rounded-2xl shadow-sm border border-border dark:border-border p-8 lg:p-12 mb-12 flex flex-col lg:flex-row items-center lg:items-start gap-12">
           <div className="w-full lg:w-1/3 flex justify-center lg:justify-start relative group">
             <div className="absolute inset-0 bg-secondary blur-2xl opacity-20 rounded-full group-hover:opacity-30 transition-opacity"></div>
@@ -156,26 +170,27 @@ export default async function AboutPage() {
             <h1 className="text-4xl lg:text-5xl font-bold text-foreground dark:text-white mb-6 leading-tight font-serif">
               {about.sheikh_name} <br />
               <span className="text-2xl lg:text-3xl font-normal text-text-muted dark:text-text-subtext mt-2 block">
-                عالم أزهري ومصلح اجتماعي
+                {about.title}
               </span>
             </h1>
-            <p className="text-lg text-text-muted dark:text-text-subtext leading-relaxed mb-8 max-w-3xl font-light">
-              {about.biography}
-            </p>
+            <div
+              className="text-lg text-text-muted dark:text-text-subtext leading-relaxed mb-8 max-w-3xl font-light prose prose-lg dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: about.biography }}
+            />
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
               {about.education && (
                 <div className="flex items-center gap-2 bg-background dark:bg-background-alt px-4 py-2 rounded-lg border border-border dark:border-border">
                   <GraduationCap className="h-5 w-5 text-secondary" />
-                  <span className="text-sm font-medium">دكتوراه في الفقه المقارن</span>
+                  <span className="text-sm font-medium">{about.education.replace(/<[^>]*>/g, "").split("\n")[0]}</span>
                 </div>
               )}
               <div className="flex items-center gap-2 bg-background dark:bg-background-alt px-4 py-2 rounded-lg border border-border dark:border-border">
                 <MapPin className="h-5 w-5 text-secondary" />
-                <span className="text-sm font-medium">القاهرة، مصر</span>
+                <span className="text-sm font-medium">{about.location}</span>
               </div>
               <div className="flex items-center gap-2 bg-background dark:bg-background-alt px-4 py-2 rounded-lg border border-border dark:border-border">
                 <Mic className="h-5 w-5 text-secondary" />
-                <span className="text-sm font-medium">خطيب وإمام</span>
+                <span className="text-sm font-medium">{about.position}</span>
               </div>
             </div>
           </div>
@@ -193,9 +208,10 @@ export default async function AboutPage() {
                   </div>
                   <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">المسيرة العلمية</h2>
                 </div>
-                <div className="prose prose-lg dark:prose-invert max-w-none text-text-muted dark:text-text-subtext font-light whitespace-pre-line">
-                  {about.education}
-                </div>
+                <div
+                  className="prose prose-lg dark:prose-invert max-w-none text-text-muted dark:text-text-subtext font-light"
+                  dangerouslySetInnerHTML={{ __html: about.education }}
+                />
               </div>
             )}
 
@@ -208,9 +224,10 @@ export default async function AboutPage() {
                   </div>
                   <h2 className="text-2xl font-bold text-foreground dark:text-white font-serif">الإنجازات</h2>
                 </div>
-                <div className="prose prose-lg dark:prose-invert max-w-none text-text-muted dark:text-text-subtext font-light whitespace-pre-line">
-                  {about.achievements}
-                </div>
+                <div
+                  className="prose prose-lg dark:prose-invert max-w-none text-text-muted dark:text-text-subtext font-light"
+                  dangerouslySetInnerHTML={{ __html: about.achievements }}
+                />
               </div>
             )}
 
@@ -287,17 +304,14 @@ export default async function AboutPage() {
           </div>
         </div>
 
-        {/* Quote Section - Now editable from Admin */}
+        {/* Quote Section - Now properly displays quote from database */}
         <div className="mt-16 text-center max-w-4xl mx-auto">
           <span className="text-5xl text-secondary opacity-50 mb-4 block">"</span>
           <blockquote className="text-2xl md:text-3xl font-bold text-primary dark:text-white leading-relaxed font-serif">
-            &quot;
-            {about.quote_text ||
-              "إنما العلم خشية، وليس العلم بكثرة الرواية، وإنما العالم من يخشى الله تعالى في سره وعلانيته."}
-            &quot;
+            &quot;{about.quote_text}&quot;
           </blockquote>
           <cite className="block mt-4 text-text-muted dark:text-text-subtext not-italic font-medium">
-            {about.quote_author || "- من أقوال الشيخ"}
+            {about.quote_author}
           </cite>
         </div>
       </div>

@@ -59,13 +59,20 @@ export default function SecurityPage() {
     if (!file) return
 
     setUploading(true)
+    setMessage({ type: "", text: "" })
+
     try {
       const fileExt = file.name.split(".").pop()
       const fileName = `avatars/${user?.id || "admin"}-${Date.now()}.${fileExt}`
 
       const { error: uploadError } = await supabase.storage.from("uploads").upload(fileName, file)
 
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        if (uploadError.message.includes("Bucket not found") || uploadError.message.includes("bucket")) {
+          throw new Error("يرجى إنشاء bucket باسم 'uploads' في Supabase Storage")
+        }
+        throw uploadError
+      }
 
       const {
         data: { publicUrl },

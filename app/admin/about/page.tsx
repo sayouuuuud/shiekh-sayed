@@ -18,18 +18,20 @@ interface SocialLink {
   is_active: boolean
 }
 
-const platformOptions = [
-  { value: "youtube", label: "يوتيوب", icon: "youtube" },
-  { value: "telegram", label: "تليجرام", icon: "send" },
-  { value: "facebook", label: "فيسبوك", icon: "facebook" },
-  { value: "twitter", label: "تويتر/إكس", icon: "twitter" },
-  { value: "instagram", label: "إنستجرام", icon: "instagram" },
-  { value: "whatsapp", label: "واتساب", icon: "message-circle" },
-  { value: "tiktok", label: "تيك توك", icon: "video" },
-  { value: "soundcloud", label: "ساوند كلاود", icon: "music" },
-  { value: "website", label: "موقع إلكتروني", icon: "globe" },
-  { value: "other", label: "آخر", icon: "link" },
-]
+// تعريف واجهة البيانات كما تأتي من قاعدة البيانات
+interface DBAboutPage {
+  id: string
+  sheikh_name: string | null
+  image_path: string | null // في الكود نسميها sheikh_photo
+  content: string | null    // في الكود نسميها biography
+  achievements: string | null
+  education: string | null
+  positions: string | null  // في الكود نسميها current_positions
+  quote: string | null      // في الكود نسميها quote_text
+  quote_author: string | null
+  stats: any
+  social_links: any
+}
 
 export default function AdminAboutPage() {
   const [loading, setLoading] = useState(true)
@@ -65,15 +67,16 @@ export default function AdminAboutPage() {
     const { data, error } = await supabase.from("about_page").select("*").single()
 
     if (data) {
+      // تحويل أسماء أعمدة قاعدة البيانات إلى أسماء متغيرات الحالة
       setAboutData({
         id: data.id || "",
         sheikh_name: data.sheikh_name || "",
-        sheikh_photo: data.sheikh_photo || "",
-        biography: data.biography || "",
+        sheikh_photo: data.image_path || "", // ربط image_path بـ sheikh_photo
+        biography: data.content || "",       // ربط content بـ biography
         achievements: data.achievements || "",
         education: data.education || "",
-        current_positions: data.current_positions || "",
-        quote_text: data.quote_text || "",
+        current_positions: data.positions || "", // ربط positions بـ current_positions
+        quote_text: data.quote || "",        // ربط quote بـ quote_text
         quote_author: data.quote_author || "- من أقوال الشيخ",
         stats: data.stats || {
           students: "5000+",
@@ -87,32 +90,44 @@ export default function AdminAboutPage() {
     setLoading(false)
   }
 
-  const handleSave = async () => {
+const handleSave = async () => {
     setSaving(true)
     setMessage({ type: "", text: "" })
 
     try {
-      const updateData = {
-        ...aboutData,
+      // نستخدم معرفاً ثابتاً لصفحة "عن الشيخ" لضمان وجود صف واحد فقط
+      const fixedId = '00000000-0000-0000-0000-000000000001';
+
+      const payload = {
+        id: fixedId, // فرض المعرف الثابت دائماً
+        sheikh_name: aboutData.sheikh_name,
+        image_path: aboutData.sheikh_photo,
+        content: aboutData.biography,
+        achievements: aboutData.achievements,
+        education: aboutData.education,
+        positions: aboutData.current_positions,
+        quote: aboutData.quote_text,
+        quote_author: aboutData.quote_author,
+        stats: aboutData.stats,
+        social_links: aboutData.social_links,
         updated_at: new Date().toISOString(),
       }
 
-      let error
-      if (aboutData.id) {
-        const result = await supabase.from("about_page").update(updateData).eq("id", aboutData.id)
-        error = result.error
-      } else {
-        const result = await supabase.from("about_page").insert(updateData)
-        error = result.error
-      }
+      // Upsert: يقوم بالتحديث إذا كان المعرف موجوداً، والإنشاء إذا لم يكن
+      const { error } = await supabase
+        .from("about_page")
+        .upsert(payload, { onConflict: 'id' })
 
       if (error) throw error
 
       setMessage({ type: "success", text: "تم الحفظ بنجاح!" })
-      fetchAboutData()
+      
+      // تحديث البيانات المعروضة لضمان التزامن
+      fetchAboutData() 
+      
     } catch (error: any) {
       console.error("[v0] Save error:", error)
-      setMessage({ type: "error", text: "حدث خطأ أثناء الحفظ: " + error.message })
+      setMessage({ type: "error", text: "حدث خطأ أثناء الحفظ: " + (error.message || JSON.stringify(error)) })
     }
 
     setSaving(false)

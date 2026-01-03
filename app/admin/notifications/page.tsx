@@ -59,13 +59,13 @@ export default function NotificationsPage() {
 
   async function checkNewContactMessages() {
     try {
-      // Get unread contact submissions that don't have notifications yet
-      const { data: submissions } = await supabase
-        .from("contact_submissions")
-        .select("id, form_data, submitted_at")
-        .eq("is_read", false)
+      // Get unread contact messages that don't have notifications yet
+      const { data: messages } = await supabase
+        .from("contact_messages")
+        .select("id, name, subject, created_at")
+        .eq("read", false)
 
-      if (!submissions || submissions.length === 0) return
+      if (!messages || messages.length === 0) return
 
       // Check which ones already have notifications
       const { data: existingNotifications } = await supabase
@@ -74,20 +74,20 @@ export default function NotificationsPage() {
         .eq("source_type", "contact")
         .in(
           "source_id",
-          submissions.map((s) => s.id),
+          messages.map((m) => m.id),
         )
 
       const existingIds = new Set(existingNotifications?.map((n) => n.source_id) || [])
 
-      // Create notifications for new submissions
-      const newNotifications = submissions
-        .filter((s) => !existingIds.has(s.id))
-        .map((s) => ({
+      // Create notifications for new messages
+      const newNotifications = messages
+        .filter((m) => !existingIds.has(m.id))
+        .map((m) => ({
           title: "رسالة تواصل جديدة",
-          message: `رسالة من ${s.form_data?.name || "زائر"}: ${s.form_data?.subject || "بدون موضوع"}`,
+          message: `رسالة من ${m.name || "زائر"}: ${m.subject || "بدون موضوع"}`,
           type: "contact" as const,
           is_read: false,
-          source_id: s.id,
+          source_id: m.id,
           source_type: "contact",
         }))
 

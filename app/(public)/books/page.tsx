@@ -124,7 +124,7 @@ export default async function BooksPage({
           </div>
         )}
 
-        {/* Books Grid - Removed download count from cards */}
+        {/* Books Grid - Improved shadow and border visibility for book cards */}
         {!books || books.length === 0 ? (
           <div className="text-center py-16 text-text-muted dark:text-text-subtext">
             <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -135,7 +135,7 @@ export default async function BooksPage({
             {books.map((book) => (
               <article
                 key={book.id}
-                className="bg-surface dark:bg-card rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-border dark:border-border flex flex-col h-full group"
+                className="bg-surface dark:bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-border/50 dark:border-border flex flex-col h-full group ring-1 ring-black/5 dark:ring-white/5"
               >
                 <div className="relative aspect-[3/4] rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
                   {book.cover_image_path ? (
@@ -183,11 +183,21 @@ export default async function BooksPage({
                             <BookOpen className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl h-[80vh]">
-                          <DialogHeader>
+                        <DialogContent
+                          className="max-w-4xl w-[90vw] h-[85vh] p-0"
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                        >
+                          <DialogHeader className="p-4 pb-2">
                             <DialogTitle>{book.title}</DialogTitle>
                           </DialogHeader>
-                          <iframe src={book.pdf_file_path} className="w-full h-full rounded-lg" title={book.title} />
+                          <div className="flex-1 px-4 pb-4 h-[calc(85vh-80px)]">
+                            <iframe
+                              src={`${book.pdf_file_path}#toolbar=1&navpanes=1&scrollbar=1`}
+                              className="w-full h-full rounded-lg border border-border"
+                              title={book.title}
+                              style={{ minHeight: "500px" }}
+                            />
+                          </div>
                         </DialogContent>
                       </Dialog>
                     )}

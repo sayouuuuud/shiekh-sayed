@@ -11,10 +11,10 @@ import {
   Video,
   Settings,
   User,
-  Palette,
   ChevronLeft,
   Eye,
   TrendingUp,
+  Calendar,
 } from "lucide-react"
 
 const quickActions = [
@@ -128,9 +128,9 @@ export default async function AdminDashboard() {
   const quickLinks = [
     { label: "إدارة الكتب", href: "/admin/books", icon: BookOpen },
     { label: "إدارة المرئيات", href: "/admin/videos", icon: Video },
+    { label: "الجدول الزمني", href: "/admin/schedule", icon: Calendar },
     { label: "إعدادات الموقع", href: "/admin/settings", icon: Settings },
-    { label: "الملف الشخصي", href: "/admin/profile", icon: User },
-    { label: "المظهر والألوان", href: "/admin/appearance", icon: Palette },
+    { label: "الأمان والملف الشخصي", href: "/admin/security", icon: User },
   ]
 
   return (

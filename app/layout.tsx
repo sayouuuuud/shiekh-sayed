@@ -44,8 +44,8 @@ async function getSiteSettings() {
 async function getAppearanceSettings() {
   try {
     const supabase = await createClient()
-    const { data } = await supabase.from("appearance_settings").select("*").single()
-    return data || {}
+    const { data } = await supabase.from("appearance_settings").select("*").limit(1)
+    return data?.[0] || {}
   } catch {
     return {}
   }

@@ -118,11 +118,21 @@ export default async function BookDetailPage({ params }: PageProps) {
                         قراءة الكتاب
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-5xl h-[90vh]">
-                      <DialogHeader>
+                    <DialogContent
+                      className="max-w-5xl w-[90vw] h-[90vh] p-0 flex flex-col"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
+                      <DialogHeader className="p-4 pb-2 flex-shrink-0">
                         <DialogTitle>{book.title}</DialogTitle>
                       </DialogHeader>
-                      <iframe src={book.pdf_file_path} className="w-full h-full rounded-lg" title={book.title} />
+                      <div className="flex-1 px-4 pb-4 min-h-0">
+                        <iframe
+                          src={`${book.pdf_file_path}#toolbar=1&navpanes=1&scrollbar=1`}
+                          className="w-full h-full rounded-lg border border-border"
+                          title={book.title}
+                          style={{ minHeight: "500px" }}
+                        />
+                      </div>
                     </DialogContent>
                   </Dialog>
                 </>

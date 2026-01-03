@@ -20,13 +20,6 @@ interface HeroData {
   underline_text: string | null
 }
 
-interface WeeklyScheduleItem {
-  id: string
-  title: string
-  day_name: string
-  time_text: string | null
-}
-
 interface FeaturedBook {
   id: string
   title: string
@@ -50,37 +43,6 @@ function parseUnderlinedText(text: string, underlineText: string | null): string
 
 export async function HeroSection({ data }: HeroSectionProps) {
   const supabase = await createClient()
-
-  let weeklySchedule: WeeklyScheduleItem[] = []
-  try {
-    const { data: scheduleData, error } = await supabase
-      .from("weekly_schedule")
-      .select("id, title, day_name, time_text")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .limit(3)
-
-    if (!error && scheduleData && scheduleData.length > 0) {
-      weeklySchedule = scheduleData
-    } else {
-      const { data: eventsData } = await supabase
-        .from("schedule_events")
-        .select("id, title, event_type, event_time")
-        .eq("is_active", true)
-        .limit(3)
-
-      if (eventsData) {
-        weeklySchedule = eventsData.map((e) => ({
-          id: e.id,
-          title: e.title,
-          day_name: e.event_type === "friday" ? "الجمعة" : e.event_type === "fiqh" ? "السبت" : "الأربعاء",
-          time_text: e.event_time,
-        }))
-      }
-    }
-  } catch (e) {
-    console.log("[v0] Weekly schedule fetch error - table may not exist yet")
-  }
 
   let featuredBook: FeaturedBook | null = null
   if (data?.featured_book_id && data.featured_book_id !== "none") {
@@ -125,7 +87,16 @@ export async function HeroSection({ data }: HeroSectionProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center justify-center gap-3 text-center">
               <span className="material-icons-outlined text-secondary text-lg">campaign</span>
-              <span className="text-sm font-medium text-foreground dark:text-white">{heroData.notice_text}</span>
+              {heroData.notice_link ? (
+                <Link
+                  href={heroData.notice_link}
+                  className="text-sm font-medium text-foreground dark:text-white hover:underline"
+                >
+                  {heroData.notice_text}
+                </Link>
+              ) : (
+                <span className="text-sm font-medium text-foreground dark:text-white">{heroData.notice_text}</span>
+              )}
             </div>
           </div>
         </div>
@@ -158,12 +129,12 @@ export async function HeroSection({ data }: HeroSectionProps) {
               }}
             />
 
-            {/* Description */}
+            {/* Description - from database */}
             <p className="text-lg lg:text-xl text-text-muted dark:text-text-subtext leading-relaxed max-w-3xl mx-auto lg:mx-0">
               {heroData.hadith_explanation}
             </p>
 
-            {/* Source */}
+            {/* Source - from database */}
             <p className="text-sm text-secondary font-medium flex items-center justify-center lg:justify-start gap-2">
               <span className="material-icons-outlined text-sm">format_quote</span>
               {heroData.hadith_translation}
@@ -190,29 +161,9 @@ export async function HeroSection({ data }: HeroSectionProps) {
                 استمع للدرس
               </Link>
             </div>
-
-            {weeklySchedule && weeklySchedule.length > 0 && (
-              <div className="mt-8 p-4 bg-surface dark:bg-card rounded-xl border border-border">
-                <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-                  <span className="material-icons-outlined text-primary">schedule</span>
-                  الدروس الأسبوعية
-                </h3>
-                <div className="space-y-2">
-                  {weeklySchedule.map((item: WeeklyScheduleItem) => (
-                    <div key={item.id} className="flex items-center justify-between text-sm">
-                      <span className="text-foreground">{item.title}</span>
-                      <span className="text-text-muted">
-                        {item.day_name}
-                        {item.time_text && ` - ${item.time_text}`}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Featured Book - Now properly shows book from database */}
+          {/* Featured Book - Now properly shows book image from database */}
           <div className="flex-shrink-0 relative group">
             <div className="absolute inset-0 bg-primary opacity-20 blur-3xl rounded-full transform scale-90 group-hover:scale-100 transition duration-700"></div>
             <div className="relative bg-surface dark:bg-card p-4 rounded-2xl shadow-xl border border-border">
@@ -223,6 +174,11 @@ export async function HeroSection({ data }: HeroSectionProps) {
                     alt={featuredBook.title}
                     className="w-full h-full object-cover"
                   />
+                  {/* Book title overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <p className="text-white font-bold text-lg">{featuredBook.title}</p>
+                    {featuredBook.author && <p className="text-white/70 text-sm">{featuredBook.author}</p>}
+                  </div>
                 </div>
               ) : (
                 <div className="relative bg-gradient-to-br from-primary to-primary-hover w-[280px] sm:w-[320px] h-[400px] sm:h-[460px] rounded-xl shadow-inner flex flex-col items-center justify-center text-center p-8 border-[8px] border-primary-hover/50">

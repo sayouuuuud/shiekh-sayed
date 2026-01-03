@@ -31,10 +31,10 @@ export default async function ArticlesPage({
     .eq("type", "article")
     .order("name", { ascending: true })
 
-  // Build query
+  // Build query - Now fetching thumbnail_path properly
   let query = supabase
     .from("articles")
-    .select("*")
+    .select("id, title, author, thumbnail_path, featured_image_path, created_at")
     .eq("publish_status", "published")
     .order("created_at", { ascending: false })
 
@@ -47,14 +47,6 @@ export default async function ArticlesPage({
   }
 
   const { data: articles } = await query
-
-  function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString("ar-SA", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,7 +99,7 @@ export default async function ArticlesPage({
         </div>
       </section>
 
-      {/* Articles Grid - Only show thumbnail, title and author */}
+      {/* Articles Grid - Fixed to show actual images from database */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           {!articles || articles.length === 0 ? (
@@ -120,37 +112,40 @@ export default async function ArticlesPage({
             </div>
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {articles.map((article) => (
-                <Link key={article.id} href={`/articles/${article.id}`} className="group">
-                  <article className="bg-card rounded-2xl overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                    {/* Thumbnail */}
-                    <div className="aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
-                      {article.thumbnail_path ? (
-                        <img
-                          src={article.thumbnail_path || "/placeholder.svg"}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="material-icons-outlined text-5xl text-primary/30">article</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-6 flex-1 flex flex-col">
-                      {/* Title */}
-                      <h2 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                        {article.title}
-                      </h2>
-                      {/* Author */}
-                      <div className="flex items-center gap-2 text-sm text-secondary font-medium mt-auto">
-                        <span className="material-icons-outlined text-sm">person</span>
-                        <span>{article.author}</span>
+              {articles.map((article) => {
+                const imagePath = article.thumbnail_path || article.featured_image_path
+                return (
+                  <Link key={article.id} href={`/articles/${article.id}`} className="group">
+                    <article className="bg-card rounded-2xl overflow-hidden border shadow-md hover:shadow-xl transition-all duration-300 h-full flex flex-col ring-1 ring-black/5 dark:ring-white/5">
+                      {/* Thumbnail - Now properly displays actual images */}
+                      <div className="aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+                        {imagePath ? (
+                          <img
+                            src={imagePath || "/placeholder.svg"}
+                            alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="material-icons-outlined text-5xl text-primary/30">article</span>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </article>
-                </Link>
-              ))}
+                      <div className="p-6 flex-1 flex flex-col">
+                        {/* Title */}
+                        <h2 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                          {article.title}
+                        </h2>
+                        {/* Author */}
+                        <div className="flex items-center gap-2 text-sm text-secondary font-medium mt-auto">
+                          <span className="material-icons-outlined text-sm">person</span>
+                          <span>{article.author}</span>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                )
+              })}
             </div>
           )}
         </div>

@@ -77,10 +77,30 @@ export default function ManageVideosPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
-    const { error } = await supabase.from("media").insert({
-      ...formData,
-      thumbnail_path: formData.thumbnail_path || null,
-    })
+
+    // Build the insert payload with correct column names
+    const insertPayload: Record<string, unknown> = {
+      title: formData.title,
+      description: formData.description || null,
+      media_type: formData.media_type,
+      media_source: formData.media_source,
+      publish_status: formData.publish_status,
+      is_active: formData.is_active,
+    }
+
+    // Use the correct column based on media source
+    if (formData.media_source === "youtube") {
+      insertPayload.youtube_url = formData.media_path_or_url
+    } else {
+      insertPayload.file_path = formData.media_path_or_url
+    }
+
+    if (formData.thumbnail_path) {
+      insertPayload.thumbnail_path = formData.thumbnail_path
+    }
+
+    const { error } = await supabase.from("media").insert(insertPayload)
+
     if (!error) {
       setIsAddModalOpen(false)
       resetForm()
@@ -95,13 +115,32 @@ export default function ManageVideosPage() {
     e.preventDefault()
     if (!editingItem) return
     setSubmitting(true)
-    const { error } = await supabase
-      .from("media")
-      .update({
-        ...formData,
-        thumbnail_path: formData.thumbnail_path || null,
-      })
-      .eq("id", editingItem.id)
+
+    // Build the update payload with correct column names
+    const updatePayload: Record<string, unknown> = {
+      title: formData.title,
+      description: formData.description || null,
+      media_type: formData.media_type,
+      media_source: formData.media_source,
+      publish_status: formData.publish_status,
+      is_active: formData.is_active,
+    }
+
+    // Use the correct column based on media source
+    if (formData.media_source === "youtube") {
+      updatePayload.youtube_url = formData.media_path_or_url
+      updatePayload.file_path = null
+    } else {
+      updatePayload.file_path = formData.media_path_or_url
+      updatePayload.youtube_url = null
+    }
+
+    if (formData.thumbnail_path) {
+      updatePayload.thumbnail_path = formData.thumbnail_path
+    }
+
+    const { error } = await supabase.from("media").update(updatePayload).eq("id", editingItem.id)
+
     if (!error) {
       setIsEditModalOpen(false)
       setEditingItem(null)
@@ -125,12 +164,17 @@ export default function ManageVideosPage() {
 
   const openEditModal = (item: MediaItem) => {
     setEditingItem(item)
+    const mediaUrl =
+      item.media_path_or_url ||
+      (item as Record<string, unknown>).youtube_url ||
+      (item as Record<string, unknown>).file_path ||
+      ""
     setFormData({
       title: item.title,
       description: item.description || "",
       media_type: item.media_type,
       media_source: item.media_source,
-      media_path_or_url: item.media_path_or_url,
+      media_path_or_url: mediaUrl as string,
       thumbnail_path: item.thumbnail_path || "",
       publish_status: item.publish_status,
       is_active: item.is_active ?? true,
@@ -311,7 +355,10 @@ export default function ManageVideosPage() {
               إضافة فيديو جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogContent
+            className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-primary dark:text-white">إضافة فيديو جديد</DialogTitle>
             </DialogHeader>
@@ -514,7 +561,10 @@ export default function ManageVideosPage() {
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-primary dark:text-white">تعديل الفيديو</DialogTitle>
           </DialogHeader>

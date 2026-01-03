@@ -2,8 +2,16 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
+
+interface ContactSettings {
+  important_notice: string
+  email: string
+  facebook_url: string
+  youtube_url: string
+  telegram_url: string
+}
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +22,33 @@ export default function ContactPage() {
   })
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
+
+  const [contactSettings, setContactSettings] = useState<ContactSettings>({
+    important_notice:
+      "هذا النموذج مخصص للتواصل العام والاقتراحات التقنية. لا يقدم الموقع فتاوى شرعية ولا يتم الرد على الأسئلة الفقهية عبر هذا النموذج.",
+    email: "contact@alsayedmourad.com",
+    facebook_url: "#",
+    youtube_url: "#",
+    telegram_url: "#",
+  })
+
+  useEffect(() => {
+    async function fetchContactSettings() {
+      const supabase = createClient()
+      const { data } = await supabase.from("contact_settings").select("*").limit(1)
+
+      if (data?.[0]) {
+        setContactSettings({
+          important_notice: data[0].important_notice || contactSettings.important_notice,
+          email: data[0].email || contactSettings.email,
+          facebook_url: data[0].facebook_url || "#",
+          youtube_url: data[0].youtube_url || "#",
+          telegram_url: data[0].telegram_url || "#",
+        })
+      }
+    }
+    fetchContactSettings()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,7 +105,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h4 className="font-bold text-foreground dark:text-foreground mb-1">البريد الإلكتروني</h4>
-                  <p className="text-text-muted dark:text-text-subtext text-sm">contact@alsayedmourad.com</p>
+                  <p className="text-text-muted dark:text-text-subtext text-sm">{contactSettings.email}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -80,13 +115,22 @@ export default function ContactPage() {
                 <div>
                   <h4 className="font-bold text-foreground dark:text-foreground mb-1">تابعنا على</h4>
                   <div className="flex gap-4 mt-2">
-                    <a href="#" className="text-text-muted dark:text-text-subtext hover:text-primary transition-colors">
+                    <a
+                      href={contactSettings.facebook_url}
+                      className="text-text-muted dark:text-text-subtext hover:text-primary transition-colors"
+                    >
                       <span className="material-icons-outlined">facebook</span>
                     </a>
-                    <a href="#" className="text-text-muted dark:text-text-subtext hover:text-red-500 transition-colors">
+                    <a
+                      href={contactSettings.youtube_url}
+                      className="text-text-muted dark:text-text-subtext hover:text-red-500 transition-colors"
+                    >
                       <span className="material-icons-outlined">smart_display</span>
                     </a>
-                    <a href="#" className="text-text-muted dark:text-text-subtext hover:text-sky-500 transition-colors">
+                    <a
+                      href={contactSettings.telegram_url}
+                      className="text-text-muted dark:text-text-subtext hover:text-sky-500 transition-colors"
+                    >
                       <span className="material-icons-outlined">send</span>
                     </a>
                   </div>
@@ -95,7 +139,7 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Warning Card */}
+          {/* Warning Card - Now uses editable notice from DB */}
           <div className="bg-amber-50 dark:bg-amber-900/20 border-r-4 border-amber-500 rounded-lg p-6 flex gap-4 items-start shadow-sm">
             <span className="material-icons-outlined text-amber-600 dark:text-amber-500 text-3xl flex-shrink-0">
               warning_amber
@@ -103,9 +147,7 @@ export default function ContactPage() {
             <div>
               <h4 className="font-bold text-amber-800 dark:text-amber-400 mb-2 text-lg">تنويه هام</h4>
               <p className="text-amber-700 dark:text-amber-300 text-sm leading-relaxed">
-                هذا النموذج مخصص للتواصل العام والاقتراحات التقنية.{" "}
-                <strong className="font-bold">لا يقدم الموقع فتاوى شرعية</strong> ولا يتم الرد على الأسئلة الفقهية عبر
-                هذا النموذج.
+                {contactSettings.important_notice}
               </p>
             </div>
           </div>

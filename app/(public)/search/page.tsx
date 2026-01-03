@@ -37,28 +37,24 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         .select("id, title, content, created_at")
         .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
         .eq("publish_status", "published")
-        .eq("is_active", true)
         .limit(10),
       supabase
         .from("lessons")
         .select("id, title, description, type, created_at")
         .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
         .eq("publish_status", "published")
-        .eq("is_active", true)
         .limit(10),
       supabase
         .from("articles")
         .select("id, title, content, author, created_at")
         .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
         .eq("publish_status", "published")
-        .eq("is_active", true)
         .limit(10),
       supabase
         .from("books")
         .select("id, title, author, description, cover_image_path, created_at")
         .or(`title.ilike.${searchTerm},description.ilike.${searchTerm},author.ilike.${searchTerm}`)
         .eq("publish_status", "published")
-        .eq("is_active", true)
         .limit(10),
     ])
 

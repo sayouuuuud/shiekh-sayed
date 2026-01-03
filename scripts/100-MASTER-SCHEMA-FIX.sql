@@ -146,9 +146,64 @@ ALTER TABLE books ADD COLUMN IF NOT EXISTS category_id UUID REFERENCES categorie
 ALTER TABLE media ADD COLUMN IF NOT EXISTS category_id UUID REFERENCES categories(id) ON DELETE SET NULL;
 ALTER TABLE media ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
 
--- 17. Add missing columns to hero_settings
-ALTER TABLE hero_settings ADD COLUMN IF NOT EXISTS underline_text VARCHAR(255);
-ALTER TABLE hero_settings ADD COLUMN IF NOT EXISTS featured_book_id UUID;
+-- =====================================================
+-- FIX: Create and Update Hero Section Table
+-- =====================================================
+
+-- 1. إنشاء جدول hero_section إذا لم يكن موجوداً (بدلاً من hero_settings)
+CREATE TABLE IF NOT EXISTS hero_section (
+  id UUID DEFAULT '00000000-0000-0000-0000-000000000001' PRIMARY KEY,
+  hadith_arabic TEXT,
+  hadith_translation TEXT,
+  hadith_explanation TEXT,
+  hadith_button_text TEXT DEFAULT 'اقرأ المزيد',
+  hadith_button_link TEXT DEFAULT '/articles',
+  book_custom_text TEXT DEFAULT 'أحدث إصدارات الشيخ',
+  book_button_text TEXT DEFAULT 'تصفح الكتب',
+  book_button_link TEXT DEFAULT '/books',
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. إضافة الأعمدة الناقصة (تم دمج الخطوة 17 والملف 007 هنا)
+-- تصحيح الاسم من hero_settings إلى hero_section
+ALTER TABLE hero_section ADD COLUMN IF NOT EXISTS underline_text VARCHAR(255);
+ALTER TABLE hero_section ADD COLUMN IF NOT EXISTS featured_book_id UUID REFERENCES books(id) ON DELETE SET NULL;
+ALTER TABLE hero_section ADD COLUMN IF NOT EXISTS important_notice TEXT;
+ALTER TABLE hero_section ADD COLUMN IF NOT EXISTS important_notice_link TEXT;
+ALTER TABLE hero_section ADD COLUMN IF NOT EXISTS show_important_notice BOOLEAN DEFAULT false;
+
+-- 3. إدخال بيانات افتراضية لضمان عمل الواجهة (لأن الكود يستخدم .single())
+INSERT INTO hero_section (
+  id, 
+  hadith_arabic, 
+  hadith_explanation, 
+  hadith_button_text, 
+  book_custom_text
+)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'من سلك طريقاً يلتمس فيه علماً سهل الله له به طريقاً إلى الجنة',
+  'حديث عظيم يبين فضل طلب العلم',
+  'اقرأ المزيد',
+  'أحدث إصدارات الشيخ'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- 4. تفعيل سياسات الأمان (RLS) للجدول
+ALTER TABLE hero_section ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all on hero_section" ON hero_section;
+CREATE POLICY "Allow all on hero_section" ON hero_section FOR ALL USING (true) WITH CHECK (true);
+
+-- 17b. Add missing columns to about_page (Essential fix for "title column does not exist" error)
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS title VARCHAR(255) DEFAULT 'عن الشيخ';
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS quote TEXT;
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS quote_author VARCHAR(255) DEFAULT 'الشيخ السيد مراد';
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS image_path TEXT;
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS birth_date VARCHAR(100);
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS education TEXT;
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS positions TEXT;
+ALTER TABLE about_page ADD COLUMN IF NOT EXISTS achievements TEXT;
 
 -- 18. Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_categories_type ON categories(type);

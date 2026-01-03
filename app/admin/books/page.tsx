@@ -179,7 +179,10 @@ export default function ManageBooksPage() {
               إضافة كتاب جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-3xl bg-card dark:bg-card max-h-[90vh] overflow-y-auto">
+          <DialogContent
+            className="sm:max-w-3xl bg-card dark:bg-card max-h-[90vh] overflow-y-auto"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-primary dark:text-white">إضافة كتاب جديد</DialogTitle>
             </DialogHeader>
@@ -428,7 +431,10 @@ export default function ManageBooksPage() {
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-3xl bg-card dark:bg-card max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="sm:max-w-3xl bg-card dark:bg-card max-h-[90vh] overflow-y-auto"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-primary dark:text-white">تعديل الكتاب</DialogTitle>
           </DialogHeader>

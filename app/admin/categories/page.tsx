@@ -40,7 +40,7 @@ export default function CategoriesPage() {
     name: "",
     type: "sermon",
     description: "",
-    parent_category_id: null,
+    parent_category_id: "none",
   })
 
   const supabase = createClient()
@@ -75,7 +75,7 @@ export default function CategoriesPage() {
       name: category.name,
       type: category.type,
       description: category.description || "",
-      parent_category_id: category.parent_category_id || null,
+      parent_category_id: category.parent_category_id || "none",
     })
     setDialogOpen(true)
   }
@@ -86,7 +86,7 @@ export default function CategoriesPage() {
       name: "",
       type: "sermon",
       description: "",
-      parent_category_id: null,
+      parent_category_id: "none",
     })
     setDialogOpen(true)
   }
@@ -101,7 +101,7 @@ export default function CategoriesPage() {
         name: formData.name,
         type: formData.type,
         description: formData.description || null,
-        parent_category_id: formData.parent_category_id || null,
+        parent_category_id: formData.parent_category_id === "none" ? null : formData.parent_category_id,
       }
 
       let error
@@ -146,12 +146,6 @@ export default function CategoriesPage() {
 
   function getChildCategories(parentId: string) {
     return categories.filter((c) => c.parent_category_id === parentId)
-  }
-
-  function getParentName(parentId: string | null | undefined) {
-    if (!parentId) return null
-    const parent = categories.find((c) => c.id === parentId)
-    return parent?.name
   }
 
   function groupCategoriesByType() {
@@ -216,7 +210,7 @@ export default function CategoriesPage() {
                 <Label>نوع المحتوى</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value) => setFormData({ ...formData, type: value, parent_category_id: null })}
+                  onValueChange={(value) => setFormData({ ...formData, type: value, parent_category_id: "none" })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -240,7 +234,7 @@ export default function CategoriesPage() {
                     <SelectValue placeholder="بدون تصنيف أب (تصنيف رئيسي)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={null}>بدون تصنيف أب</SelectItem>
+                    <SelectItem value="none">بدون تصنيف أب</SelectItem>
                     {getParentCategories(formData.type)
                       .filter((c) => c.id !== editingCategory?.id)
                       .map((cat) => (

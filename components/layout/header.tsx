@@ -23,7 +23,7 @@ interface NavItem {
   label: string
   href: string
   order_index: number
-  is_active: boolean
+  is_active?: boolean
 }
 
 export function Header() {
@@ -61,18 +61,20 @@ export function Header() {
       const { data: navData } = await supabase
         .from("navbar_items")
         .select("*")
-        .eq("is_active", true)
         .order("order_index", { ascending: true })
 
       if (navData && navData.length > 0) {
-        setNavLinks(navData.map((item: NavItem) => ({ href: item.href, label: item.label })))
+        // Filter active items in JavaScript if is_active exists
+        const activeItems = navData.filter((item: NavItem) => item.is_active !== false)
+        if (activeItems.length > 0) {
+          setNavLinks(activeItems.map((item: NavItem) => ({ href: item.href, label: item.label })))
+        }
       }
 
-      // Load logo from appearance settings
-      const { data: appearanceData } = await supabase.from("appearance_settings").select("site_logo_path").single()
+      const { data: appearanceData } = await supabase.from("appearance_settings").select("site_logo_path").limit(1)
 
-      if (appearanceData?.site_logo_path) {
-        setLogoPath(appearanceData.site_logo_path)
+      if (appearanceData?.[0]?.site_logo_path) {
+        setLogoPath(appearanceData[0].site_logo_path)
       }
     }
 

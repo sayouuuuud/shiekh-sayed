@@ -12,40 +12,37 @@ import { createClient } from "@/lib/supabase/client"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
 import { FileUpload } from "@/components/admin/file-upload"
 import { Pagination } from "@/components/admin/pagination"
-import {
-  GraduationCap,
-  PlusCircle,
-  BookOpen,
-  History,
-  CheckCircle,
-  Search,
-  Play,
-  Music,
-  Eye,
-  Edit,
-  Trash2,
-} from "lucide-react"
+import { BookOpen, Plus, Eye, Search, Edit, Trash2, Loader2, CheckCircle, FileEdit } from "lucide-react"
 
 interface Lesson {
   id: string
   title: string
   description: string
+  content: string
+  lesson_type: string
   type: string
-  lesson_type: string | null
   media_source: string
-  media_path_or_url: string
+  media_url?: string
   thumbnail_path?: string
+  duration?: string
   publish_status: string
   is_active: boolean
-  is_archived: boolean
   views_count: number
   created_at: string
+  category_id?: string
+}
+
+interface Category {
+  id: string
+  name: string
+  type: string
 }
 
 const ITEMS_PER_PAGE = 10
 
 export default function ManageDarsPage() {
   const [lessons, setLessons] = useState<Lesson[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -54,14 +51,16 @@ export default function ManageDarsPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    type: "audio",
-    lesson_type: "general",
+    content: "",
+    lesson_type: "fiqh",
+    type: "video",
     media_source: "youtube",
-    media_path_or_url: "",
+    media_url: "",
     thumbnail_path: "",
+    duration: "",
     publish_status: "draft",
     is_active: true,
-    is_archived: false,
+    category_id: "none", // Added category_id
   })
   const [submitting, setSubmitting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -87,16 +86,27 @@ export default function ManageDarsPage() {
     setLoading(false)
   }
 
+  const fetchCategories = async () => {
+    const { data } = await supabase.from("categories").select("*").eq("type", "lesson")
+    if (data) setCategories(data)
+  }
+
   useEffect(() => {
     fetchLessons()
+    fetchCategories() // Fetch categories on mount
   }, [currentPage])
 
   const handleAddLesson = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+
+    const categoryIdToSend = formData.category_id === "none" ? null : formData.category_id
+
     const { error } = await supabase.from("lessons").insert({
       ...formData,
+      media_url: formData.media_url || null,
       thumbnail_path: formData.thumbnail_path || null,
+      category_id: categoryIdToSend,
     })
     if (!error) {
       setIsAddModalOpen(false)
@@ -112,11 +122,16 @@ export default function ManageDarsPage() {
     e.preventDefault()
     if (!editingLesson) return
     setSubmitting(true)
+
+    const categoryIdToSend = formData.category_id === "none" ? null : formData.category_id
+
     const { error } = await supabase
       .from("lessons")
       .update({
         ...formData,
+        media_url: formData.media_url || null,
         thumbnail_path: formData.thumbnail_path || null,
+        category_id: categoryIdToSend,
       })
       .eq("id", editingLesson.id)
     if (!error) {
@@ -142,15 +157,17 @@ export default function ManageDarsPage() {
     setEditingLesson(lesson)
     setFormData({
       title: lesson.title,
-      description: lesson.description,
+      description: lesson.description || "",
+      content: lesson.content || "",
+      lesson_type: lesson.lesson_type,
       type: lesson.type,
-      lesson_type: lesson.lesson_type || "general",
       media_source: lesson.media_source,
-      media_path_or_url: lesson.media_path_or_url,
+      media_url: lesson.media_url || "",
       thumbnail_path: lesson.thumbnail_path || "",
+      duration: lesson.duration || "",
       publish_status: lesson.publish_status,
       is_active: lesson.is_active ?? true,
-      is_archived: lesson.is_archived ?? false,
+      category_id: lesson.category_id || "none", // Handle category_id
     })
     setIsEditModalOpen(true)
   }
@@ -159,39 +176,39 @@ export default function ManageDarsPage() {
     setFormData({
       title: "",
       description: "",
-      type: "audio",
-      lesson_type: "general",
+      content: "",
+      lesson_type: "fiqh",
+      type: "video",
       media_source: "youtube",
-      media_path_or_url: "",
+      media_url: "",
       thumbnail_path: "",
+      duration: "",
       publish_status: "draft",
       is_active: true,
-      is_archived: false,
+      category_id: "none", // Reset category_id
     })
   }
 
   const filteredLessons = lessons.filter((l) => l.title.toLowerCase().includes(searchQuery.toLowerCase()))
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
-  const getLessonTypeLabel = (type: string | null) => {
-    const labels: Record<string, string> = {
-      fiqh: "فقه",
-      seerah: "سيرة",
-      general: "عام",
+  const getLessonTypeLabel = (type: string) => {
+    switch (type) {
+      case "fiqh":
+        return "فقه"
+      case "seerah":
+        return "سيرة"
+      default:
+        return "عام"
     }
-    return labels[type || "general"] || "عام"
   }
 
-  const getLessonTypeColor = (type: string | null) => {
-    const colors: Record<string, string> = {
-      fiqh: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-      seerah: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-      general: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-    }
-    return colors[type || "general"] || colors.general
+  const getCategoryName = (categoryId: string | undefined) => {
+    if (!categoryId) return null
+    const category = categories.find((c) => c.id === categoryId)
+    return category?.name
   }
 
-  // Form Component (reused for both Add and Edit)
   const LessonForm = ({ onSubmit, isEdit = false }: { onSubmit: (e: React.FormEvent) => void; isEdit?: boolean }) => (
     <form onSubmit={onSubmit} className="space-y-6 mt-4">
       <div className="space-y-2">
@@ -199,24 +216,24 @@ export default function ManageDarsPage() {
         <Input
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="مثال: شرح صحيح البخاري"
+          placeholder="عنوان الدرس"
           className="bg-muted dark:bg-background-alt"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label>وصف الدرس</Label>
+        <Label>الوصف</Label>
         <RichTextEditor
           content={formData.description}
           onChange={(html) => setFormData({ ...formData, description: html })}
-          placeholder="اكتب وصفاً للدرس..."
+          placeholder="وصف مختصر للدرس..."
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label>تصنيف الدرس *</Label>
+          <Label>نوع الدرس</Label>
           <Select
             value={formData.lesson_type}
             onValueChange={(value) => setFormData({ ...formData, lesson_type: value })}
@@ -232,6 +249,25 @@ export default function ManageDarsPage() {
           </Select>
         </div>
         <div className="space-y-2">
+          <Label>التصنيف</Label>
+          <Select
+            value={formData.category_id || "none"}
+            onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+          >
+            <SelectTrigger className="bg-muted dark:bg-background-alt">
+              <SelectValue placeholder="اختر التصنيف" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">بدون تصنيف</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
           <Label>نوع المحتوى</Label>
           <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
             <SelectTrigger className="bg-muted dark:bg-background-alt">
@@ -243,6 +279,9 @@ export default function ManageDarsPage() {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>مصدر المحتوى</Label>
           <Select
@@ -258,39 +297,6 @@ export default function ManageDarsPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      {formData.media_source === "local" ? (
-        <FileUpload
-          accept={formData.type === "audio" ? "audio/*" : "video/*"}
-          folder={formData.type === "audio" ? "lessons/audio" : "lessons/video"}
-          label={formData.type === "audio" ? "مسار الملف الصوتي" : "مسار ملف الفيديو"}
-          onUploadComplete={(path) => setFormData({ ...formData, media_path_or_url: path })}
-          currentFile={formData.media_path_or_url}
-        />
-      ) : (
-        <div className="space-y-2">
-          <Label>رابط يوتيوب *</Label>
-          <Input
-            value={formData.media_path_or_url}
-            onChange={(e) => setFormData({ ...formData, media_path_or_url: e.target.value })}
-            placeholder="https://youtube.com/watch?v=..."
-            className="bg-muted dark:bg-background-alt"
-            dir="ltr"
-            required
-          />
-        </div>
-      )}
-
-      <FileUpload
-        accept="image/*"
-        folder="thumbnails"
-        label="مسار الصورة المصغرة"
-        onUploadComplete={(path) => setFormData({ ...formData, thumbnail_path: path })}
-        currentFile={formData.thumbnail_path}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>حالة النشر</Label>
           <Select
@@ -306,22 +312,63 @@ export default function ManageDarsPage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-6 pt-6">
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={formData.is_active}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-            />
-            <Label>نشط</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={formData.is_archived}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_archived: checked })}
-            />
-            <Label>أرشيف</Label>
-          </div>
+      </div>
+
+      {formData.media_source === "local" ? (
+        <FileUpload
+          accept={formData.type === "audio" ? "audio/*" : "video/*"}
+          folder={formData.type === "audio" ? "lessons/audio" : "lessons/video"}
+          label={formData.type === "audio" ? "الملف الصوتي" : "ملف الفيديو"}
+          onUploadComplete={(path) => setFormData({ ...formData, media_url: path })}
+          currentFile={formData.media_url}
+        />
+      ) : (
+        <div className="space-y-2">
+          <Label>رابط يوتيوب</Label>
+          <Input
+            value={formData.media_url}
+            onChange={(e) => setFormData({ ...formData, media_url: e.target.value })}
+            placeholder="https://youtube.com/watch?v=..."
+            className="bg-muted dark:bg-background-alt"
+            dir="ltr"
+          />
         </div>
+      )}
+
+      <FileUpload
+        accept="image/*"
+        folder="lessons/thumbnails"
+        label="الصورة المصغرة"
+        onUploadComplete={(path) => setFormData({ ...formData, thumbnail_path: path })}
+        currentFile={formData.thumbnail_path}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>المدة</Label>
+          <Input
+            value={formData.duration}
+            onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+            placeholder="مثال: 45 دقيقة"
+            className="bg-muted dark:bg-background-alt"
+          />
+        </div>
+        <div className="flex items-center gap-2 pt-6">
+          <Switch
+            checked={formData.is_active}
+            onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+          />
+          <Label>نشط</Label>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>محتوى الدرس (تفريغ)</Label>
+        <RichTextEditor
+          content={formData.content}
+          onChange={(html) => setFormData({ ...formData, content: html })}
+          placeholder="المحتوى الكامل للدرس..."
+        />
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-border">
@@ -336,7 +383,16 @@ export default function ManageDarsPage() {
           إلغاء
         </Button>
         <Button type="submit" className="bg-primary hover:bg-primary-hover text-white" disabled={submitting}>
-          {submitting ? "جاري الحفظ..." : isEdit ? "حفظ التغييرات" : "حفظ الدرس"}
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+              جاري الحفظ...
+            </>
+          ) : isEdit ? (
+            "حفظ التغييرات"
+          ) : (
+            "إضافة الدرس"
+          )}
         </Button>
       </div>
     </form>
@@ -345,22 +401,25 @@ export default function ManageDarsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground dark:text-white font-serif flex items-center gap-3">
-            <GraduationCap className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold text-primary dark:text-white flex items-center gap-3 font-serif">
+            <BookOpen className="h-8 w-8 text-primary" />
             إدارة الدروس العلمية
           </h1>
-          <p className="text-text-muted dark:text-gray-400 mt-2">إضافة وتعديل الدروس والمحاضرات</p>
+          <p className="text-text-muted dark:text-gray-400 mt-2">إضافة وتعديل الدروس والشروحات العلمية</p>
         </div>
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-xl font-bold">
-              <PlusCircle className="h-5 w-5 ml-2" />
+              <Plus className="h-5 w-5 ml-2" />
               إضافة درس جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto">
+          <DialogContent
+            className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-primary dark:text-white">إضافة درس جديد</DialogTitle>
             </DialogHeader>
@@ -370,87 +429,85 @@ export default function ManageDarsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-secondary flex items-center justify-center">
-            <GraduationCap className="h-7 w-7" />
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
           <div>
-            <p className="text-sm text-text-muted">إجمالي الدروس</p>
-            <p className="text-2xl font-bold text-foreground dark:text-white mt-1">{totalCount}</p>
+            <span className="block text-text-muted text-sm mb-1">إجمالي الدروس</span>
+            <span className="text-3xl font-bold text-primary dark:text-white">{totalCount}</span>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+            <BookOpen className="h-6 w-6" />
           </div>
         </div>
-        <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
-            <BookOpen className="h-7 w-7" />
-          </div>
+        <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
           <div>
-            <p className="text-sm text-text-muted">دروس فقه</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">
-              {lessons.filter((l) => l.lesson_type === "fiqh").length}
-            </p>
-          </div>
-        </div>
-        <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 flex items-center justify-center">
-            <History className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="text-sm text-text-muted">دروس سيرة</p>
-            <p className="text-2xl font-bold text-orange-600 mt-1">
-              {lessons.filter((l) => l.lesson_type === "seerah").length}
-            </p>
-          </div>
-        </div>
-        <div className="bg-card p-6 rounded-2xl border border-border flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center">
-            <CheckCircle className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="text-sm text-text-muted">المنشورة</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">
+            <span className="block text-text-muted text-sm mb-1">المنشورة</span>
+            <span className="text-3xl font-bold text-green-600">
               {lessons.filter((l) => l.publish_status === "published").length}
-            </p>
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+            <CheckCircle className="h-6 w-6" />
+          </div>
+        </div>
+        <div className="bg-card p-6 rounded-2xl border border-border flex items-center justify-between">
+          <div>
+            <span className="block text-text-muted text-sm mb-1">مسودات</span>
+            <span className="text-3xl font-bold text-yellow-600">
+              {lessons.filter((l) => l.publish_status === "draft").length}
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
+            <FileEdit className="h-6 w-6" />
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <h3 className="text-xl font-bold text-foreground dark:text-white">قائمة الدروس</h3>
+      <div className="bg-card rounded-3xl border border-border overflow-hidden">
+        <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/50 dark:bg-background-alt/50">
+          <h2 className="font-bold text-xl text-primary dark:text-white">قائمة الدروس ({totalCount})</h2>
           <div className="relative">
-            <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 h-5 w-5 text-text-muted" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-10 bg-muted dark:bg-background-alt w-full md:w-64"
+              className="pl-4 pr-10 py-2 rounded-lg w-64 bg-card dark:bg-card"
               placeholder="بحث عن درس..."
             />
+            <Search className="absolute right-3 top-2.5 text-text-muted h-5 w-5" />
           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-text-muted">جاري التحميل...</div>
+          <div className="p-12 text-center text-text-muted flex items-center justify-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            جاري التحميل...
+          </div>
         ) : filteredLessons.length === 0 ? (
           <div className="p-12 text-center text-text-muted">{searchQuery ? "لا توجد نتائج" : "لا توجد دروس بعد"}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-right">
-              <thead className="bg-muted/50 dark:bg-background-alt/50 text-text-muted text-sm">
+              <thead className="bg-muted/50 dark:bg-background-alt text-xs font-bold text-text-muted uppercase tracking-wider">
                 <tr>
-                  <th className="px-6 py-4 font-medium">الدرس</th>
-                  <th className="px-6 py-4 font-medium">التصنيف</th>
-                  <th className="px-6 py-4 font-medium">النوع</th>
-                  <th className="px-6 py-4 font-medium">الحالة</th>
-                  <th className="px-6 py-4 font-medium">نشط</th>
-                  <th className="px-6 py-4 font-medium">الإجراءات</th>
+                  <th className="px-6 py-4">#</th>
+                  <th className="px-6 py-4">الدرس</th>
+                  <th className="px-6 py-4">النوع</th>
+                  <th className="px-6 py-4">التصنيف</th>
+                  <th className="px-6 py-4">المشاهدات</th>
+                  <th className="px-6 py-4">الحالة</th>
+                  <th className="px-6 py-4">نشط</th>
+                  <th className="px-6 py-4 text-center">الإجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredLessons.map((lesson) => (
-                  <tr key={lesson.id} className="hover:bg-muted/50 dark:hover:bg-background-alt/50 transition-colors">
-                    <td className="px-6 py-5">
+                {filteredLessons.map((lesson, index) => (
+                  <tr
+                    key={lesson.id}
+                    className="group hover:bg-muted/50 dark:hover:bg-background-alt/50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-text-muted text-sm">{String(index + 1).padStart(2, "0")}</td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {lesson.thumbnail_path ? (
                           <img
@@ -459,66 +516,65 @@ export default function ManageDarsPage() {
                             className="w-12 h-12 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                            {lesson.type === "video" ? (
-                              <Play className="h-5 w-5 text-primary" />
-                            ) : (
-                              <Music className="h-5 w-5 text-primary" />
-                            )}
+                          <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
                           </div>
                         )}
                         <div>
-                          <p className="font-bold text-foreground dark:text-white">{lesson.title}</p>
-                          <p className="text-xs text-text-muted mt-1">
+                          <h3 className="font-bold text-foreground dark:text-gray-200 text-sm mb-1">{lesson.title}</h3>
+                          <span className="text-xs text-text-muted">
                             {new Date(lesson.created_at).toLocaleDateString("ar-EG")}
-                          </p>
+                          </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <span
-                        className={`text-xs px-3 py-1 rounded-full font-bold ${getLessonTypeColor(lesson.lesson_type)}`}
-                      >
+                    <td className="px-6 py-4">
+                      <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                         {getLessonTypeLabel(lesson.lesson_type)}
                       </span>
                     </td>
-                    <td className="px-6 py-5">
-                      <span className="text-sm text-text-muted">
-                        {lesson.type === "video" ? "فيديو" : "صوتي"} - {lesson.media_source}
-                      </span>
+                    <td className="px-6 py-4">
+                      {getCategoryName(lesson.category_id) ? (
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                          {getCategoryName(lesson.category_id)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-text-muted">-</span>
+                      )}
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-4 text-sm text-text-muted">{lesson.views_count || 0}</td>
+                    <td className="px-6 py-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${lesson.publish_status === "published" ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"}`}
+                        className={`text-xs px-3 py-1 rounded-full font-medium ${lesson.publish_status === "published" ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"}`}
                       >
                         {lesson.publish_status === "published" ? "منشور" : "مسودة"}
                       </span>
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-4">
                       <Switch
                         checked={lesson.is_active ?? true}
                         onCheckedChange={() => toggleActive(lesson.id, lesson.is_active ?? true)}
                       />
                     </td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => window.open(`/dars/${lesson.id}`, "_blank")}
-                          className="p-2 rounded-lg hover:bg-muted text-text-muted hover:text-gray-600 transition-colors"
+                          className="p-2 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                           title="عرض"
                         >
                           <Eye className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => openEditModal(lesson)}
-                          className="p-2 rounded-lg hover:bg-muted text-text-muted hover:text-blue-600 transition-colors"
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                           title="تعديل"
                         >
                           <Edit className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleDeleteLesson(lesson.id)}
-                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors"
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                           title="حذف"
                         >
                           <Trash2 className="h-5 w-5" />
@@ -531,13 +587,24 @@ export default function ManageDarsPage() {
             </table>
           </div>
         )}
-      </div>
 
-      {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
+        <div className="p-4 border-t border-border">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={totalCount}
+            itemsPerPage={ITEMS_PER_PAGE}
+          />
+        </div>
+      </div>
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="sm:max-w-3xl bg-card max-h-[90vh] overflow-y-auto"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-primary dark:text-white">تعديل الدرس</DialogTitle>
           </DialogHeader>

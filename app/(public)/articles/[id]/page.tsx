@@ -65,10 +65,10 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
         {/* Article Header */}
         <article>
-          {article.featured_image_path && (
-            <div className="mb-8 rounded-2xl overflow-hidden">
+          {(article.thumbnail_path || article.featured_image_path) && (
+            <div className="mb-8 rounded-2xl overflow-hidden shadow-lg">
               <img
-                src={article.featured_image_path || "/placeholder.svg"}
+                src={article.thumbnail_path || article.featured_image_path || "/placeholder.svg"}
                 alt={article.title}
                 className="w-full h-96 object-cover"
               />
